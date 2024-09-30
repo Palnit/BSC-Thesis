@@ -11,7 +11,7 @@ set(VCPKG_TRACE_FIND_PACKAGE true)
 
 project(GPGPU_Edge_Detector
         VERSION 0.1
-        LANGUAGES CUDA CXX)
+        LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CUDA_STANDARD 17)
@@ -83,6 +83,8 @@ set(RESOURCES
         shaders/default_vertex.vert
 )
 
+
+find_package(CUDA)
 find_package(CUDAToolkit)
 find_package(SDL2 CONFIG REQUIRED)
 find_package(SDL2_image CONFIG REQUIRED)
@@ -93,6 +95,8 @@ find_package(OpenGL REQUIRED)
 find_package(implot CONFIG REQUIRED)
 
 
+if (CUDAToolkit_FOUND AND CUDA_FOUND)
+add_compile_definitions(CUDA_EXISTS)
 add_library(cuda_comp STATIC
         ${CUDA_HEADER_FILES}
         ${CUDA_SOURCE_FILES}
@@ -108,6 +112,7 @@ set_target_properties(cuda_comp
         CUDA_STANDARD 17
         CUDA_SEPARABLE_COMPILATION OFF
 )
+endif()
 
 add_executable(${CMAKE_PROJECT_NAME}
         ${SOURCE_FILES}
@@ -117,8 +122,6 @@ add_executable(${CMAKE_PROJECT_NAME}
 target_compile_features(${CMAKE_PROJECT_NAME} PRIVATE cxx_std_17)
 
 target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE
-        cuda_comp
-        CUDA::toolkit
         $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main>
         $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>
         $<IF:$<TARGET_EXISTS:SDL2_image::SDL2_image>,SDL2_image::SDL2_image,SDL2_image::SDL2_image-static>
@@ -128,6 +131,13 @@ target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE
         OpenGL::GL
         implot::implot
 )
+
+if (CUDAToolkit_FOUND AND CUDA_FOUND)
+    target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE
+    cuda_comp
+    CUDA::toolkit
+            )
+endif ()
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES

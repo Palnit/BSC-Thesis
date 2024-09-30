@@ -10,8 +10,6 @@
 #include <ctime>
 #include <algorithm>
 
-#include <cuda_runtime.h>
-
 #include <implot.h>
 
 int MainWindow::Init() {
