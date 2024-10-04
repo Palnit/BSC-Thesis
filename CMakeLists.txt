@@ -38,7 +38,6 @@ set(HEADER_FILES
 )
 
 set(SOURCE_FILES
-        src/main.cpp
         src/general/OpenGL_SDL/basic_window.cpp
         src/general/OpenGL_SDL/SDL_GLDebugMessageCallback.cpp
         src/general/main_window.cpp
@@ -124,7 +123,7 @@ target_include_directories(cuda_comp
 
 set_target_properties(cuda_comp
         PROPERTIES
-        CUDA_RUNTIME_LIBRARY Shared
+        CUDA_RUNTIME_LIBRARY Static
         CUDA_STANDARD 17
         CUDA_SEPARABLE_COMPILATION OFF
 )
@@ -133,9 +132,16 @@ endif()
 add_executable(${CMAKE_PROJECT_NAME}
         ${SOURCE_FILES}
         ${HEADER_FILES}
+        src/main.cpp
+)
+
+add_library(${CMAKE_PROJECT_NAME}_lib STATIC
+        ${SOURCE_FILES}
+        ${HEADER_FILES}
 )
 
 target_compile_features(${CMAKE_PROJECT_NAME} PRIVATE cxx_std_17)
+target_compile_features(${CMAKE_PROJECT_NAME}_lib PRIVATE cxx_std_17)
 
 target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE
         $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main>
@@ -153,22 +159,52 @@ target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE
         OpenCL::UtilsCpp
 )
 
+target_link_libraries(${CMAKE_PROJECT_NAME}_lib PRIVATE
+        $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main>
+        $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>
+        $<IF:$<TARGET_EXISTS:SDL2_image::SDL2_image>,SDL2_image::SDL2_image,SDL2_image::SDL2_image-static>
+        imgui::imgui
+        GLEW::GLEW
+        glm::glm
+        OpenGL::GL
+        implot::implot
+        OpenCL::OpenCL
+        OpenCL::Headers
+        OpenCL::HeadersCpp
+        OpenCL::Utils
+        OpenCL::UtilsCpp
+)
+
+
 if (CUDAToolkit_FOUND AND CUDA_FOUND)
     enable_language(CUDA)
 
     target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE
     cuda_comp
     CUDA::toolkit)
+    target_link_libraries(${CMAKE_PROJECT_NAME}_lib PRIVATE
+            cuda_comp
+            CUDA::toolkit)
 endif ()
 
 set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES
         LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 
+set_target_properties(${CMAKE_PROJECT_NAME}_lib PROPERTIES
+        LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 
 target_include_directories(${CMAKE_PROJECT_NAME}
         PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
+
+
+target_include_directories(${CMAKE_PROJECT_NAME}_lib
+        PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+
+add_subdirectory(test)
 
 
 foreach (file ${RESOURCES})
