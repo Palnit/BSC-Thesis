@@ -9,8 +9,8 @@
 #include <utility>
 #include <SDL_surface.h>
 #include <GL/glew.h>
-#include "include/general/OpenGL_SDL/vertex_array_object.h"
-#include "include/general/OpenGL_SDL/shader_program.h"
+#include "general/OpenGL_SDL/vertex_array_object.h"
+#include "general/OpenGL_SDL/shader_program.h"
 
 /*!
  * \class DetectorBase

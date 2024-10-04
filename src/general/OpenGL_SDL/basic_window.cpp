@@ -2,9 +2,9 @@
 // Created by Palnit on 2023. 11. 11.
 //
 
-#include "include/general/OpenGL_SDL/basic_window.h"
-#include "include/general/OpenGL_SDL/SDL_GLDebugMessageCallback.h"
-#include "include/general/OpenGL_SDL/generic_structs.h"
+#include "general/OpenGL_SDL/basic_window.h"
+#include "general/OpenGL_SDL/SDL_GLDebugMessageCallback.h"
+#include "general/OpenGL_SDL/generic_structs.h"
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>

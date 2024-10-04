@@ -9,7 +9,7 @@ FetchContent_MakeAvailable(vcpkg)
 set(CMAKE_TOOLCHAIN_FILE "${vcpkg_SOURCE_DIR}/scripts/buildsystems/vcpkg.cmake" CACHE FILEPATH "")
 set(VCPKG_TRACE_FIND_PACKAGE true)
 
-project(GPGPU_Edge_Detector
+project(BSC_Thesis
         VERSION 0.1
         LANGUAGES CXX)
 
@@ -93,6 +93,7 @@ find_package(glm CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(implot CONFIG REQUIRED)
+find_package(OpenCL CONFIG REQUIRED)
 
 
 if (CUDAToolkit_FOUND AND CUDA_FOUND)
@@ -105,6 +106,21 @@ target_compile_features(cuda_comp PRIVATE
         cuda_std_17
 )
 
+set_target_properties(cuda_comp PROPERTIES LINKER_LANGUAGE CUDA)
+
+target_link_libraries(cuda_comp PRIVATE
+        CUDA::toolkit
+        CUDA::cudart
+        CUDA::cuda_driver
+)
+
+set_target_properties(cuda_comp PROPERTIES
+        LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+
+target_include_directories(cuda_comp
+        PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
 
 set_target_properties(cuda_comp
         PROPERTIES
@@ -130,19 +146,30 @@ target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE
         glm::glm
         OpenGL::GL
         implot::implot
+        OpenCL::OpenCL
+        OpenCL::Headers
+        OpenCL::HeadersCpp
+        OpenCL::Utils
+        OpenCL::UtilsCpp
 )
 
 if (CUDAToolkit_FOUND AND CUDA_FOUND)
+    enable_language(CUDA)
+
     target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE
     cuda_comp
-    CUDA::toolkit
-            )
+    CUDA::toolkit)
 endif ()
 
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES
         LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+
+
+target_include_directories(${CMAKE_PROJECT_NAME}
+        PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+
 
 foreach (file ${RESOURCES})
     string(REPLACE "/" "_" n_file ${file})

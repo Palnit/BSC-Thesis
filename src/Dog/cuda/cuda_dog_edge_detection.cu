@@ -2,8 +2,8 @@
 // Created by Palnit on 2024. 01. 21.
 //
 
-#include "include/Dog/cuda/cuda_dog_edge_detection.cuh"
-#include "include/general/cuda/gauss_blur.cuh"
+#include "Dog/cuda/cuda_dog_edge_detection.cuh"
+#include "general/cuda/gauss_blur.cuh"
 
 __global__ void DifferenceOfGaussian(float* kernel1,
                                      float* kernel2,

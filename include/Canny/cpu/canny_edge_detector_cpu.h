@@ -5,8 +5,8 @@
 #ifndef GPGPU_EDGE_DETECTOR_INCLUDE_CANNY_CPU_CANNY_EDGE_DETECTOR_CPU_H_
 #define GPGPU_EDGE_DETECTOR_INCLUDE_CANNY_CPU_CANNY_EDGE_DETECTOR_CPU_H_
 
-#include "include/general/detector_base.h"
-#include "include/Canny/canny_timings.h"
+#include "general/detector_base.h"
+#include "Canny/canny_timings.h"
 
 /*!
  * \class CannyEdgeDetectorCPU

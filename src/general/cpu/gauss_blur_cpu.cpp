@@ -3,8 +3,8 @@
 //
 #define _USE_MATH_DEFINES
 #include <cmath>
-#include "include/general/cpu/gauss_blur_cpu.h"
-#include "include/general/OpenGL_SDL/generic_structs.h"
+#include "general/cpu/gauss_blur_cpu.h"
+#include "general/OpenGL_SDL/generic_structs.h"
 
 void DetectorsCPU::CopyBack(uint8_t* dest, float* src, int w, int h) {
     RGBA* color;

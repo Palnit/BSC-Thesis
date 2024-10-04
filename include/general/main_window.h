@@ -5,10 +5,10 @@
 #ifndef GPGPU_EDGE_DETECTOR_INCLUDE_MAIN_WINDOW_H_
 #define GPGPU_EDGE_DETECTOR_INCLUDE_MAIN_WINDOW_H_
 
-#include "include/general/OpenGL_SDL/basic_window.h"
-#include "include/general/detector_base.h"
-#include "include/Canny/cuda/canny_edge_detector_cuda.h"
-#include "include/general/OpenGL_SDL/file_handling.h"
+#include "general/OpenGL_SDL/basic_window.h"
+#include "general/detector_base.h"
+#include "Canny/cuda/canny_edge_detector_cuda.h"
+#include "general/OpenGL_SDL/file_handling.h"
 #include "imgui_display.h"
 
 /*!

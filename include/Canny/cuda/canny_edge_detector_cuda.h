@@ -7,12 +7,12 @@
 
 #include <utility>
 
-#include "include/general/detector_base.h"
+#include "general/detector_base.h"
 #include "GL/glew.h"
-#include "include/general/OpenGL_SDL/element_buffer_object.h"
-#include "include/general/OpenGL_SDL/vertex_array_object.h"
-#include "include/general/OpenGL_SDL/shader_program.h"
-#include "include/Canny/canny_timings.h"
+#include "general/OpenGL_SDL/element_buffer_object.h"
+#include "general/OpenGL_SDL/vertex_array_object.h"
+#include "general/OpenGL_SDL/shader_program.h"
+#include "Canny/canny_timings.h"
 
 /*!
  * \class CannyEdgeDetectorCuda

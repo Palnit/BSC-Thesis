@@ -2,7 +2,7 @@
 // Created by Palnit on 2024. 01. 17.
 //
 
-#include "include/general/OpenGL_SDL/element_buffer_object.h"
+#include "general/OpenGL_SDL/element_buffer_object.h"
 
 ElementBufferObject::ElementBufferObject() : m_usage(GL_STATIC_DRAW) {
     glGenBuffers(1, &m_EBO);

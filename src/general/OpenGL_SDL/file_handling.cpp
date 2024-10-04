@@ -6,7 +6,7 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
-#include "include/general/OpenGL_SDL/file_handling.h"
+#include "general/OpenGL_SDL/file_handling.h"
 #include <SDL2/SDL_image.h>
 
 SDL_Surface* FileHandling::LoadImage(const char* file) {

@@ -2,7 +2,7 @@
 // Created by Palnit on 2024. 01. 21.
 //
 
-#include "include/general/cuda/gauss_blur.cuh"
+#include "general/cuda/gauss_blur.cuh"
 #include <math_constants.h>
 #include <cstdio>
 

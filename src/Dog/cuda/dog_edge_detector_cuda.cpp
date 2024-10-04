@@ -3,9 +3,9 @@
 //
 
 #include <cuda_runtime.h>
-#include "include/Dog/cuda/dog_edge_detector_cuda.h"
+#include "Dog/cuda/dog_edge_detector_cuda.h"
 #include "imgui.h"
-#include "include/Dog/cuda/cuda_dog_edge_detection.cuh"
+#include "Dog/cuda/cuda_dog_edge_detection.cuh"
 #include "SDL_image.h"
 
 void DogEdgeDetectorCuda::DetectEdge() {

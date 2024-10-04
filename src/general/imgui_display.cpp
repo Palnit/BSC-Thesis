@@ -2,11 +2,11 @@
 // Created by Palnit on 2024. 01. 20.
 //
 
-#include "include/general/imgui_display.h"
-#include "include/general/main_window.h"
-#include "include/Dog/cuda/dog_edge_detector_cuda.h"
-#include "include/Canny/cpu/canny_edge_detector_cpu.h"
-#include "include/Dog/cpu/dog_edge_detector_cpu.h"
+#include "general/imgui_display.h"
+#include "general/main_window.h"
+#include "Dog/cuda/dog_edge_detector_cuda.h"
+#include "Canny/cpu/canny_edge_detector_cpu.h"
+#include "Dog/cpu/dog_edge_detector_cpu.h"
 #include <imgui.h>
 
 void ImGuiDisplay::DisplayImGui() {

@@ -2,10 +2,10 @@
 // Created by Palnit on 2023. 11. 11.
 //
 
-#include "include/general//main_window.h"
-#include "include/general/detector_base.h"
-#include "include/general/OpenGL_SDL/file_handling.h"
-#include "include/general/OpenGL_SDL/generic_structs.h"
+#include "general//main_window.h"
+#include "general/detector_base.h"
+#include "general/OpenGL_SDL/file_handling.h"
+#include "general/OpenGL_SDL/generic_structs.h"
 
 #include <ctime>
 #include <algorithm>

@@ -43,7 +43,7 @@
 // https://gist.github.com/liam-middlebrook/c52b069e4be2d87a6d2f
 // https://gist.github.com/Plasmoxy/aec637b85e306f671339dcfd509efc82
 
-#include "include/general/OpenGL_SDL/SDL_GLDebugMessageCallback.h"
+#include "general/OpenGL_SDL/SDL_GLDebugMessageCallback.h"
 
 #include <SDL2/SDL_log.h>
 

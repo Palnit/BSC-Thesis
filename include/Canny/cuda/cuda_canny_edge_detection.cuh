@@ -7,7 +7,7 @@
 
 #include <cstdint>
 #include <cuda_runtime.h>
-#include "include/Canny/canny_timings.h"
+#include "Canny/canny_timings.h"
 
 /*!
  * This function uses the sobel operator to calculate the gradient and the

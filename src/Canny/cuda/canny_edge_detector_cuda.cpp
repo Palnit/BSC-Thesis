@@ -2,11 +2,11 @@
 // Created by Palnit on 2024. 01. 16.
 //
 
-#include "include/Canny/cuda/canny_edge_detector_cuda.h"
-#include "include/Canny/cuda/cuda_canny_edge_detection.cuh"
+#include "Canny/cuda/canny_edge_detector_cuda.h"
+#include "Canny/cuda/cuda_canny_edge_detection.cuh"
 #include "SDL_timer.h"
-#include "include/general/OpenGL_SDL/basic_window.h"
-#include "include/general/OpenGL_SDL/file_handling.h"
+#include "general/OpenGL_SDL/basic_window.h"
+#include "general/OpenGL_SDL/file_handling.h"
 
 #include <cuda_runtime.h>
 

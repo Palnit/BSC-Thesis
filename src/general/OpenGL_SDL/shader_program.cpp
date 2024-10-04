@@ -2,7 +2,7 @@
 // Created by Palnit on 2024. 01. 17.
 //
 
-#include "include/general/OpenGL_SDL/shader_program.h"
+#include "general/OpenGL_SDL/shader_program.h"
 
 ShaderProgram::ShaderProgram() {
     m_program = glCreateProgram();

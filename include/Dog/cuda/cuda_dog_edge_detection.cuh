@@ -7,7 +7,7 @@
 
 #include <cstdint>
 #include <cuda_runtime.h>
-#include "include/Dog/dog_timings.h"
+#include "Dog/dog_timings.h"
 
 /*!
  * This cuda function calculates the difference of 2 gaussian kernels at every

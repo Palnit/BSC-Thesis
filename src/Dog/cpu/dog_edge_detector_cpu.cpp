@@ -3,9 +3,9 @@
 //
 
 #include <chrono>
-#include "include/Dog/cpu/dog_edge_detector_cpu.h"
+#include "Dog/cpu/dog_edge_detector_cpu.h"
 #include "imgui.h"
-#include "include/general/cpu/gauss_blur_cpu.h"
+#include "general/cpu/gauss_blur_cpu.h"
 #include "SDL_image.h"
 
 void DogEdgeDetectorCPU::DetectEdge() {

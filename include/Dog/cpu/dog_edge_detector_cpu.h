@@ -5,8 +5,8 @@
 #ifndef GPGPU_EDGE_DETECTOR_SRC_DOG_CPU_DOGEDGEDETECTORCPU_H_
 #define GPGPU_EDGE_DETECTOR_SRC_DOG_CPU_DOGEDGEDETECTORCPU_H_
 
-#include "include/general/detector_base.h"
-#include "include/Dog/dog_timings.h"
+#include "general/detector_base.h"
+#include "Dog/dog_timings.h"
 
 /*!
  * \class DogEdgeDetectorCPU

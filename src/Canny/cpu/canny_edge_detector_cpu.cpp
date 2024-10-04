@@ -2,10 +2,10 @@
 // Created by Palnit on 2024. 01. 21.
 //
 
-#include "include/Canny/cpu/canny_edge_detector_cpu.h"
+#include "Canny/cpu/canny_edge_detector_cpu.h"
 #include "imgui.h"
-#include "include/general/OpenGL_SDL/generic_structs.h"
-#include "include/general/cpu/gauss_blur_cpu.h"
+#include "general/OpenGL_SDL/generic_structs.h"
+#include "general/cpu/gauss_blur_cpu.h"
 #include "chrono"
 #include "SDL_image.h"
 

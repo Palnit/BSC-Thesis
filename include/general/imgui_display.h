@@ -7,7 +7,7 @@
 
 #include <vector>
 #include "detector_base.h"
-#include "include/general/OpenGL_SDL/basic_window.h"
+#include "general/OpenGL_SDL/basic_window.h"
 
 /*!
  * \class ImGuiDisplay

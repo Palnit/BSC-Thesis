@@ -2,10 +2,10 @@
 // Created by Palnit on 2023. 11. 12.
 //
 
-#include "include/Canny/cuda/cuda_canny_edge_detection.cuh"
+#include "Canny/cuda/cuda_canny_edge_detection.cuh"
 #include <cstdio>
 #include <math_constants.h>
-#include "include/general/cuda/gauss_blur.cuh"
+#include "general/cuda/gauss_blur.cuh"
 
 __global__ void DetectionOperator(float* src,
                                   float* gradient,
