@@ -7,7 +7,6 @@
 
 #include "general/OpenGL_SDL/basic_window.h"
 #include "general/detector_base.h"
-#include "Canny/cuda/canny_edge_detector_cuda.h"
 #include "general/OpenGL_SDL/file_handling.h"
 #include "imgui_display.h"
 
@@ -88,7 +87,6 @@ public:
 
 private:
     std::vector<DetectorBase*> m_detectors;
-    CannyEdgeDetectorCuda* m_det;
     ImGuiDisplay m_display;
 
 };
