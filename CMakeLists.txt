@@ -104,6 +104,7 @@ find_package(OpenCL CONFIG REQUIRED)
 
 
 if (CUDAToolkit_FOUND AND CUDA_FOUND)
+    enable_language(CUDA)
     add_compile_definitions(CUDA_EXISTS)
     add_library(cuda_comp STATIC
             ${CUDA_HEADER_FILES}
@@ -165,10 +166,6 @@ target_link_libraries(${CMAKE_PROJECT_NAME}_lib PRIVATE
         OpenGL::GL
         implot::implot
         OpenCL::OpenCL
-        OpenCL::Headers
-        OpenCL::HeadersCpp
-        OpenCL::Utils
-        OpenCL::UtilsCpp
 )
 
 target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE
@@ -182,14 +179,9 @@ target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE
         OpenGL::GL
         implot::implot
         OpenCL::OpenCL
-        OpenCL::Headers
-        OpenCL::HeadersCpp
-        OpenCL::Utils
-        OpenCL::UtilsCpp
 )
 
 if (CUDAToolkit_FOUND AND CUDA_FOUND)
-    enable_language(CUDA)
 
     target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE
     cuda_comp

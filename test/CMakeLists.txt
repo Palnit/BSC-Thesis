@@ -23,10 +23,6 @@ target_link_libraries(BSC_Thesis_Tests PRIVATE
         OpenGL::GL
         implot::implot
         OpenCL::OpenCL
-        OpenCL::Headers
-        OpenCL::HeadersCpp
-        OpenCL::Utils
-        OpenCL::UtilsCpp
         ${CMAKE_PROJECT_NAME}_lib
 )
 

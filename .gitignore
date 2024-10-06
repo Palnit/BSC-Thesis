@@ -1,2 +1,5 @@
-cmake-build-*/
+cmake-build*/
+.cache/
 .idea/
+.git/
+imgui.ini
