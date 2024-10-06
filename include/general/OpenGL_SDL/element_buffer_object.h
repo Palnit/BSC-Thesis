@@ -16,17 +16,18 @@
  */
 class ElementBufferObject {
 public:
-
     /*!
      * Default constructor
      */
-    ElementBufferObject();
+    ElementBufferObject() : m_EBO(0), m_usage(GL_STATIC_DRAW) {
+    }
 
     /*!
      * Constructor
      * \param usage The way the data will be used
      */
-    ElementBufferObject(GLenum usage);
+    ElementBufferObject(GLenum usage) : m_EBO(0), m_usage(usage) {
+    }
 
     /*!
      * A templated constructor to take any sized array as input
@@ -35,9 +36,8 @@ public:
      * \param usage The way the data will be used
      */
     template<auto size>
-    ElementBufferObject(unsigned int (& elements)[size],
-                        GLenum usage) : m_usage(usage) {
-        glGenBuffers(1, &m_EBO);
+    ElementBufferObject(unsigned int (&elements)[size],
+                        GLenum usage) : m_EBO(0), m_usage(usage) {
         m_elements.insert(m_elements.end(),
                           elements,
                           elements + size);
@@ -49,8 +49,7 @@ public:
      * \param usage The way the data will be used
      */
     ElementBufferObject(std::initializer_list<unsigned int> list,
-                        GLenum usage) : m_usage(usage) {
-        glGenBuffers(1, &m_EBO);
+                        GLenum usage) : m_EBO(0), m_usage(usage) {
         m_elements.insert(m_elements.end(),
                           list.begin(),
                           list.end());
@@ -79,7 +78,7 @@ public:
      * \param elements The array of elements
      */
     template<auto size>
-    void AddElement(unsigned int (& elements)[size]) {
+    void AddElement(unsigned int (&elements)[size]) {
         m_elements.insert(m_elements.end(),
                           elements,
                           elements + size);
@@ -109,4 +108,4 @@ private:
     bool m_set = false;
 };
 
-#endif //GPGPU_EDGE_DETECTOR_SRC_GENERAL_OPENGL_SDL_ELEMENTBUFFEROBJECT_H_
+#endif//GPGPU_EDGE_DETECTOR_SRC_GENERAL_OPENGL_SDL_ELEMENTBUFFEROBJECT_H_

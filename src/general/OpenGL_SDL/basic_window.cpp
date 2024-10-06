@@ -12,8 +12,8 @@
 #include <GL/glew.h>
 
 #include <imgui.h>
-#include <imgui_impl_sdl2.h>
 #include <imgui_impl_opengl3.h>
+#include <imgui_impl_sdl2.h>
 #include <implot.h>
 
 BasicWindow::BasicWindow(const char* title,
@@ -30,7 +30,6 @@ BasicWindow::BasicWindow(const char* title,
       m_flags(flags),
       m_running(true) {
     SDL_LogSetPriority(SDL_LOG_CATEGORY_ERROR, SDL_LOG_PRIORITY_ERROR);
-
 }
 int BasicWindow::run() {
     if (InitWindow()) {

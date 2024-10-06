@@ -4,14 +4,6 @@
 
 #include "general/OpenGL_SDL/element_buffer_object.h"
 
-ElementBufferObject::ElementBufferObject() : m_usage(GL_STATIC_DRAW) {
-    glGenBuffers(1, &m_EBO);
-}
-
-ElementBufferObject::ElementBufferObject(GLenum usage) : m_usage(usage) {
-    glGenBuffers(1, &m_EBO);
-}
-
 void ElementBufferObject::AddElement(unsigned int element) {
     m_elements.push_back(element);
     m_set = false;
@@ -22,6 +14,9 @@ void ElementBufferObject::AddElement(std::initializer_list<unsigned int> list) {
 }
 
 void ElementBufferObject::Bind() {
+    if (!m_EBO) {
+        glGenBuffers(1, &m_EBO);
+    }
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
     if (!m_set) {
         glBufferData(GL_ELEMENT_ARRAY_BUFFER,
@@ -36,10 +31,10 @@ void ElementBufferObject::UnBind() {
 }
 ElementBufferObject::~ElementBufferObject() {
     m_elements.clear();
-    glDeleteBuffers(1, &m_EBO);
+    if (m_EBO) {
+        glDeleteBuffers(1, &m_EBO);
+    }
 }
 void ElementBufferObject::SetUsage(GLenum usage) {
     m_usage = usage;
 }
-
-
