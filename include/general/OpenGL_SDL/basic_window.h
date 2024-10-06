@@ -145,4 +145,4 @@ protected:
     SDL_Event m_ev;
 };
 
-#endif//BASIC_WINDOW_H_
+#endif //BASIC_WINDOW_H_
