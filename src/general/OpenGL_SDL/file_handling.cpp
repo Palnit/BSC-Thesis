@@ -3,6 +3,8 @@
 //
 
 #include "general/OpenGL_SDL/file_handling.h"
+#include "general/OpenCL/file_handling.h"
+
 #include <SDL2/SDL_image.h>
 #include <fstream>
 #include <iostream>

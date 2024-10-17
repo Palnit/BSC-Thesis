@@ -78,6 +78,16 @@ set(CUDA_CPP_SOURCE_FILES
         src/Dog/cuda/dog_edge_detector_cuda.cpp
 )
 
+set(OPENCL_HEADER_FILES
+        include/general/OpenCL/get_devices.h
+        include/general/OpenCL/file_handling.h
+)
+
+set(OPENCL_SOURCE_FILES
+        src/general/OpenCL/get_devices.cpp
+        src/general/OpenCL/file_handling.cpp
+)
+
 set(RESOURCES
         pictures/img.jpg
         pictures/test.jpg
@@ -88,6 +98,9 @@ set(RESOURCES
 
         shaders/default_fragment.frag
         shaders/default_vertex.vert
+
+        OpenCLKernels/test.cl
+
 )
 
 
@@ -136,7 +149,7 @@ if (CUDAToolkit_FOUND AND CUDA_FOUND)
             CUDA_STANDARD 17
             CUDA_SEPARABLE_COMPILATION OFF
     )
-endif()
+endif ()
 
 add_executable(${CMAKE_PROJECT_NAME}
         src/main.cpp
@@ -145,6 +158,8 @@ add_executable(${CMAKE_PROJECT_NAME}
 add_library(${CMAKE_PROJECT_NAME}_lib STATIC
         ${SOURCE_FILES}
         ${HEADER_FILES}
+        ${OPENCL_SOURCE_FILES}
+        ${OPENCL_HEADER_FILES}
 )
 if (CUDAToolkit_FOUND AND CUDA_FOUND)
     target_sources(${CMAKE_PROJECT_NAME}_lib PRIVATE
@@ -184,8 +199,8 @@ target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE
 if (CUDAToolkit_FOUND AND CUDA_FOUND)
 
     target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE
-    cuda_comp
-    CUDA::toolkit)
+            cuda_comp
+            CUDA::toolkit)
     target_link_libraries(${CMAKE_PROJECT_NAME}_lib PRIVATE
             cuda_comp
             CUDA::toolkit)

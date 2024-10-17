@@ -8,6 +8,6 @@
 /*!
  * Gets information from the cuda Api about our GPU if it exists
  */
-void GetGpuInfo();
+void GetGpuInfoCuda();
 
 #endif //GPU_INFO_H_
