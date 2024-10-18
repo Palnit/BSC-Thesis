@@ -31,11 +31,11 @@ int main(int argc, char* args[]) {
     ClWrapper::Memory<int, 100> A_test(programTest, CL_MEM_READ_WRITE);
     ClWrapper::Memory<int, 100> B_test(programTest, CL_MEM_READ_WRITE);
     ClWrapper::Memory<int, 100> C_test(programTest, CL_MEM_READ_WRITE);
-    ClWrapper::Memory<int, 1> N_test(programTest, CL_MEM_READ_WRITE);
+    ClWrapper::Memory<int, 1> N_test(programTest, CL_MEM_READ_ONLY);
 
     N_test = 100;
 
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < N_test; i++) {
         A_test[i] = 10;
         B_test[i] = 100 - i - 1;
     }
@@ -48,12 +48,11 @@ int main(int argc, char* args[]) {
 
     kernel_test(cl::NDRange(1, 100), A_test, B_test, C_test, N_test);
 
-    // read result from GPU to here
     C_test.ReadFromDevice();
 
     std::cout << "result2: {";
-    for (int i = 0; i < 100; i++) {
-        std::cout << C_test[i] << " ";
+    for (int i : C_test) {
+        std::cout << i << " ";
     }
     std::cout << "}" << std::endl;
 

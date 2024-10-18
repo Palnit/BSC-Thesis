@@ -84,6 +84,11 @@ public:
         delete m_data;
     }
 
+    T* begin() { return &m_data[0]; }
+    const T* begin() const { return &m_data[0]; }
+    T* end() { return &m_data[N]; }
+    const T* end() const { return &m_data[N]; }
+
     void WriteToDevice() {
         m_program.m_commandQueue
             .enqueueWriteBuffer(m_buffer, CL_TRUE, 0, sizeof(T) * N, m_data);
@@ -173,6 +178,9 @@ public:
         m_data = std::move(otherData);
         return *this;
     }
+
+    operator T&() { return m_data; }
+    operator T() const { return m_data; }
 
     void WriteToDevice() {
         m_program.m_commandQueue
