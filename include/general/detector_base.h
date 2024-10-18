@@ -34,7 +34,7 @@ public:
     /*!
      * Destructor that frees the SDL_Surfaces of the pictures
      */
-    ~DetectorBase() {
+    virtual ~DetectorBase() {
         SDL_FreeSurface(m_base);
         SDL_FreeSurface(m_detected);
     }

@@ -81,11 +81,17 @@ set(CUDA_CPP_SOURCE_FILES
 set(OPENCL_HEADER_FILES
         include/general/OpenCL/get_devices.h
         include/general/OpenCL/file_handling.h
+        include/general/OpenCL/program.h
+        include/general/OpenCL/memory.h
+        include/general/OpenCL/kernel.h
 )
 
 set(OPENCL_SOURCE_FILES
         src/general/OpenCL/get_devices.cpp
         src/general/OpenCL/file_handling.cpp
+        src/general/OpenCL/program.cpp
+        src/general/OpenCL/kernel.cpp
+        src/general/OpenCL/memory.cpp
 )
 
 set(RESOURCES

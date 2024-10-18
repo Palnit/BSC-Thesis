@@ -6,6 +6,9 @@
 
 #include "general/OpenCL/get_devices.h"
 #include "general/OpenCL/file_handling.h"
+#include "general/OpenCL/program.h"
+#include "general/OpenCL/memory.h"
+#include "general/OpenCL/kernel.h"
 
 int main(int argc, char* args[]) {
 
@@ -22,66 +25,35 @@ int main(int argc, char* args[]) {
                        | SDL_WINDOW_RESIZABLE);
 
     std::vector<cl::Device> devices = GetOpenCLInfoAndDevices();
-    cl::Context context(devices[0]);
-    cl::Program::Sources sources;
-    FileHandling::LoadOpenCLKernel("OpenCLKernels/test.cl", sources);
-    std::string kernel_code2 =
-        "   void kernel what(global const int* A, global const int* B, global int* C, "
-        "                          global const int* N) {"
-        "    simple_add(A,B,C,N);       "
-        "   }";
+    ClWrapper::Program programTest(devices[0]);
+    programTest.AddSource("OpenCLKernels/test.cl");
 
-    sources.emplace_back(kernel_code2);
+    ClWrapper::Memory<int, 100> A_test(programTest, CL_MEM_READ_WRITE);
+    ClWrapper::Memory<int, 100> B_test(programTest, CL_MEM_READ_WRITE);
+    ClWrapper::Memory<int, 100> C_test(programTest, CL_MEM_READ_WRITE);
+    ClWrapper::Memory<int, 1> N_test(programTest, CL_MEM_READ_WRITE);
 
-    cl::Program program(context, sources);
-    if (program.build(devices[0]) != CL_SUCCESS) {
-        std::cout << "Error building: "
-                  << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(devices[0])
-                  << std::endl;
-        exit(1);
+    N_test = 100;
+
+    for (int i = 0; i < 100; i++) {
+        A_test[i] = 10;
+        B_test[i] = 100 - i - 1;
     }
 
-    // apparently OpenCL only likes arrays ...
-    // N holds the number of elements in the vectors we want to add
-    int N[1] = {100};
-    const int n = 100;
+    A_test.WriteToDevice();
+    B_test.WriteToDevice();
+    N_test.WriteToDevice();
 
-    // create buffers on device (allocate space on GPU)
-    cl::Buffer buffer_A(context, CL_MEM_READ_WRITE, sizeof(int) * n);
-    cl::Buffer buffer_B(context, CL_MEM_READ_WRITE, sizeof(int) * n);
-    cl::Buffer buffer_C(context, CL_MEM_READ_WRITE, sizeof(int) * n);
-    cl::Buffer buffer_N(context, CL_MEM_READ_ONLY, sizeof(int));
+    ClWrapper::Kernel kernel_test(programTest, "simple_add");
 
-    // create things on here (CPU)
-    int A[n], B[n];
-    for (int i = 0; i < n; i++) {
-        A[i] = 10;
-        B[i] = n - i - 1;
-    }
-    // create a queue (a queue of commands that the GPU will execute)
-    cl::CommandQueue queue(context, devices[0]);
+    kernel_test(cl::NDRange(1, 100), A_test, B_test, C_test, N_test);
 
-    // push write commands to queue
-    queue.enqueueWriteBuffer(buffer_A, CL_TRUE, 0, sizeof(int) * n, A);
-    queue.enqueueWriteBuffer(buffer_B, CL_TRUE, 0, sizeof(int) * n, B);
-    queue.enqueueWriteBuffer(buffer_N, CL_TRUE, 0, sizeof(int), N);
-
-    // RUN ZE KERNEL
-    cl::Kernel kernel(program, "what", nullptr);
-    kernel.setArg(0, buffer_A);
-    kernel.setArg(1, buffer_B);
-    kernel.setArg(2, buffer_C);
-    kernel.setArg(3, buffer_N);
-
-    queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(1, n));
-
-    int C[n];
     // read result from GPU to here
-    queue.enqueueReadBuffer(buffer_C, CL_TRUE, 0, sizeof(int) * n, C);
+    C_test.ReadFromDevice();
 
-    std::cout << "result: {";
-    for (int i : C) {
-        std::cout << i << " ";
+    std::cout << "result2: {";
+    for (int i = 0; i < 100; i++) {
+        std::cout << C_test[i] << " ";
     }
     std::cout << "}" << std::endl;
 
