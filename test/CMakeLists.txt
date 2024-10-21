@@ -1,8 +1,12 @@
-set(TEST_INCLUDES_FILES)
+set(TEST_INCLUDES_FILES
+    include/spiral_indexer.h
+    include/surface_painters.h
+    )
 
 set(TEST_SOURCE_FILES
     src/main.cpp
-)
+    src/surface_painters.cpp
+    src/spiral_indexer.cpp )
 
 
 add_executable(BSC_Thesis_Tests
@@ -33,6 +37,8 @@ target_include_directories(BSC_Thesis_Tests
 )
 
 
+find_package(CUDA)
+find_package(CUDAToolkit)
 if (CUDAToolkit_FOUND AND CUDA_FOUND)
     enable_language(CUDA)
 
