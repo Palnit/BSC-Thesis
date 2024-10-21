@@ -5,8 +5,8 @@
 #ifndef GPGPU_EDGE_DETECTOR_INCLUDE_CANNY_CPU_CANNY_EDGE_DETECTOR_CPU_H_
 #define GPGPU_EDGE_DETECTOR_INCLUDE_CANNY_CPU_CANNY_EDGE_DETECTOR_CPU_H_
 
-#include "general/detector_base.h"
 #include "Canny/canny_timings.h"
+#include "general/detector_base.h"
 
 /*!
  * \class CannyEdgeDetectorCPU
@@ -17,19 +17,15 @@
  */
 class CannyEdgeDetectorCPU : public DetectorBase {
 public:
-
     /*!
      * Implementation of the base constructor
      * \param picture The picture to be taken
      * \param name The name of the detector
      */
-    CannyEdgeDetectorCPU(SDL_Surface* base,
-                         std::string name) : DetectorBase(base,
-                                                          std::move(name)),
-                                             m_w(m_base->w),
-                                             m_h(m_base->h) {
-
-    }
+    CannyEdgeDetectorCPU(SDL_Surface* base, std::string name)
+        : DetectorBase(base, std::move(name)),
+          m_w(m_base->w),
+          m_h(m_base->h) {}
 
     /*!
      * Implementation of the DetectEdge function class the detection functions
@@ -37,7 +33,7 @@ public:
     void DetectEdge() override;
 
     /*!
-     * Implementation of the DisplayImGui function displays the variables
+     * Implementation of the MainWindowDisplayImGui function displays the variables
      * related to this edge detection method to be modified easily
      */
     void DisplayImGui() override;
@@ -47,6 +43,7 @@ public:
      * detected image
      */
     void Display() override;
+
 private:
     int m_w;
     int m_h;
@@ -119,5 +116,5 @@ void DoubleThreshold(float* src,
  * \param h The height of the image
  */
 void Hysteresis(float* src, float* dest, int w, int h);
-}
-#endif //GPGPU_EDGE_DETECTOR_INCLUDE_CANNY_CPU_CANNY_EDGE_DETECTOR_CPU_H_
+}// namespace DetectorsCPU
+#endif//GPGPU_EDGE_DETECTOR_INCLUDE_CANNY_CPU_CANNY_EDGE_DETECTOR_CPU_H_

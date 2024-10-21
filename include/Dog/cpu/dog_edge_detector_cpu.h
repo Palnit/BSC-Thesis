@@ -5,8 +5,8 @@
 #ifndef GPGPU_EDGE_DETECTOR_SRC_DOG_CPU_DOGEDGEDETECTORCPU_H_
 #define GPGPU_EDGE_DETECTOR_SRC_DOG_CPU_DOGEDGEDETECTORCPU_H_
 
-#include "general/detector_base.h"
 #include "Dog/dog_timings.h"
+#include "general/detector_base.h"
 
 /*!
  * \class DogEdgeDetectorCPU
@@ -16,24 +16,22 @@
  */
 class DogEdgeDetectorCPU : public DetectorBase {
 public:
-
     /*!
      * Implementation of the base constructor
      * \param picture The picture to be taken
      * \param name The name of the detector
      */
-    DogEdgeDetectorCPU(SDL_Surface* base, std::string name) : DetectorBase(base,
-                                                                           std::move(
-                                                                               name)),
-                                                              m_w(m_base->w),
-                                                              m_h(m_base->h) {}
+    DogEdgeDetectorCPU(SDL_Surface* base, std::string name)
+        : DetectorBase(base, std::move(name)),
+          m_w(m_base->w),
+          m_h(m_base->h) {}
     /*!
      * Implementation of the DetectEdge function class the detection functions
      */
     void DetectEdge() override;
 
     /*!
-     * Implementation of the DisplayImGui function displays the variables
+     * Implementation of the MainWindowDisplayImGui function displays the variables
      * related to this edge detection method to be modified easily
      */
     void DisplayImGui() override;
@@ -43,6 +41,7 @@ public:
      * detected image
      */
     void Display() override;
+
 private:
     int m_w;
     int m_h;
@@ -74,6 +73,6 @@ void DifferenceOfGaussian(float* kernel1,
                           float* kernel2,
                           float* finalKernel,
                           int kernelSize);
-}
+}// namespace DetectorsCPU
 
-#endif //GPGPU_EDGE_DETECTOR_SRC_DOG_CPU_DOGEDGEDETECTORCPU_H_
+#endif//GPGPU_EDGE_DETECTOR_SRC_DOG_CPU_DOGEDGEDETECTORCPU_H_
