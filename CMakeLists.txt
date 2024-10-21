@@ -15,6 +15,7 @@ project(BSC_Thesis
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CUDA_STANDARD 17)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(HEADER_FILES
         include/general/OpenGL_SDL/basic_window.h

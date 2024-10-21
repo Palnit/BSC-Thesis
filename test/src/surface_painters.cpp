@@ -55,9 +55,7 @@ void DrawLine(SDL_Surface* surface,
     }
 }
 
-void SurfacePainters::DrawLine(SDL_Surface* surface,
-                               glm::vec2 start,
-                               glm::vec2 end) {
+void DrawLine(SDL_Surface* surface, glm::vec2 start, glm::vec2 end) {
     float dx = abs(end.x - start.x);
     int sx = start.x < end.x ? 1 : -1;
     float dy = -abs(end.y - start.y);

@@ -1,6 +1,7 @@
 #ifndef BSC_THESIS_INCLUDE_GENERAL_OPENCL_MEMORY_H_
 #define BSC_THESIS_INCLUDE_GENERAL_OPENCL_MEMORY_H_
 
+#include <cassert>
 #include "general/OpenCL/program.h"
 namespace ClWrapper {
 
@@ -17,18 +18,17 @@ public:
     Memory(ClWrapper::Program& program,
            T* data,
            size_t size,
-           cl_mem_flags memType) : m_program(program),
-                                   m_memType(memType),
-                                   m_buffer(program.m_context,
-                                            memType,
-                                            sizeof(T) * size) {
+           cl_mem_flags memType)
+        : m_program(program),
+          m_memType(memType),
+          m_buffer(program.m_context, memType, sizeof(T) * size) {
         assert(N == size);
 
         m_data = new T[size];
         std::copy(data, data + size, m_data);
     }
 
-    Memory(ClWrapper::Program& program, T (& data)[N], cl_mem_flags memType)
+    Memory(ClWrapper::Program& program, T (&data)[N], cl_mem_flags memType)
         : m_program(program),
           m_memType(memType),
           m_buffer(program.m_context, memType, sizeof(T) * N) {
@@ -54,9 +54,7 @@ public:
     }
 
     Memory& operator=(const ClWrapper::Memory<T, N>& other) {
-        if (this == other) {
-            return *this;
-        }
+        if (this == other) { return *this; }
         m_program = other.m_program;
         m_data = new T[N];
         m_buffer = other.m_buffer;
@@ -65,9 +63,7 @@ public:
     }
 
     Memory& operator=(ClWrapper::Memory<T, N>&& other) noexcept {
-        if (this == other) {
-            return *this;
-        }
+        if (this == other) { return *this; }
         m_program = other.m_program;
         m_data = other.m_data;
         m_buffer = std::move(other.m_buffer);
@@ -80,9 +76,7 @@ public:
         return *(m_data + position);
     }
 
-    ~Memory() {
-        delete m_data;
-    }
+    ~Memory() { delete m_data; }
 
     T* begin() { return &m_data[0]; }
     const T* begin() const { return &m_data[0]; }
@@ -90,15 +84,13 @@ public:
     const T* end() const { return &m_data[N]; }
 
     void WriteToDevice() {
-        m_program.m_commandQueue
-            .enqueueWriteBuffer(m_buffer, CL_TRUE, 0, sizeof(T) * N, m_data);
-
+        m_program.m_commandQueue.enqueueWriteBuffer(m_buffer, CL_TRUE, 0,
+                                                    sizeof(T) * N, m_data);
     }
 
     void ReadFromDevice() {
-        m_program.m_commandQueue
-            .enqueueReadBuffer(m_buffer, CL_TRUE, 0, sizeof(T) * N, m_data);
-
+        m_program.m_commandQueue.enqueueReadBuffer(m_buffer, CL_TRUE, 0,
+                                                   sizeof(T) * N, m_data);
     }
     friend class Kernel;
 
@@ -107,7 +99,6 @@ private:
     T* m_data;
     cl::Buffer m_buffer;
     cl_mem_flags m_memType;
-
 };
 
 template<typename T>
@@ -119,15 +110,11 @@ public:
           m_memType(memType),
           m_buffer(program.m_context, memType, sizeof(T)) {}
 
-    Memory(ClWrapper::Program& program,
-           T data,
-           cl_mem_flags memType) : m_program(program),
-                                   m_data(data),
-                                   m_memType(memType),
-                                   m_buffer(program.m_context,
-                                            memType,
-                                            sizeof(T)) {
-    }
+    Memory(ClWrapper::Program& program, T data, cl_mem_flags memType)
+        : m_program(program),
+          m_data(data),
+          m_memType(memType),
+          m_buffer(program.m_context, memType, sizeof(T)) {}
 
     Memory(const ClWrapper::Memory<T, 1>& other)
         : m_program(other.m_program),
@@ -140,13 +127,10 @@ public:
         : m_program(other.m_program),
           m_data(std::move(other.m_data)),
           m_memType(other.m_memType),
-          m_buffer(std::move(other.m_buffer)) {
-    }
+          m_buffer(std::move(other.m_buffer)) {}
 
     Memory& operator=(const ClWrapper::Memory<T, 1>& other) {
-        if (this == other) {
-            return *this;
-        }
+        if (this == other) { return *this; }
         m_program = other.m_program;
         m_data = other.m_data;
         m_buffer = other.m_buffer;
@@ -154,9 +138,7 @@ public:
     }
 
     Memory& operator=(ClWrapper::Memory<T, 1>&& other) noexcept {
-        if (this == other) {
-            return *this;
-        }
+        if (this == other) { return *this; }
         m_program = other.m_program;
         m_data = std::move(other.m_data);
         m_buffer = std::move(other.m_buffer);
@@ -164,17 +146,13 @@ public:
     }
 
     Memory& operator=(T& otherData) {
-        if (m_data == otherData) {
-            return *this;
-        }
+        if (m_data == otherData) { return *this; }
         m_data = otherData;
         return *this;
     }
 
     Memory& operator=(T&& otherData) {
-        if (m_data == otherData) {
-            return *this;
-        }
+        if (m_data == otherData) { return *this; }
         m_data = std::move(otherData);
         return *this;
     }
@@ -183,26 +161,24 @@ public:
     operator T() const { return m_data; }
 
     void WriteToDevice() {
-        m_program.m_commandQueue
-            .enqueueWriteBuffer(m_buffer, CL_TRUE, 0, sizeof(T), &m_data);
-
+        m_program.m_commandQueue.enqueueWriteBuffer(m_buffer, CL_TRUE, 0,
+                                                    sizeof(T), &m_data);
     }
 
     void ReadFromDevice() {
-        m_program.m_commandQueue
-            .enqueueReadBuffer(m_buffer, CL_TRUE, 0, sizeof(T), &m_data);
-
+        m_program.m_commandQueue.enqueueReadBuffer(m_buffer, CL_TRUE, 0,
+                                                   sizeof(T), &m_data);
     }
 
     friend class Kernel;
+
 private:
     ClWrapper::Program& m_program;
     T m_data;
     cl::Buffer m_buffer;
     cl_mem_flags m_memType;
-
 };
 
-}
+}// namespace ClWrapper
 
-#endif //BSC_THESIS_INCLUDE_GENERAL_OPENCL_MEMORY_H_
+#endif//BSC_THESIS_INCLUDE_GENERAL_OPENCL_MEMORY_H_

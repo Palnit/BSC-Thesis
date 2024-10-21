@@ -20,4 +20,4 @@ int interpolate(int from, int to, float percent);
 
 }// namespace SurfacePainters
 
-#endif//BSC_THESIS_SURFACE_PAINTERS_H
+#endif //BSC_THESIS_SURFACE_PAINTERS_H

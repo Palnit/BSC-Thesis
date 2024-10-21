@@ -9,6 +9,7 @@ class TesterBase {
 public:
     explicit TesterBase(const std::string& mName);
     void MainWindowDisplayImGui();
+    virtual void ResultDisplay() = 0;
     virtual void SpecializedDisplayImGui() = 0;
     virtual void Test() = 0;
 

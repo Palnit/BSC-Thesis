@@ -1,3 +1,5 @@
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(TEST_INCLUDES_FILES
         include/spiral_indexer.h
         include/surface_painters.h
