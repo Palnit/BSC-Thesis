@@ -6,7 +6,7 @@
 #define GPGPU_EDGE_DETECTOR_INCLUDE_CUDA_DOG_EDGE_DETECTION_CUH_
 
 #include <cstdint>
-//#include <cuda_runtime.h>
+#include <cuda_runtime.h>
 #include "Dog/dog_timings.h"
 
 /*!
