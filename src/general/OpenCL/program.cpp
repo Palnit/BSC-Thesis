@@ -4,7 +4,7 @@ namespace ClWrapper {
 Program::Program(const cl::Device& device)
     : m_device(device),
       m_context(device),
-      m_commandQueue(m_context, m_device),
+      m_commandQueue(m_context, m_device, CL_QUEUE_PROFILING_ENABLE),
       m_built(false) {
 
 }

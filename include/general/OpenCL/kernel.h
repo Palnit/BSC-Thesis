@@ -25,9 +25,42 @@ public:
             }(),
             ...);
 
+        cl::Event event;
         m_program.m_commandQueue
-            .enqueueNDRangeKernel(m_kernel, cl::NullRange, range);
+            .enqueueNDRangeKernel(m_kernel,
+                                  cl::NullRange,
+                                  range,
+                                  cl::NullRange,
+                                  nullptr,
+                                  &event);
+        event.wait();
     }
+
+    template<typename... T, size_t... N>
+    void operator()(cl::NDRange range,
+                    cl::NDRange range2,
+                    ClWrapper::Memory<T, N>& ... memory) {
+        if (!m_program.GetBuilt()) {
+            m_program.Build();
+        }
+        m_kernel.~Kernel();
+        new(&m_kernel) cl::Kernel(m_program.m_program, m_kernelName);
+        size_t i = 0;
+        (
+            [&] {
+                m_kernel.setArg(i, memory.m_buffer);
+                i++;
+            }(),
+            ...);
+
+        cl::Event event;
+         m_program.m_commandQueue
+            .enqueueNDRangeKernel(m_kernel, cl::NullRange, range, range2,
+                                  nullptr, &event);
+        event.wait();
+
+    }
+
 private:
     ClWrapper::Program& m_program;
     cl::Kernel m_kernel;

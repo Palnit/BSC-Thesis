@@ -23,33 +23,33 @@ void DogEdgeDetectorCPU::DetectEdge() {
     auto t1 = std::chrono::high_resolution_clock::now();
 
     m_timings.GrayScale_ms =
-        DetectorsCPU::TimerRunner(DetectorsCPU::ConvertGrayScale,
-                                  (uint8_t*) m_base->pixels,
-                                  m_pixels1,
-                                  m_w,
-                                  m_h);
+        Detectors::TimerRunner(DetectorsCPU::ConvertGrayScale,
+                               (uint8_t*) m_base->pixels,
+                               m_pixels1,
+                               m_w,
+                               m_h);
     m_timings.Gauss1Creation_ms =
-        DetectorsCPU::TimerRunner(DetectorsCPU::GenerateGauss, m_kernel1,
-                                  m_gaussKernelSize,
-                                  m_standardDeviation1);
+        Detectors::TimerRunner(DetectorsCPU::GenerateGauss, m_kernel1,
+                               m_gaussKernelSize,
+                               m_standardDeviation1);
     m_timings.Gauss2Creation_ms =
-        DetectorsCPU::TimerRunner(DetectorsCPU::GenerateGauss, m_kernel2,
-                                  m_gaussKernelSize,
-                                  m_standardDeviation2);
+        Detectors::TimerRunner(DetectorsCPU::GenerateGauss, m_kernel2,
+                               m_gaussKernelSize,
+                               m_standardDeviation2);
     m_timings.DifferenceOfGaussian_ms =
-        DetectorsCPU::TimerRunner(DetectorsCPU::DifferenceOfGaussian,
-                                  m_kernel1,
-                                  m_kernel2,
-                                  m_finalKernel,
-                                  m_gaussKernelSize);
+        Detectors::TimerRunner(DetectorsCPU::DifferenceOfGaussian,
+                               m_kernel1,
+                               m_kernel2,
+                               m_finalKernel,
+                               m_gaussKernelSize);
 
     m_timings.Convolution_ms =
-        DetectorsCPU::TimerRunner(DetectorsCPU::GaussianFilter, m_pixels1,
-                                  m_pixels2,
-                                  m_finalKernel,
-                                  m_gaussKernelSize,
-                                  m_w,
-                                  m_h);
+        Detectors::TimerRunner(DetectorsCPU::GaussianFilter, m_pixels1,
+                               m_pixels2,
+                               m_finalKernel,
+                               m_gaussKernelSize,
+                               m_w,
+                               m_h);
 
     DetectorsCPU::CopyBack((uint8_t*) m_detected->pixels,
                            m_pixels2,

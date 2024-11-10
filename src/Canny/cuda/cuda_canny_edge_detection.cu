@@ -12,8 +12,8 @@ __global__ void DetectionOperator(float* src,
                                   float* tangent,
                                   int w,
                                   int h) {
-    int col = blockIdx.x * (blockDim.x - 3 + 1) + threadIdx.x;
-    int row = blockIdx.y * (blockDim.y - 3 + 1) + threadIdx.y;
+    int col = blockIdx.x * (blockDim.x - 3) + threadIdx.x;
+    int row = blockIdx.y * (blockDim.y - 3) + threadIdx.y;
     int col_i = col - 1;
     int row_i = row - 1;
 
@@ -61,8 +61,8 @@ __global__ void NonMaximumSuppression(float* gradient_in,
                                       int w,
                                       int h) {
 
-    int col = blockIdx.x * (blockDim.x - 3 + 1) + threadIdx.x;
-    int row = blockIdx.y * (blockDim.y - 3 + 1) + threadIdx.y;
+    int col = blockIdx.x * (blockDim.x - 3) + threadIdx.x;
+    int row = blockIdx.y * (blockDim.y - 3) + threadIdx.y;
     int col_i = col - 1;
     int row_i = row - 1;
 
@@ -135,8 +135,8 @@ __global__ void Hysteresis(float* gradient_in,
                            float* gradient_out,
                            int w,
                            int h) {
-    int col = blockIdx.x * (blockDim.x - 3 + 1) + threadIdx.x;
-    int row = blockIdx.y * (blockDim.y - 3 + 1) + threadIdx.y;
+    int col = blockIdx.x * (blockDim.x - 3) + threadIdx.x;
+    int row = blockIdx.y * (blockDim.y - 3) + threadIdx.y;
     int col_i = col - 1;
     int row_i = row - 1;
 
@@ -194,14 +194,14 @@ void CudaCannyDetector::CannyEdgeDetection() {
              + (m_h % threads.y == 0 ? 0 : 1));
 
     dim3 block2
-        ((m_w / (threads.x - m_gaussKernelSize + 1))
-             + (m_w % (threads.x - m_gaussKernelSize + 1) == 0 ? 0 : 1),
-         (m_h / (threads.y - m_gaussKernelSize + 1))
-             + (m_h % (threads.y - m_gaussKernelSize + 1) == 0 ? 0 : 1));
+        ((m_w / (threads.x - m_gaussKernelSize))
+             + (m_w % (threads.x - m_gaussKernelSize) == 0 ? 0 : 1),
+         (m_h / (threads.y - m_gaussKernelSize))
+             + (m_h % (threads.y - m_gaussKernelSize) == 0 ? 0 : 1));
     dim3 block3
-        ((m_w / (threads.x - 3 + 1)) + (m_w % (threads.x - 3 + 1) == 0 ? 0 : 1),
-         (m_h / (threads.y - 3 + 1))
-             + (m_h % (threads.y - 3 + 1) == 0 ? 0 : 1));
+        ((m_w / (threads.x - 3)) + (m_w % (threads.x - 3) == 0 ? 0 : 1),
+         (m_h / (threads.y - 3))
+             + (m_h % (threads.y - 3) == 0 ? 0 : 1));
 
     cudaMalloc((void**) &kernel,
                sizeof(float) * m_gaussKernelSize * m_gaussKernelSize);

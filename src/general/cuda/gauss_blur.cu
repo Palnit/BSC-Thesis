@@ -53,8 +53,8 @@ __global__ void GaussianFilter(float* src,
                                int kernelSize,
                                int w,
                                int h) {
-    int col = blockIdx.x * (blockDim.x - kernelSize + 1) + threadIdx.x;
-    int row = blockIdx.y * (blockDim.y - kernelSize + 1) + threadIdx.y;
+    int col = blockIdx.x * (blockDim.x - kernelSize) + threadIdx.x;
+    int row = blockIdx.y * (blockDim.y - kernelSize) + threadIdx.y;
     int k = (kernelSize - 1) / 2;
     int col_i = col - k;
     int row_i = row - k;

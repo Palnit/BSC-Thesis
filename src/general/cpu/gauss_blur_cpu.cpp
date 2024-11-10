@@ -1,10 +1,10 @@
 //
 // Created by Palnit on 2024. 01. 22.
 //
-#define _USE_MATH_DEFINES
 #include "general/cpu/gauss_blur_cpu.h"
 #include <cmath>
 #include "general/OpenGL_SDL/generic_structs.h"
+#define M_PI_F 3.141592654F
 
 void DetectorsCPU::CopyBack(uint8_t* dest, float* src, int w, int h) {
     RGBA* color;
@@ -35,8 +35,8 @@ void DetectorsCPU::GenerateGauss(float* kernel, int kernelSize, float sigma) {
             float xp = (((x + 1.f) - (1.f + k)) * ((x + 1.f) - (1.f + k)));
             float yp = (((y + 1.f) - (1.f + k)) * ((y + 1.f) - (1.f + k)));
             *(kernel + x + (y * kernelSize)) =
-                (1.f / (2.f * M_PI * sigma * sigma))
-                * exp(-((xp + yp) / (2.f * sigma * sigma)));
+                (1.f / (2.f * M_PI_F * sigma * sigma))
+                    * exp(-((xp + yp) / (2.f * sigma * sigma)));
             sum += *(kernel + x + (y * kernelSize));
         }
     }
@@ -66,8 +66,9 @@ void DetectorsCPU::GaussianFilter(float* img,
                     if (ix >= w) { ix = w - 1; }
                     if (jx < 0) { jx = 0; }
                     if (jx >= h) { jx = h - 1; }
-                    sum += *(img + ix + (jx * w))
-                        * (*(gauss + (i + k) + ((j + k) * kernelSize)));
+                    sum = std::fmaf(*(img + ix + (jx * w)),
+                                    *(gauss + (i + k) + ((j + k) * kernelSize)),
+                                    sum);
                 }
             }
             *(dest + x + (y * w)) = sum;

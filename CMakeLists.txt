@@ -85,6 +85,8 @@ set(OPENCL_HEADER_FILES
         include/general/OpenCL/program.h
         include/general/OpenCL/memory.h
         include/general/OpenCL/kernel.h
+        include/Canny/OpenCl/canny_edge_detector_open_cl.h
+        include/Dog/OpenCl/dog_edge_detector_open_cl.h
 )
 
 set(OPENCL_SOURCE_FILES
@@ -93,6 +95,8 @@ set(OPENCL_SOURCE_FILES
         src/general/OpenCL/program.cpp
         src/general/OpenCL/kernel.cpp
         src/general/OpenCL/memory.cpp
+        src/Canny/OpenCl/canny_edge_detector_open_cl.cpp
+        src/Dog/OpenCl/dog_edge_detector_open_cl.cpp
 )
 
 set(RESOURCES
@@ -106,7 +110,9 @@ set(RESOURCES
         shaders/default_fragment.frag
         shaders/default_vertex.vert
 
-        OpenCLKernels/test.cl
+        OpenCLKernels/gauss_blur.cl
+        OpenCLKernels/canny.cl
+        OpenCLKernels/dog.cl
 
 )
 

@@ -22,7 +22,7 @@ void TestingImGuiDisplay::DisplayImGui() {
     }
     ImGui::End();
     ImGui::SetNextWindowPos(ImVec2(m_width / 2, 0));
-    ImGui::SetNextWindowSize(ImVec2(m_width / 2, m_height / 2));
+    ImGui::SetNextWindowSize(ImVec2(m_width / 2, m_height));
     if (!ImGui::Begin("Results", NULL,
                       ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDocking
                           | ImGuiWindowFlags_NoResize
@@ -31,10 +31,7 @@ void TestingImGuiDisplay::DisplayImGui() {
         return;
     }
 
-    if (ImGui::BeginTabBar("Results")) {
-        auto* window = dynamic_cast<TestingWindow*>(m_parent);
-        for (auto tester : window->m_testers) { tester->ResultDisplay(); }
-        ImGui::EndTabBar();
-    }
+    auto* window = dynamic_cast<TestingWindow*>(m_parent);
+    for (auto tester : window->m_testers) { tester->ResultDisplay(); }
     ImGui::End();
 }

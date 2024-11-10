@@ -3,7 +3,8 @@
 #include <utility>
 
 void TesterBase::MainWindowDisplayImGui() {
-    if (ImGui::BeginTabItem(m_name.c_str())) {
+    m_selected = ImGui::BeginTabItem(m_name.c_str());
+    if (m_selected) {
         ImGui::InputInt("Iteration Count", &m_iterations);
         ImGui::SeparatorText("Pictures");
         ImGui::InputInt("Test Pictures Height", &m_height);
@@ -27,7 +28,7 @@ TesterBase::TesterBase(const std::string& name)
       m_width(100),
       m_iterations(100),
       m_normalLines(5),
-      m_bezierLines(5) {
+      m_bezierLines(5), m_selected(false) {
     m_backGroundColor[0] = 0;
     m_backGroundColor[1] = 0;
     m_backGroundColor[2] = 255;

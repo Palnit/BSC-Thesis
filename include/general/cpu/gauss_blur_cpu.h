@@ -57,6 +57,8 @@ void GaussianFilter(float* img,
                     int w,
                     int h);
 
+}
+namespace Detectors {
 /*!
  * A function that takes any kinds of function and it's arguments as an argument
  * runs it and measures the running time of the argument function with

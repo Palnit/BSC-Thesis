@@ -1,17 +1,16 @@
-#ifndef BSC_THESIS_CANNY_CPU_TESTER_H
-#define BSC_THESIS_CANNY_CPU_TESTER_H
-#include <cmath>
-#include <vector>
-#include "Canny/canny_timings.h"
-#include "tester_base.h"
+#ifndef BSC_THESIS_TEST_INCLUDE_CANNY_CUDA_CANNY_CUDA_TESTER_H_
+#define BSC_THESIS_TEST_INCLUDE_CANNY_CUDA_CANNY_CUDA_TESTER_H_
 
-class CannyCpuTester : public TesterBase {
+#include <vector>
+#include "tester_base.h"
+#include "Canny/canny_timings.h"
+
+class CannyCudaTester : public TesterBase {
 public:
-    explicit CannyCpuTester();
+    explicit CannyCudaTester();
     void SpecializedDisplayImGui() override;
     void ResultDisplay() override;
     void Test() override;
-
 private:
     std::vector<CannyTimings> m_allTimings;
     std::vector<float> m_AVG;
@@ -21,10 +20,6 @@ private:
     float m_highTrashHold = 1;
     float m_lowTrashHold = 0.5;
     int m_gaussKernelSize = 3;
-    float* m_pixels1;
-    float* m_pixels2;
-    float* m_kernel;
-    float* m_tangent;
 };
 
-#endif//BSC_THESIS_CANNY_CPU_TESTER_H
+#endif //BSC_THESIS_TEST_INCLUDE_CANNY_CUDA_CANNY_CUDA_TESTER_H_

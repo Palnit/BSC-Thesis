@@ -1,8 +1,11 @@
 #include "testing_window.h"
 #include "Canny/Cpu/canny_cpu_tester.h"
 
+#ifdef CUDA_EXISTS
+#include "Canny/Cuda/canny_cuda_tester.h"
+#endif
+
 void TestingWindow::RenderImGui() {
-    BasicWindow::RenderImGui();
     m_imGuiWindow.DisplayImGui();
 }
 
@@ -20,6 +23,9 @@ void TestingWindow::Resize() {
 }
 int TestingWindow::Init() {
     m_testers.push_back(new CannyCpuTester());
+#ifdef CUDA_EXISTS
+    m_testers.push_back(new CannyCudaTester());
+#endif
     return 0;
 }
 TestingWindow::~TestingWindow() {

@@ -29,10 +29,10 @@ void DetectorsCPU::Dilation(uint8_t* image,
                         jx = h - 1;
                     }
 
-                    if(*(structuringElement+(i+k)+((j+k)+kernelSize)) == 1)
-                    {
-                        float value = *(image+ix+(jx*w));
-                        if( value > max){
+                    if (*(structuringElement + (i + k) + ((j + k) + kernelSize))
+                        == 1) {
+                        float value = *(image + ix + (jx * w));
+                        if (value > max) {
                             max = value;
                         }
                     }
@@ -72,10 +72,10 @@ void DetectorsCPU::Erosion(uint8_t* image,
                         jx = h - 1;
                     }
 
-                    if(*(structuringElement+(i+k)+((j+k)+kernelSize)) == 1)
-                    {
-                        float value = *(image+ix+(jx*w));
-                        if( value < min){
+                    if (*(structuringElement + (i + k) + ((j + k) + kernelSize))
+                        == 1) {
+                        float value = *(image + ix + (jx * w));
+                        if (value < min) {
                             min = value;
                         }
                     }

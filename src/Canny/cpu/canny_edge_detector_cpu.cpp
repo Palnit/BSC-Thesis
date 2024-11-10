@@ -8,6 +8,7 @@
 #include "general/cpu/gauss_blur_cpu.h"
 #include "chrono"
 #include "SDL_image.h"
+#define M_PI_F 3.141592654F
 
 void CannyEdgeDetectorCPU::DetectEdge() {
     m_pixels1 =
@@ -21,51 +22,51 @@ void CannyEdgeDetectorCPU::DetectEdge() {
 
     auto t1 = std::chrono::high_resolution_clock::now();
     m_timings.GrayScale_ms =
-        DetectorsCPU::TimerRunner(DetectorsCPU::ConvertGrayScale,
-                                  (uint8_t*) m_base->pixels,
-                                  m_pixels1,
-                                  m_w,
-                                  m_h);
+        Detectors::TimerRunner(DetectorsCPU::ConvertGrayScale,
+                               (uint8_t*) m_base->pixels,
+                               m_pixels1,
+                               m_w,
+                               m_h);
     m_timings.GaussCreation_ms =
-        DetectorsCPU::TimerRunner(DetectorsCPU::GenerateGauss, m_kernel,
-                                  m_gaussKernelSize,
-                                  m_standardDeviation);
+        Detectors::TimerRunner(DetectorsCPU::GenerateGauss, m_kernel,
+                               m_gaussKernelSize,
+                               m_standardDeviation);
 
     m_timings.Blur_ms =
-        DetectorsCPU::TimerRunner(DetectorsCPU::GaussianFilter, m_pixels1,
-                                  m_pixels2,
-                                  m_kernel,
-                                  m_gaussKernelSize,
-                                  m_w,
-                                  m_h);
+        Detectors::TimerRunner(DetectorsCPU::GaussianFilter, m_pixels1,
+                               m_pixels2,
+                               m_kernel,
+                               m_gaussKernelSize,
+                               m_w,
+                               m_h);
     m_timings.SobelOperator_ms =
-        DetectorsCPU::TimerRunner(DetectorsCPU::DetectionOperator,
-                                  m_pixels2,
-                                  m_pixels1,
-                                  m_tangent,
-                                  m_w,
-                                  m_h);
+        Detectors::TimerRunner(DetectorsCPU::DetectionOperator,
+                               m_pixels2,
+                               m_pixels1,
+                               m_tangent,
+                               m_w,
+                               m_h);
     m_timings.NonMaximumSuppression_ms =
-        DetectorsCPU::TimerRunner(DetectorsCPU::NonMaximumSuppression,
-                                  m_pixels1,
-                                  m_pixels2,
-                                  m_pixels2,
-                                  m_w,
-                                  m_h);
+        Detectors::TimerRunner(DetectorsCPU::NonMaximumSuppression,
+                               m_pixels1,
+                               m_pixels2,
+                               m_tangent,
+                               m_w,
+                               m_h);
     m_timings.DoubleThreshold_ms =
-        DetectorsCPU::TimerRunner(DetectorsCPU::DoubleThreshold,
-                                  m_pixels2,
-                                  m_pixels1,
-                                  m_w,
-                                  m_h,
-                                  m_highTrashHold,
-                                  m_lowTrashHold);
+        Detectors::TimerRunner(DetectorsCPU::DoubleThreshold,
+                               m_pixels2,
+                               m_pixels1,
+                               m_w,
+                               m_h,
+                               m_highTrashHold,
+                               m_lowTrashHold);
     m_timings.Hysteresis_ms =
-        DetectorsCPU::TimerRunner(DetectorsCPU::Hysteresis,
-                                  m_pixels1,
-                                  m_pixels2,
-                                  m_w,
-                                  m_h);
+        Detectors::TimerRunner(DetectorsCPU::Hysteresis,
+                               m_pixels1,
+                               m_pixels2,
+                               m_w,
+                               m_h);
 
     DetectorsCPU::CopyBack((uint8_t*) m_detected->pixels,
                            m_pixels2,
@@ -162,36 +163,30 @@ void DetectorsCPU::DetectionOperator(float* src,
                                      int h) {
     float SobelX[] = {-1, 0, +1, -2, 0, +2, -1, 0, +1};
     float SobelY[] = {+1, +2, +1, 0, 0, 0, -1, -2, -1};
-    int k = 1;
     for (int x = 0; x < w; ++x) {
         for (int y = 0; y < h; ++y) {
             float SumX = 0;
             float SumY = 0;
-            for (int i = -k; i <= k; i++) {
-                for (int j = -k; j <= k; j++) {
+            for (int i = -1; i < 2; i++) {
+                for (int j = -1; j < 2; j++) {
                     int ix = x + i;
                     int jx = y + j;
-                    if (ix < 0) {
-                        ix = 0;
-                    }
-                    if (ix >= w) {
-                        ix = w - 1;
-                    }
-                    if (jx < 0) {
-                        jx = 0;
-                    }
-                    if (jx >= h) {
-                        jx = h - 1;
-                    }
-                    SumX += *(src + ix + (jx * w))
-                        * (*(SobelX + (i + k) + ((j + k) * 3)));
-                    SumY += *(src + ix + (jx * w))
-                        * (*(SobelY + (i + k) + ((j + k) * 3)));
 
+                    if (ix < 0) { ix = 0; }
+                    if (ix >= w) { ix = w - 1; }
+                    if (jx < 0) { jx = 0; }
+                    if (jx >= h) { jx = h - 1; }
+
+                    SumX = std::fmaf(*(src + ix + (jx * w)),
+                                     *(SobelX + (i + 1) + ((j + 1) * 3)),
+                                     SumX);
+                    SumY = std::fmaf(*(src + ix + (jx * w)),
+                                     *(SobelY + (i + 1) + ((j + 1) * 3)),
+                                     SumY);
                 }
             }
             *(dest + x + (y * w)) = hypotf(SumX, SumY);
-            float angle = (atan2(SumX, SumY) * 180.f) / M_PI;
+            float angle = (atan2(SumX, SumY) * 180.f) / M_PI_F;
             if (angle < 0) {
                 angle += 180;
             }
@@ -284,8 +279,6 @@ void DetectorsCPU::Hysteresis(float* src, float* dest, int w, int h) {
     bool strong = false;
     for (int x = 0; x < w; ++x) {
         for (int y = 0; y < h; ++y) {
-            float SumX = 0;
-            float SumY = 0;
             *(dest + x + (y * w)) = *(src + x + (y * w));
             if (*(src + x + (y * w)) != 125.f) {
                 continue;

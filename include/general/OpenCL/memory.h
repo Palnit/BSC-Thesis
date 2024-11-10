@@ -28,7 +28,7 @@ public:
         std::copy(data, data + size, m_data);
     }
 
-    Memory(ClWrapper::Program& program, T (&data)[N], cl_mem_flags memType)
+    Memory(ClWrapper::Program& program, T (& data)[N], cl_mem_flags memType)
         : m_program(program),
           m_memType(memType),
           m_buffer(program.m_context, memType, sizeof(T) * N) {
@@ -78,10 +78,10 @@ public:
 
     ~Memory() { delete m_data; }
 
-    T* begin() { return &m_data[0]; }
-    const T* begin() const { return &m_data[0]; }
-    T* end() { return &m_data[N]; }
-    const T* end() const { return &m_data[N]; }
+    T* begin() { return m_data[0]; }
+    const T* begin() const { return m_data[0]; }
+    T* end() { return m_data[N]; }
+    const T* end() const { return m_data[N]; }
 
     void WriteToDevice() {
         m_program.m_commandQueue.enqueueWriteBuffer(m_buffer, CL_TRUE, 0,
@@ -175,6 +175,106 @@ public:
 private:
     ClWrapper::Program& m_program;
     T m_data;
+    cl::Buffer m_buffer;
+    cl_mem_flags m_memType;
+};
+
+template<typename T>
+class Memory<T, 0> {
+public:
+    Memory() = delete;
+    Memory(ClWrapper::Program& program, size_t size, cl_mem_flags memType)
+        : m_size(size),
+          m_program(program),
+          m_data(new T[m_size]),
+          m_memType(memType),
+          m_buffer(program.m_context, memType, sizeof(T) * m_size) {}
+
+    Memory(ClWrapper::Program& program,
+           T* data,
+           size_t size,
+           cl_mem_flags memType)
+        : m_size(size), m_program(program),
+          m_memType(memType),
+          m_buffer(program.m_context, memType, sizeof(T) * m_size) {
+
+        m_data = new T[m_size];
+        std::copy(data, data + m_size, m_data);
+    }
+
+    template<size_t N>
+    Memory(ClWrapper::Program& program, T (& data)[N], cl_mem_flags memType)
+        : m_program(program),
+          m_memType(memType),
+          m_buffer(program.m_context, memType, sizeof(T) * m_size) {
+
+        assert(m_size == N);
+
+        m_data = new T[m_size];
+        std::copy(data, data + m_size, m_data);
+    }
+
+    Memory(const ClWrapper::Memory<T, 0>& other)
+        : m_program(other.m_program),
+          m_memType(other.m_memType),
+          m_buffer(other.m_buffer) {
+        m_data = new T[m_size];
+        std::copy(other.m_data, other.m_data + m_size, m_data);
+    }
+
+    Memory(ClWrapper::Memory<T, 0>&& other) noexcept
+        : m_program(other.m_program),
+          m_memType(other.m_memType),
+          m_buffer(std::move(other.m_buffer)) {
+        m_data = other.m_data;
+        other.m_data = nullptr;
+    }
+
+    Memory& operator=(const ClWrapper::Memory<T, 0>& other) {
+        if (this == other) { return *this; }
+        m_program = other.m_program;
+        m_data = new T[m_size];
+        m_buffer = other.m_buffer;
+        std::copy(other.m_data, other.m_data + m_size, m_data);
+        return *this;
+    }
+
+    Memory& operator=(ClWrapper::Memory<T, 0>&& other) noexcept {
+        if (this == other) { return *this; }
+        m_program = other.m_program;
+        m_data = other.m_data;
+        m_buffer = std::move(other.m_buffer);
+        other.m_data = nullptr;
+        return *this;
+    }
+
+    T& operator[](size_t position) {
+        assert(m_size > position);
+        return *(m_data + position);
+    }
+
+    ~Memory() { delete m_data; }
+
+    T* begin() { return &m_data[0]; }
+    const T* begin() const { return &m_data[0]; }
+    T* end() { return &m_data[m_size]; }
+    const T* end() const { return &m_data[m_size]; }
+
+    void WriteToDevice() {
+        m_program.m_commandQueue.enqueueWriteBuffer(m_buffer, CL_TRUE, 0,
+                                                    sizeof(T) * m_size, m_data);
+    }
+
+    void ReadFromDevice() {
+        m_program.m_commandQueue.enqueueReadBuffer(m_buffer, CL_TRUE, 0,
+                                                   sizeof(T) * m_size, m_data);
+    }
+    friend class Kernel;
+
+private:
+    size_t m_size;
+    ClWrapper::Program& m_program;
+    T* m_data;
     cl::Buffer m_buffer;
     cl_mem_flags m_memType;
 };

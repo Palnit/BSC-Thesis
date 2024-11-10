@@ -71,7 +71,8 @@ private:
     char m_buf[300] = "Name Detector";
     std::vector<std::string>
         m_pictures
-        {"d2.png", "d2_90.jpg", "img.jpg", "test.jpg", "github.PNG", "d4.gif"};
+        {"d2.png", "d2_90.jpg", "img.jpg", "test.jpg", "github.PNG", "d4.gif",
+         "base2.png"};
 };
 
 #endif //GPGPU_EDGE_DETECTOR_SRC_GENERAL_IMGUI_DISPLAY_H_

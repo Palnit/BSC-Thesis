@@ -6,16 +6,18 @@
 #include "general/main_window.h"
 #include "Canny/cpu/canny_edge_detector_cpu.h"
 #include "Dog/cpu/dog_edge_detector_cpu.h"
+#include "Canny/OpenCl/canny_edge_detector_open_cl.h"
 #include <imgui.h>
 
 #ifdef CUDA_EXISTS
 #include "Canny/cuda/canny_edge_detector_cuda.h"
 #include "Dog/cuda/dog_edge_detector_cuda.h"
+#include "Dog/OpenCl/dog_edge_detector_open_cl.h"
 #endif
 
 void ImGuiDisplay::DisplayImGui() {
     ImGui::SetNextWindowPos(ImVec2(0, 0));
-    ImGui::SetNextWindowSize(ImVec2(m_width / 3, m_height));
+    ImGui::SetNextWindowSize(ImVec2(m_width / 2.5f, m_height));
     if (!ImGui::Begin("Edge Detector Options",
                       NULL,
                       ImGuiWindowFlags_NoMove
@@ -29,13 +31,16 @@ void ImGuiDisplay::DisplayImGui() {
     ImGui::SameLine();
     ImGui::RadioButton("Canny Cuda GPU", &m_add, 1);
 #endif
-
+    ImGui::SameLine();
+    ImGui::RadioButton("Canny OpenCL GPU", &m_add, 4);
 
     ImGui::RadioButton("DOG CPU", &m_add, 2);
 #ifdef CUDA_EXISTS
     ImGui::SameLine();
     ImGui::RadioButton("DOG Cuda GPU", &m_add, 3);
 #endif
+    ImGui::SameLine();
+    ImGui::RadioButton("DOG OpenCL GPU", &m_add, 5);
 
     ImGui::InputText("Detector Name", m_buf, 300);
 
@@ -69,6 +74,12 @@ void ImGuiDisplay::DisplayImGui() {
                 detector = new DogEdgeDetectorCuda(m_base, m_buf);
                 break;
 #endif
+            case 4:
+                detector = new CannyEdgeDetectorOpenCl(m_base, m_buf);
+                break;
+            case 5:
+                detector = new DogEdgeDetectorOpenCl(m_base, m_buf);
+                break;
         }
 
         m_detectors.push_back(detector);
