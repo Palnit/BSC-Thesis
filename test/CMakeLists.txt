@@ -27,9 +27,25 @@ set(TEST_CUDA_INCLUDES_FILES
         include/Canny/Cuda/canny_cuda_tester.h
 )
 
+set(TEST_OPENCL_INCLUDES_FILES
+        include/Canny/OpenCl/canny_open_cl_tester.h
+)
+
+set(TEST_OPENCL_SOURCE_FILES
+        src/Canny/OpenCl/canny_open_cl_tester.cpp
+)
+
+set(TEST_RESOURCES
+        OpenCLKernels/canny.cl
+        OpenCLKernels/dog.cl
+        OpenCLKernels/gauss_blur.cl
+)
+
 add_executable(BSC_Thesis_Tests
         ${TEST_SOURCE_FILES}
         ${TEST_HEADER_FILES}
+        ${TEST_OPENCL_SOURCE_FILES}
+        ${TEST_OPENCL_INCLUDES_FILES}
 )
 
 
@@ -100,3 +116,20 @@ if (CUDAToolkit_FOUND AND CUDA_FOUND)
             testing_cuda_comp
             CUDA::toolkit)
 endif ()
+
+
+foreach (file ${TEST_RESOURCES})
+    string(REPLACE "/" "_" n_file ${file})
+    ADD_CUSTOM_TARGET(
+            test_copy_${n_file}_file
+            ${CMAKE_COMMAND}
+            -D SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}/..
+            -D DESTINATION_DIR=${CMAKE_CURRENT_BINARY_DIR}
+            -D file=${file}
+            -P copy.cmake
+            COMMENT "Running custom target for file: ${file} in project: ${CMAKE_PROJECT_NAME}" VERBATIM
+    )
+    ADD_DEPENDENCIES(BSC_Thesis_Tests test_copy_${n_file}_file)
+endforeach ()
+
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/../copy.cmake DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

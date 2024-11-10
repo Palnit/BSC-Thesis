@@ -3,6 +3,7 @@
 
 #ifdef CUDA_EXISTS
 #include "Canny/Cuda/canny_cuda_tester.h"
+#include "Canny/OpenCl/canny_open_cl_tester.h"
 #endif
 
 void TestingWindow::RenderImGui() {
@@ -26,6 +27,7 @@ int TestingWindow::Init() {
 #ifdef CUDA_EXISTS
     m_testers.push_back(new CannyCudaTester());
 #endif
+    m_testers.push_back(new CannyOpenClTester());
     return 0;
 }
 TestingWindow::~TestingWindow() {
