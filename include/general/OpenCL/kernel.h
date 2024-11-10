@@ -11,7 +11,7 @@ public:
         program), m_kernelName(kernelName) {}
 
     template<typename... T, size_t... N>
-    void operator()(cl::NDRange range, ClWrapper::Memory<T, N>& ... memory) {
+    float operator()(cl::NDRange range, ClWrapper::Memory<T, N>& ... memory) {
         if (!m_program.GetBuilt()) {
             m_program.Build();
         }
@@ -34,12 +34,15 @@ public:
                                   nullptr,
                                   &event);
         event.wait();
+        auto start = event.getProfilingInfo<CL_PROFILING_COMMAND_START>();
+        auto end = event.getProfilingInfo<CL_PROFILING_COMMAND_END>();
+        return (end - start) / 1000000.f;
     }
 
     template<typename... T, size_t... N>
-    void operator()(cl::NDRange range,
-                    cl::NDRange range2,
-                    ClWrapper::Memory<T, N>& ... memory) {
+    float operator()(cl::NDRange range,
+                     cl::NDRange range2,
+                     ClWrapper::Memory<T, N>& ... memory) {
         if (!m_program.GetBuilt()) {
             m_program.Build();
         }
@@ -54,10 +57,13 @@ public:
             ...);
 
         cl::Event event;
-         m_program.m_commandQueue
+        m_program.m_commandQueue
             .enqueueNDRangeKernel(m_kernel, cl::NullRange, range, range2,
                                   nullptr, &event);
         event.wait();
+        auto start = event.getProfilingInfo<CL_PROFILING_COMMAND_START>();
+        auto end = event.getProfilingInfo<CL_PROFILING_COMMAND_END>();
+        return (end - start) / 1000000.f;
 
     }
 

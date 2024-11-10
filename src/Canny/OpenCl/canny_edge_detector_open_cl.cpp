@@ -149,70 +149,75 @@ void CannyEdgeDetectorOpenCl::DetectEdge() {
 
     auto t1 = std::chrono::high_resolution_clock::now();
 
-    m_timings.GrayScale_ms =
-        Detectors::TimerRunner(ConvertToGreyScale,
-                               cl::NDRange(width, height),
-                               cl::NDRange(32, 32),
-                               image,
-                               tmp, w, h);
+    m_timings.GrayScale_ms = ConvertToGreyScale(
+        cl::NDRange(width, height),
+        cl::NDRange(32, 32),
+        image,
+        tmp, w, h);
 
-    m_timings.GaussCreation_ms = Detectors::TimerRunner(GetGaussian,
-                                                        cl::NDRange(
-                                                            m_gaussKernelSize,
-                                                            m_gaussKernelSize),
-                                                        cl::NDRange(
-                                                            m_gaussKernelSize,
-                                                            m_gaussKernelSize),
-                                                        gauss,
-                                                        kernelSize,
-                                                        sigma);
-    m_timings.Blur_ms = Detectors::TimerRunner(GaussianFilter,
-                                               cl::NDRange(widthNKernel,
-                                                           heightNKernel),
-                                               cl::NDRange(32, 32),
-                                               tmp,
-                                               tmp2,
-                                               gauss,
-                                               kernelSize, w, h);
+    m_timings.GaussCreation_ms = GetGaussian(
+        cl::NDRange(m_gaussKernelSize,
+                    m_gaussKernelSize),
+        cl::NDRange(
+            m_gaussKernelSize,
+            m_gaussKernelSize),
+        gauss,
+        kernelSize,
+        sigma);
+    m_timings.Blur_ms = GaussianFilter(
+        cl::NDRange(widthNKernel,
+                    heightNKernel),
+        cl::NDRange(32, 32),
+        tmp,
+        tmp2,
+        gauss,
+        kernelSize, w, h);
 
-    m_timings.SobelOperator_ms = Detectors::TimerRunner(DetectionOperator,
-                                                        cl::NDRange(width3Kernel,
-                                                                    height3Kernel),
-                                                        cl::NDRange(32, 32),
-                                                        tmp2,
-                                                        tmp,
-                                                        tangent,
-                                                        w,
-                                                        h);
+    m_timings.SobelOperator_ms = DetectionOperator(
+        cl::NDRange(
+            width3Kernel,
+            height3Kernel),
+        cl::NDRange(32, 32),
+        tmp2,
+        tmp,
+        tangent,
+        w,
+        h);
 
-    m_timings.NonMaximumSuppression_ms =
-        Detectors::TimerRunner(NonMaximumSuppression,
-                               cl::NDRange(width3Kernel,
-                                           height3Kernel),
-                               cl::NDRange(32, 32),
-                               tmp,
-                               tmp2,
-                               tangent,
-                               w,
-                               h);
+    m_timings.NonMaximumSuppression_ms = NonMaximumSuppression(
+        cl::NDRange(width3Kernel,
+                    height3Kernel),
+        cl::NDRange(32, 32),
+        tmp,
+        tmp2,
+        tangent,
+        w,
+        h);
 
-    m_timings.DoubleThreshold_ms = Detectors::TimerRunner(DoubleThreshold,
-                                                          cl::NDRange(width,
-                                                                      height),
-                                                          cl::NDRange(32, 32),
-                                                          tmp2,
-                                                          tmp,
-                                                          w,
-                                                          h, high, low);
+    m_timings.DoubleThreshold_ms = DoubleThreshold(
+        cl::NDRange(width,
+                    height),
+        cl::NDRange(32,
+                    32),
+        tmp2,
+        tmp,
+        w,
+        h, high, low);
 
-    m_timings.Hysteresis_ms = Detectors::TimerRunner(Hysteresis,
-                                                     cl::NDRange(width3Kernel,
-                                                                 height3Kernel),
-                                                     cl::NDRange(32, 32),
-                                                     tmp,
-                                                     tmp2,
-                                                     w,
-                                                     h);
+    m_timings.Hysteresis_ms = Hysteresis(
+        cl::NDRange(
+            width3Kernel,
+            height3Kernel),
+        cl::NDRange(32, 32),
+        tmp,
+        tmp2,
+        w,
+        h);
+
+    CopyBack(cl::NDRange(width, height),
+             cl::NDRange(32, 32),
+             tmp2,
+             image, w, h);
 
     CopyBack(cl::NDRange(width, height),
              cl::NDRange(32, 32),
