@@ -1,11 +1,11 @@
 #include "Dog/OpenCl/dog_edge_detector_open_cl.h"
-#include "imgui.h"
 #include "SDL_image.h"
-#include "general/OpenCL/program.h"
 #include "general/OpenCL/get_devices.h"
-#include "general/OpenCL/memory.h"
 #include "general/OpenCL/kernel.h"
+#include "general/OpenCL/memory.h"
+#include "general/OpenCL/program.h"
 #include "general/cpu/gauss_blur_cpu.h"
+#include "imgui.h"
 
 void DogEdgeDetectorOpenCl::DetectEdge() {
     ClWrapper::Program programTest(OpenCLInfo::OPENCL_DEVICES[0]);
@@ -14,41 +14,28 @@ void DogEdgeDetectorOpenCl::DetectEdge() {
 
     size_t size = (m_base->w * m_base->h * m_base->format->BytesPerPixel);
 
-    ClWrapper::Memory<uint8_t, 0>
-        image(programTest, (uint8_t*) m_base->pixels, size, CL_MEM_READ_WRITE);
+    ClWrapper::Memory<uint8_t, 0> image(programTest, (uint8_t*) m_base->pixels,
+                                        size, CL_MEM_READ_WRITE);
     ClWrapper::Memory<float, 0> tmp(programTest, size, CL_MEM_READ_WRITE);
     ClWrapper::Memory<float, 0> tmp2(programTest, size, CL_MEM_READ_WRITE);
 
-    ClWrapper::Memory<float, 0>
-        gauss1(programTest,
-               m_gaussKernelSize * m_gaussKernelSize,
-               CL_MEM_READ_WRITE);
-    ClWrapper::Memory<float, 0>
-        gauss2(programTest,
-               m_gaussKernelSize * m_gaussKernelSize,
-               CL_MEM_READ_WRITE);
+    ClWrapper::Memory<float, 0> gauss1(
+        programTest, m_gaussKernelSize * m_gaussKernelSize, CL_MEM_READ_WRITE);
+    ClWrapper::Memory<float, 0> gauss2(
+        programTest, m_gaussKernelSize * m_gaussKernelSize, CL_MEM_READ_WRITE);
 
-    ClWrapper::Memory<float, 0>
-        finalGauss(programTest,
-                   m_gaussKernelSize * m_gaussKernelSize,
-                   CL_MEM_READ_WRITE);
-    ClWrapper::Memory<int, 1> kernelSize(programTest,
-                                         m_gaussKernelSize,
+    ClWrapper::Memory<float, 0> finalGauss(
+        programTest, m_gaussKernelSize * m_gaussKernelSize, CL_MEM_READ_WRITE);
+    ClWrapper::Memory<int, 1> kernelSize(programTest, m_gaussKernelSize,
                                          CL_MEM_READ_WRITE);
-    ClWrapper::Memory<float, 1> sigma1(programTest,
-                                       m_standardDeviation1,
+    ClWrapper::Memory<float, 1> sigma1(programTest, m_standardDeviation1,
                                        CL_MEM_READ_WRITE);
-    ClWrapper::Memory<float, 1> sigma2(programTest,
-                                       m_standardDeviation2,
+    ClWrapper::Memory<float, 1> sigma2(programTest, m_standardDeviation2,
                                        CL_MEM_READ_WRITE);
 
-    ClWrapper::Memory<int, 1> w(programTest,
-                                m_base->w,
-                                CL_MEM_READ_WRITE);
+    ClWrapper::Memory<int, 1> w(programTest, m_base->w, CL_MEM_READ_WRITE);
 
-    ClWrapper::Memory<int, 1> h(programTest,
-                                m_base->h,
-                                CL_MEM_READ_WRITE);
+    ClWrapper::Memory<int, 1> h(programTest, m_base->h, CL_MEM_READ_WRITE);
 
     image.WriteToDevice();
     kernelSize.WriteToDevice();
@@ -65,79 +52,47 @@ void DogEdgeDetectorOpenCl::DetectEdge() {
 
     size_t width =
         m_base->w + (m_base->w % 32 != 0 ? (32 - m_base->w % 32) : 0);
-    size_t
-        height =
+    size_t height =
         m_base->h + (m_base->h % 32 != 0 ? (32 - m_base->h % 32) : 0);
 
     size_t missingW =
         (width / 32) * (m_gaussKernelSize * 2 + (m_gaussKernelSize - 1 / 2));
     size_t missingH =
         (height / 32) * (m_gaussKernelSize * 2 + (m_gaussKernelSize - 1 / 2));
-    size_t widthNKernel = (m_base->w + missingW) % 32 != 0 ?
-                          m_base->w + missingW
-                              + (32 - (m_base->w + missingW) % 32) : m_base->w
-                              + missingW;
-    size_t heightNKernel = (m_base->h + missingH) % 32 != 0 ?
-                           m_base->h + missingH
-                               + (32 - (m_base->h + missingH) % 32) : m_base->h
-                               + missingH;
+    size_t widthNKernel = (m_base->w + missingW) % 32 != 0
+        ? m_base->w + missingW + (32 - (m_base->w + missingW) % 32)
+        : m_base->w + missingW;
+    size_t heightNKernel = (m_base->h + missingH) % 32 != 0
+        ? m_base->h + missingH + (32 - (m_base->h + missingH) % 32)
+        : m_base->h + missingH;
 
     auto t1 = std::chrono::high_resolution_clock::now();
 
     m_timings.GrayScale_ms =
-        Detectors::TimerRunner(ConvertToGreyScale,
-                               cl::NDRange(width, height),
-                               cl::NDRange(32, 32),
-                               image,
-                               tmp, w, h);
+        Detectors::TimerRunner(ConvertToGreyScale, cl::NDRange(width, height),
+                               cl::NDRange(32, 32), image, tmp, w, h);
 
-    m_timings.Gauss1Creation_ms = Detectors::TimerRunner(GetGaussian,
-                                                         cl::NDRange(
-                                                             m_gaussKernelSize,
-                                                             m_gaussKernelSize),
-                                                         cl::NDRange(
-                                                             m_gaussKernelSize,
-                                                             m_gaussKernelSize),
-                                                         gauss1,
-                                                         kernelSize,
-                                                         sigma1);
+    m_timings.Gauss1Creation_ms = Detectors::TimerRunner(
+        GetGaussian, cl::NDRange(m_gaussKernelSize, m_gaussKernelSize),
+        cl::NDRange(m_gaussKernelSize, m_gaussKernelSize), gauss1, kernelSize,
+        sigma1);
 
-    m_timings.Gauss2Creation_ms = Detectors::TimerRunner(GetGaussian,
-                                                         cl::NDRange(
-                                                             m_gaussKernelSize,
-                                                             m_gaussKernelSize),
-                                                         cl::NDRange(
-                                                             m_gaussKernelSize,
-                                                             m_gaussKernelSize),
-                                                         gauss2,
-                                                         kernelSize,
-                                                         sigma2);
+    m_timings.Gauss2Creation_ms = Detectors::TimerRunner(
+        GetGaussian, cl::NDRange(m_gaussKernelSize, m_gaussKernelSize),
+        cl::NDRange(m_gaussKernelSize, m_gaussKernelSize), gauss2, kernelSize,
+        sigma2);
 
-    m_timings.DifferenceOfGaussian_ms =
-        Detectors::TimerRunner(DifferenceOfGaussian,
-                               cl::NDRange(
-                                   m_gaussKernelSize,
-                                   m_gaussKernelSize),
-                               cl::NDRange(
-                                   m_gaussKernelSize,
-                                   m_gaussKernelSize),
-                               gauss1,
-                               gauss2,
-                               finalGauss, kernelSize);
+    m_timings.DifferenceOfGaussian_ms = Detectors::TimerRunner(
+        DifferenceOfGaussian, cl::NDRange(m_gaussKernelSize, m_gaussKernelSize),
+        cl::NDRange(m_gaussKernelSize, m_gaussKernelSize), gauss1, gauss2,
+        finalGauss, kernelSize);
 
-    m_timings.Convolution_ms = Detectors::TimerRunner(GaussianFilter,
-                                                      cl::NDRange(widthNKernel,
-                                                                  heightNKernel),
-                                                      cl::NDRange(32, 32),
-                                                      tmp,
-                                                      tmp2,
-                                                      finalGauss,
-                                                      kernelSize, w, h);
+    m_timings.Convolution_ms = Detectors::TimerRunner(
+        GaussianFilter, cl::NDRange(widthNKernel, heightNKernel),
+        cl::NDRange(32, 32), tmp, tmp2, finalGauss, kernelSize, w, h);
 
-    CopyBack(cl::NDRange(width, height),
-             cl::NDRange(32, 32),
-             tmp2,
-             image, w, h);
+    CopyBack(cl::NDRange(width, height), cl::NDRange(32, 32), tmp2, image, w,
+             h);
     image.ReadFromDevice();
     auto t2 = std::chrono::high_resolution_clock::now();
     std::chrono::duration<float, std::milli> time = t2 - t1;
@@ -146,49 +101,40 @@ void DogEdgeDetectorOpenCl::DetectEdge() {
     std::copy(image.begin(), image.end(), (uint8_t*) m_detected->pixels);
 
     glBindTexture(GL_TEXTURE_2D, tex);
-    glTexImage2D(GL_TEXTURE_2D,
-                 0,
-                 GL_RGBA,
-                 m_base->w,
-                 m_base->h,
-                 0,
-                 GL_RGBA,
-                 GL_UNSIGNED_BYTE,
-                 image.begin());
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_base->w, m_base->h, 0, GL_RGBA,
+                 GL_UNSIGNED_BYTE, image.begin());
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
 }
 void DogEdgeDetectorOpenCl::DisplayImGui() {
     if (ImGui::BeginTabItem(m_name.c_str())) {
+        if (OpenCLInfo::OPENCL_DEVICES[0]
+                .getInfo<CL_DEVICE_MAX_WORK_GROUP_SIZE>()
+            < 1024) {
+            ImGui::Text("Not Enough Work Group");
+            ImGui::EndTabItem();
+            return;
+        }
 
         if (ImGui::SliderInt("Gauss Kernel Size", &m_gaussKernelSize, 3, 21)) {
-            if (m_gaussKernelSize % 2 == 0) {
-                m_gaussKernelSize++;
-            }
+            if (m_gaussKernelSize % 2 == 0) { m_gaussKernelSize++; }
         }
         ImGui::SetItemTooltip("Only Odd Numbers");
-        if (ImGui::SliderFloat("Standard Deviation 1",
-                               &m_standardDeviation1,
-                               0.0001f,
-                               30.0f)) {
+        if (ImGui::SliderFloat("Standard Deviation 1", &m_standardDeviation1,
+                               0.0001f, 30.0f)) {
             if (m_standardDeviation1 >= m_standardDeviation2) {
                 m_standardDeviation1--;
             }
         }
         ImGui::SetItemTooltip("Standard Deviation 1 should be smaller than 2");
-        if (ImGui::SliderFloat("Standard Deviation 2",
-                               &m_standardDeviation2,
-                               0.0001f,
-                               30.0f)) {
+        if (ImGui::SliderFloat("Standard Deviation 2", &m_standardDeviation2,
+                               0.0001f, 30.0f)) {
             if (m_standardDeviation1 >= m_standardDeviation2) {
                 m_standardDeviation2++;
             }
         }
-        if (ImGui::Button("Detect")) {
-            DetectEdge();
-        }
+        if (ImGui::Button("Detect")) { DetectEdge(); }
         if (!m_timingsReady) {
             ImGui::EndTabItem();
             return;

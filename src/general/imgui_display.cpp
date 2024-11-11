@@ -3,25 +3,23 @@
 //
 
 #include "general/imgui_display.h"
-#include "general/main_window.h"
-#include "Canny/cpu/canny_edge_detector_cpu.h"
-#include "Dog/cpu/dog_edge_detector_cpu.h"
-#include "Canny/OpenCl/canny_edge_detector_open_cl.h"
 #include <imgui.h>
+#include "Canny/OpenCl/canny_edge_detector_open_cl.h"
+#include "Canny/cpu/canny_edge_detector_cpu.h"
+#include "Dog/OpenCl/dog_edge_detector_open_cl.h"
+#include "Dog/cpu/dog_edge_detector_cpu.h"
+#include "general/main_window.h"
 
 #ifdef CUDA_EXISTS
 #include "Canny/cuda/canny_edge_detector_cuda.h"
 #include "Dog/cuda/dog_edge_detector_cuda.h"
-#include "Dog/OpenCl/dog_edge_detector_open_cl.h"
 #endif
 
 void ImGuiDisplay::DisplayImGui() {
     ImGui::SetNextWindowPos(ImVec2(0, 0));
     ImGui::SetNextWindowSize(ImVec2(m_width / 2.5f, m_height));
-    if (!ImGui::Begin("Edge Detector Options",
-                      NULL,
-                      ImGuiWindowFlags_NoMove
-                          | ImGuiWindowFlags_NoDocking
+    if (!ImGui::Begin("Edge Detector Options", NULL,
+                      ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDocking
                           | ImGuiWindowFlags_NoResize)) {
         ImGui::End();
         return;
@@ -44,11 +42,8 @@ void ImGuiDisplay::DisplayImGui() {
 
     ImGui::InputText("Detector Name", m_buf, 300);
 
-    ImGui::ListBox("Choose picture",
-                   &m_picture,
-                   VectorOfStringGetter,
-                   (void*) &m_pictures,
-                   (int) m_pictures.size());
+    ImGui::ListBox("Choose picture", &m_picture, VectorOfStringGetter,
+                   (void*) &m_pictures, (int) m_pictures.size());
 
     if (ImGui::Button("Add")) {
         auto* parent = dynamic_cast<MainWindow*>(m_parent);
@@ -87,11 +82,8 @@ void ImGuiDisplay::DisplayImGui() {
         m_names.emplace_back(m_buf);
     }
 
-    ImGui::ListBox("Detectors",
-                   &m_remove,
-                   VectorOfStringGetter,
-                   (void*) &m_names,
-                   (int) m_names.size());
+    ImGui::ListBox("Detectors", &m_remove, VectorOfStringGetter,
+                   (void*) &m_names, (int) m_names.size());
 
     if (ImGui::Button("Remove")) {
         auto* parent = dynamic_cast<MainWindow*>(m_parent);
@@ -101,11 +93,8 @@ void ImGuiDisplay::DisplayImGui() {
     }
     ImGui::Separator();
     if (ImGui::BeginTabBar("Detector Options")) {
-        for (DetectorBase* detector : m_detectors) {
-            detector->DisplayImGui();
-        }
+        for (DetectorBase* detector : m_detectors) { detector->DisplayImGui(); }
         ImGui::EndTabBar();
     }
     ImGui::End();
-
 }

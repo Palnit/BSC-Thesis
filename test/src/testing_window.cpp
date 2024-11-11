@@ -1,14 +1,12 @@
 #include "testing_window.h"
 #include "Canny/Cpu/canny_cpu_tester.h"
+#include "Canny/OpenCl/canny_open_cl_tester.h"
 
 #ifdef CUDA_EXISTS
 #include "Canny/Cuda/canny_cuda_tester.h"
-#include "Canny/OpenCl/canny_open_cl_tester.h"
 #endif
 
-void TestingWindow::RenderImGui() {
-    m_imGuiWindow.DisplayImGui();
-}
+void TestingWindow::RenderImGui() { m_imGuiWindow.DisplayImGui(); }
 
 TestingWindow::TestingWindow(const char* title,
                              int x,
