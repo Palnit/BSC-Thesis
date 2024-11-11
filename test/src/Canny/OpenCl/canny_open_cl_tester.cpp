@@ -13,12 +13,13 @@
 #include "surface_painters.h"
 
 void CannyOpenClTester::ResultDisplay() {
-    if (OpenCLInfo::OPENCL_DEVICES[0].getInfo<CL_DEVICE_MAX_WORK_GROUP_SIZE>()
-        < 1024) {
-        ImGui::Text("Not Enough Work Group");
-        return;
-    }
     if (m_selected) {
+        if (OpenCLInfo::OPENCL_DEVICES[0]
+                .getInfo<CL_DEVICE_MAX_WORK_GROUP_SIZE>()
+            < 1024) {
+            ImGui::Text("Not Enough Work Group");
+            return;
+        }
         auto* x = new float[m_iterations];
         auto* x2 = new int[m_iterations];
         for (int i = 0; i < m_iterations; i++) { x[i] = x2[i] = i; }

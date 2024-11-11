@@ -15,6 +15,13 @@ typedef struct RGBA {
     uint8_t g;
     uint8_t b;
     uint8_t a;
+    bool operator==(const RGBA& other) {
+        if (other.r == this->r && other.g == this->g && other.b == this->b
+            && other.a == this->a) {
+            return true;
+        }
+        return false;
+    }
 } RGBA;
 
 /*!
@@ -52,5 +59,5 @@ namespace ErrorHandling {
  */
 void HandelSDLError(const char* type);
 
-}
-#endif //GPGPU_EDGE_DETECTOR_INCLUDE_GENERAL_GENERIC_STRUCTS_H_
+}// namespace ErrorHandling
+#endif//GPGPU_EDGE_DETECTOR_INCLUDE_GENERAL_GENERIC_STRUCTS_H_

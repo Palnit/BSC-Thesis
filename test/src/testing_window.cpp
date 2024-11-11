@@ -1,6 +1,7 @@
 #include "testing_window.h"
 #include "Canny/Cpu/canny_cpu_tester.h"
 #include "Canny/OpenCl/canny_open_cl_tester.h"
+#include "Dog/Cpu/dog_cpu_tester.h"
 
 #ifdef CUDA_EXISTS
 #include "Canny/Cuda/canny_cuda_tester.h"
@@ -26,6 +27,7 @@ int TestingWindow::Init() {
     m_testers.push_back(new CannyCudaTester());
 #endif
     m_testers.push_back(new CannyOpenClTester());
+    m_testers.push_back(new DogCpuTester());
     return 0;
 }
 TestingWindow::~TestingWindow() {

@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.22)
 include(FetchContent)
 FetchContent_Declare(vcpkg
         GIT_REPOSITORY "https://github.com/microsoft/vcpkg/"
-)
+        )
 FetchContent_MakeAvailable(vcpkg)
 
 set(CMAKE_TOOLCHAIN_FILE "${vcpkg_SOURCE_DIR}/scripts/buildsystems/vcpkg.cmake" CACHE FILEPATH "")
@@ -35,7 +35,7 @@ set(HEADER_FILES
         include/general/cpu/gauss_blur_cpu.h
         include/Dog/cpu/dog_edge_detector_cpu.h
         include/general/cpu/morphology_cpu.h
-)
+        )
 
 set(SOURCE_FILES
         src/general/OpenGL_SDL/basic_window.cpp
@@ -53,31 +53,31 @@ set(SOURCE_FILES
         src/general/cpu/gauss_blur_cpu.cpp
         src/Dog/cpu/dog_edge_detector_cpu.cpp
         src/general/cpu/morphology_cpu.cpp
-)
+        )
 
 set(CUDA_HEADER_FILES
         include/Canny/cuda/cuda_canny_edge_detection.cuh
         include/general/cuda/gauss_blur.cuh
         include/Dog/cuda/cuda_dog_edge_detection.cuh
-)
+        )
 
 set(CUDA_CPP_HEADER_FILES
         include/Canny/cuda/canny_edge_detector_cuda.h
         include/Dog/cuda/dog_edge_detector_cuda.h
         include/general/cuda/gpu_info.h
-)
+        )
 
 set(CUDA_SOURCE_FILES
         src/Canny/cuda/cuda_canny_edge_detection.cu
         src/general/cuda/gauss_blur.cu
         src/Dog/cuda/cuda_dog_edge_detection.cu
-)
+        )
 
 set(CUDA_CPP_SOURCE_FILES
         src/Canny/cuda/canny_edge_detector_cuda.cpp
         src/general/cuda/gpu_info.cpp
         src/Dog/cuda/dog_edge_detector_cuda.cpp
-)
+        )
 
 set(OPENCL_HEADER_FILES
         include/general/OpenCL/get_devices.h
@@ -87,7 +87,7 @@ set(OPENCL_HEADER_FILES
         include/general/OpenCL/kernel.h
         include/Canny/OpenCl/canny_edge_detector_open_cl.h
         include/Dog/OpenCl/dog_edge_detector_open_cl.h
-)
+        )
 
 set(OPENCL_SOURCE_FILES
         src/general/OpenCL/get_devices.cpp
@@ -97,7 +97,7 @@ set(OPENCL_SOURCE_FILES
         src/general/OpenCL/memory.cpp
         src/Canny/OpenCl/canny_edge_detector_open_cl.cpp
         src/Dog/OpenCl/dog_edge_detector_open_cl.cpp
-)
+        )
 
 set(RESOURCES
         pictures/img.jpg
@@ -106,6 +106,7 @@ set(RESOURCES
         pictures/d2_90.jpg
         pictures/github.PNG
         pictures/d4.gif
+        pictures/base2.png
 
         shaders/default_fragment.frag
         shaders/default_vertex.vert
@@ -114,7 +115,7 @@ set(RESOURCES
         OpenCLKernels/canny.cl
         OpenCLKernels/dog.cl
 
-)
+        )
 
 
 find_package(CUDA)
@@ -135,10 +136,10 @@ if (CUDAToolkit_FOUND AND CUDA_FOUND)
     add_library(cuda_comp STATIC
             ${CUDA_HEADER_FILES}
             ${CUDA_SOURCE_FILES}
-    )
+            )
     target_compile_features(cuda_comp PRIVATE
             cuda_std_17
-    )
+            )
 
     set_target_properties(cuda_comp PROPERTIES LINKER_LANGUAGE CUDA)
 
@@ -146,7 +147,7 @@ if (CUDAToolkit_FOUND AND CUDA_FOUND)
             CUDA::toolkit
             CUDA::cudart
             CUDA::cuda_driver
-    )
+            )
 
     set_target_properties(cuda_comp PROPERTIES
             LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
@@ -154,30 +155,30 @@ if (CUDAToolkit_FOUND AND CUDA_FOUND)
 
     target_include_directories(cuda_comp
             PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include
-    )
+            )
 
     set_target_properties(cuda_comp
             PROPERTIES
             CUDA_RUNTIME_LIBRARY Static
             CUDA_STANDARD 17
             CUDA_SEPARABLE_COMPILATION OFF
-    )
+            )
 endif ()
 
 add_executable(${CMAKE_PROJECT_NAME}
         src/main.cpp
-)
+        )
 
 add_library(${CMAKE_PROJECT_NAME}_lib STATIC
         ${SOURCE_FILES}
         ${HEADER_FILES}
         ${OPENCL_SOURCE_FILES}
         ${OPENCL_HEADER_FILES}
-)
+        )
 if (CUDAToolkit_FOUND AND CUDA_FOUND)
     target_sources(${CMAKE_PROJECT_NAME}_lib PRIVATE
             ${CUDA_CPP_SOURCE_FILES}
-    )
+            )
 endif ()
 
 target_compile_features(${CMAKE_PROJECT_NAME} PRIVATE cxx_std_17)
@@ -194,7 +195,7 @@ target_link_libraries(${CMAKE_PROJECT_NAME}_lib PRIVATE
         OpenGL::GL
         implot::implot
         OpenCL::OpenCL
-)
+        )
 
 target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE
         ${CMAKE_PROJECT_NAME}_lib
@@ -207,7 +208,7 @@ target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE
         OpenGL::GL
         implot::implot
         OpenCL::OpenCL
-)
+        )
 
 if (CUDAToolkit_FOUND AND CUDA_FOUND)
 
@@ -229,12 +230,12 @@ set_target_properties(${CMAKE_PROJECT_NAME}_lib PROPERTIES
 
 target_include_directories(${CMAKE_PROJECT_NAME}
         PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include
-)
+        )
 
 
 target_include_directories(${CMAKE_PROJECT_NAME}_lib
         PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include
-)
+        )
 
 add_subdirectory(test)
 
