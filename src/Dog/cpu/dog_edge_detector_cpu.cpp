@@ -121,7 +121,7 @@ void DetectorsCPU::DifferenceOfGaussian(float* kernel1,
         for (int j = 0; j < kernelSize; ++j) {
             *(finalKernel + i + (j * kernelSize)) =
                 *(kernel1 + i + (j * kernelSize))
-                - *(kernel2 + i + (j * kernelSize));
+                    - *(kernel2 + i + (j * kernelSize));
         }
     }
 }

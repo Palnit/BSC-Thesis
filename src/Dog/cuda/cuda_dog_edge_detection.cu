@@ -14,6 +14,7 @@ __global__ void DifferenceOfGaussian(float* kernel1,
 
     *(finalKernel + x + (y * kernelSize)) =
         *(kernel1 + x + (y * kernelSize)) - *(kernel2 + x + (y * kernelSize));
+
 }
 
 void CudaDogDetector::DogDetect() {

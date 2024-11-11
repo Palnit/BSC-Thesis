@@ -12,7 +12,6 @@ void DetectorsCPU::CopyBack(uint8_t* dest, float* src, int w, int h) {
         for (int y = 0; y < h; ++y) {
             color = (RGBA*) (dest + (x * 4) + (y * w * 4));
             color->r = color->g = color->b = *(src + x + (y * w));
-            color->a = 255;
         }
     }
 }
@@ -62,11 +61,12 @@ void DetectorsCPU::GaussianFilter(float* img,
                 for (int j = -k; j <= k; j++) {
                     int ix = x + i;
                     int jx = y + j;
-                    if (ix < 0) { ix = 0; }
-                    if (ix >= w) { ix = w - 1; }
-                    if (jx < 0) { jx = 0; }
-                    if (jx >= h) { jx = h - 1; }
-                    sum = std::fmaf(*(img + ix + (jx * w)),
+                    float pixel = *(img + ix + (jx * w));
+                    if (ix < 0) { pixel = 0; }
+                    if (ix >= w) { pixel = 0; }
+                    if (jx < 0) { pixel = 0; }
+                    if (jx >= h) { pixel = 0; }
+                    sum = std::fmaf(pixel,
                                     *(gauss + (i + k) + ((j + k) * kernelSize)),
                                     sum);
                 }
