@@ -23,18 +23,22 @@ set(TEST_SOURCE_FILES
 
 set(TEST_CUDA_SOURCE_FILES
         src/Canny/Cuda/canny_cuda_tester.cpp
+        src/Dog/Cuda/dog_cuda_tester.cpp
         )
 
 set(TEST_CUDA_INCLUDES_FILES
         include/Canny/Cuda/canny_cuda_tester.h
+        include/Dog/Cuda/dog_cuda_tester.h
         )
 
 set(TEST_OPENCL_INCLUDES_FILES
         include/Canny/OpenCl/canny_open_cl_tester.h
+        include/Dog/OpenCl/dog_open_cl_tester.h
         )
 
 set(TEST_OPENCL_SOURCE_FILES
         src/Canny/OpenCl/canny_open_cl_tester.cpp
+        src/Dog/OpenCl/dog_open_cl_tester.cpp
         )
 
 set(TEST_RESOURCES
@@ -87,6 +91,7 @@ if (CUDAToolkit_FOUND AND CUDA_FOUND)
     set_target_properties(testing_cuda_comp PROPERTIES LINKER_LANGUAGE CUDA)
 
     target_link_libraries(testing_cuda_comp PRIVATE
+            cuda_comp
             CUDA::toolkit
             CUDA::cudart
             CUDA::cuda_driver

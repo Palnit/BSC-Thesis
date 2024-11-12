@@ -2,9 +2,11 @@
 #include "Canny/Cpu/canny_cpu_tester.h"
 #include "Canny/OpenCl/canny_open_cl_tester.h"
 #include "Dog/Cpu/dog_cpu_tester.h"
+#include "Dog/OpenCl/dog_open_cl_tester.h"
 
 #ifdef CUDA_EXISTS
 #include "Canny/Cuda/canny_cuda_tester.h"
+#include "Dog/Cuda/dog_cuda_tester.h"
 #endif
 
 void TestingWindow::RenderImGui() { m_imGuiWindow.DisplayImGui(); }
@@ -28,6 +30,10 @@ int TestingWindow::Init() {
 #endif
     m_testers.push_back(new CannyOpenClTester());
     m_testers.push_back(new DogCpuTester());
+#ifdef CUDA_EXISTS
+    m_testers.push_back(new DogCudaTester());
+#endif
+    m_testers.push_back(new DogOpenClTester);
     return 0;
 }
 TestingWindow::~TestingWindow() {
