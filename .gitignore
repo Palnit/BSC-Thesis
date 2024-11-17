@@ -3,3 +3,5 @@ cmake-build*/
 .idea/
 .git/
 imgui.ini
+*/build/*
+*eps-converted-to.pdf
