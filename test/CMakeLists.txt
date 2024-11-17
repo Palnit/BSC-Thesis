@@ -8,7 +8,7 @@ set(TEST_INCLUDES_FILES
         include/tester_base.h
         include/Canny/Cpu/canny_cpu_tester.h
         include/Dog/Cpu/dog_cpu_tester.h
-        )
+)
 
 set(TEST_SOURCE_FILES
         src/main.cpp
@@ -19,40 +19,40 @@ set(TEST_SOURCE_FILES
         src/tester_base.cpp
         src/Canny/Cpu/canny_cpu_tester.cpp
         src/Dog/Cpu/dog_cpu_tester.cpp
-        )
+)
 
 set(TEST_CUDA_SOURCE_FILES
         src/Canny/Cuda/canny_cuda_tester.cpp
         src/Dog/Cuda/dog_cuda_tester.cpp
-        )
+)
 
 set(TEST_CUDA_INCLUDES_FILES
         include/Canny/Cuda/canny_cuda_tester.h
         include/Dog/Cuda/dog_cuda_tester.h
-        )
+)
 
 set(TEST_OPENCL_INCLUDES_FILES
         include/Canny/OpenCl/canny_open_cl_tester.h
         include/Dog/OpenCl/dog_open_cl_tester.h
-        )
+)
 
 set(TEST_OPENCL_SOURCE_FILES
         src/Canny/OpenCl/canny_open_cl_tester.cpp
         src/Dog/OpenCl/dog_open_cl_tester.cpp
-        )
+)
 
 set(TEST_RESOURCES
         OpenCLKernels/canny.cl
         OpenCLKernels/dog.cl
         OpenCLKernels/gauss_blur.cl
-        )
+)
 
 add_executable(BSC_Thesis_Tests
         ${TEST_SOURCE_FILES}
         ${TEST_HEADER_FILES}
         ${TEST_OPENCL_SOURCE_FILES}
         ${TEST_OPENCL_INCLUDES_FILES}
-        )
+)
 
 
 target_compile_features(BSC_Thesis_Tests PRIVATE cxx_std_17)
@@ -68,13 +68,13 @@ target_link_libraries(BSC_Thesis_Tests PRIVATE
         implot::implot
         OpenCL::OpenCL
         ${CMAKE_PROJECT_NAME}_lib
-        )
+)
 
 
 target_include_directories(BSC_Thesis_Tests
         PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include
         ${CMAKE_CURRENT_SOURCE_DIR}/../include
-        )
+)
 
 
 if (CUDAToolkit_FOUND AND CUDA_FOUND)
@@ -83,10 +83,10 @@ if (CUDAToolkit_FOUND AND CUDA_FOUND)
     add_library(testing_cuda_comp STATIC
             ${TEST_CUDA_INCLUDES_FILES}
             ${TEST_CUDA_SOURCE_FILES}
-            )
+    )
     target_compile_features(testing_cuda_comp PRIVATE
             cuda_std_17
-            )
+    )
 
     set_target_properties(testing_cuda_comp PROPERTIES LINKER_LANGUAGE CUDA)
 
@@ -100,7 +100,7 @@ if (CUDAToolkit_FOUND AND CUDA_FOUND)
             $<IF:$<TARGET_EXISTS:SDL2_image::SDL2_image>,SDL2_image::SDL2_image,SDL2_image::SDL2_image-static>
             imgui::imgui
             implot::implot
-            )
+    )
 
     set_target_properties(testing_cuda_comp PROPERTIES
             LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
@@ -109,14 +109,14 @@ if (CUDAToolkit_FOUND AND CUDA_FOUND)
     target_include_directories(testing_cuda_comp
             PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include
             ${CMAKE_CURRENT_SOURCE_DIR}/../include
-            )
+    )
 
     set_target_properties(testing_cuda_comp
             PROPERTIES
             CUDA_RUNTIME_LIBRARY Static
             CUDA_STANDARD 17
             CUDA_SEPARABLE_COMPILATION OFF
-            )
+    )
 
     target_link_libraries(BSC_Thesis_Tests PRIVATE
             cuda_comp
@@ -138,5 +138,6 @@ foreach (file ${TEST_RESOURCES})
     )
     ADD_DEPENDENCIES(BSC_Thesis_Tests test_copy_${n_file}_file)
 endforeach ()
+
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/../copy.cmake DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

@@ -61,12 +61,11 @@ void DetectorsCPU::GaussianFilter(float* img,
                 for (int j = -k; j <= k; j++) {
                     int ix = x + i;
                     int jx = y + j;
-                    float pixel = *(img + ix + (jx * w));
-                    if (ix < 0) { pixel = 0; }
-                    if (ix >= w) { pixel = 0; }
-                    if (jx < 0) { pixel = 0; }
-                    if (jx >= h) { pixel = 0; }
-                    sum = std::fmaf(pixel,
+                    if (ix < 0) { ix = 0; }
+                    if (ix >= w) { ix = w - 1; }
+                    if (jx < 0) { jx = 0; }
+                    if (jx >= h) { jx = h - 1; }
+                    sum = std::fmaf(*(img + ix + (jx * w)),
                                     *(gauss + (i + k) + ((j + k) * kernelSize)),
                                     sum);
                 }
