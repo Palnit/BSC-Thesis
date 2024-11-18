@@ -3,6 +3,7 @@
 #include <SDL_surface.h>
 #include <implot.h>
 #include <filesystem>
+#include <numeric>
 #include <random>
 #include "general/OpenCL/get_devices.h"
 #include "general/OpenCL/kernel.h"

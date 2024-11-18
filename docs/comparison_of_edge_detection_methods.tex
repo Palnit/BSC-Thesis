@@ -11,12 +11,14 @@
 \author{Petrányi Bálint}
 \degree{Computer Science BSc}
 \supervisor{Gede Mátyás}
-\affiliation{Assistant Lecturer}
+\affiliation{Associate Professor}
 \university{Eötvös Loránd University}
 \faculty{Faculty of Informatics}
-\department{Dept. of Software Technology and Methodology}
+\department{Institute of Cartography and Geoinformatics}
 \city{Budapest}
 \logo{elte_cimer_szines}
+
+\usepackage{acronym}
 
 \newcommand{\CC}{C\nolinebreak\hspace{-.05em}\raisebox{.4ex}{\tiny\bf +}\nolinebreak\hspace{-.10em}\raisebox{.4ex}{\tiny\bf +}}
 \def\CC{{C\nolinebreak[4]\hspace{-.05em}\raisebox{.4ex}{\tiny\bf ++}}}
@@ -30,5 +32,27 @@
 \cleardoublepage
 
 \input{chapters/introduction.tex}
-
+\cleardoublepage
+\input{chapters/user_docs.tex}
+\cleardoublepage
+\input{chapters/developer_docs.tex}
+\cleardoublepage
+\input{chapters/summary.tex}
+\cleardoublepage
+\chapter*{Appendix}
+\phantomsection
+\addcontentsline{toc}{chapter}{Appendix}
+\section*{List of Acronyms}
+\phantomsection
+\addcontentsline{toc}{section}{List of Acronyms}
+\begin{acronym}
+ \acro{GPGPU}{General-purpose computing on graphics processing unit}
+ \acro{Canny}{Canny edge detector}
+ \acro{DoG}{Difference of Gaussians}
+ \acro{GPU}{Graphics processing unit}
+ \acro{CPU}{Central processing unit}
+ \acro{SDL2}{Simple Media Layer}
+ \acro{ImGui}{Immediate mode graphics user interface library}
+\end{acronym}
+\cleardoublepage
 \end{document}

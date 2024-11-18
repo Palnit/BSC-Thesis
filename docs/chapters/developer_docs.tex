@@ -1,0 +1,17 @@
+\chapter{Developer Documentation}
+
+In this chapter I will explain what was my plan going into the development of my thesis, how I handled problems during development, and we will finally take a look at the test conducted to compare the libraries.
+
+\section{Development plan}
+
+For my planing I choose to do my project using the \CC\ programming language. To visualize the data I choose to use \ac{SDL2} with \ac{ImGui} and OpenGL and obviously for \ac{GPGPU} libraries CUDA and OpenCL.
+
+\subsection{Architecture}
+
+The plan for the architecture was a simple Model View but its hard to differentiate what's part of a Model and View since there's no library elements or event management system in \CC\ and the aforementioned libraries. The plan was to write an abstraction layer over \ac{SDL2} to use as the base for displaying the \ac{ImGui} and the pictures. Obviously this contains some logic but these logic are mainly related to displaying the images and the Gui.
+
+The model part contains the detectors themselves of which they can be all called whit a simple function call or class creation. Here because the differences between the algorithms and the fewness of them there's no need to create a pure abstraction over the detector themselves. For the algorithm I planed to make every part of the algorithms separate to be able to measure each step in the algorithm. This is slightly a bad move from the perspective of code optimization but we gain huge insight at what parts of the algorithm takes up the most time
+
+\section{Algorithms}
+
+I will now 
