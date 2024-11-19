@@ -27,9 +27,6 @@ void MainWindow::Render() {
 }
 
 void MainWindow::RenderImGui() {
-    bool t = true;
-    ImGui::ShowMetricsWindow(&t);
-    ImGui::ShowDemoWindow(&t);
     m_display.DisplayImGui();
 
 }

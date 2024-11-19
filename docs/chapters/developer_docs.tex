@@ -4,7 +4,8 @@ In this chapter I will explain what was my plan going into the development of my
 
 \section{Development plan}
 
-For my planing I choose to do my project using the \CC\ programming language. To visualize the data I choose to use \ac{SDL2} with \ac{ImGui} and OpenGL and obviously for \ac{GPGPU} libraries CUDA and OpenCL.
+For my planing I choose to do my project using the \CC\ programming language. To visualize the data I choose to use \ac{SDL2} with \ac{ImGui} and OpenGL and obviously for \ac{GPGPU} libraries CUDA and OpenCL. The main plan was to implement the two edge detection algorithms. I could have choose to do only the algorithm implementation without a user interface but I decided against it. The reason simply being that goal of the thesis is to show the difference of \ac{GPGPU} libraries speed and be a helpful tool for people to test them out themselves. Thus the plan for the Gui was to have two programs one for synthetic testing environment pure library speed. The result from those test are for pictures that only contain two colors and have simple lines and curves on them. This proves a good way of testing for accuracy and speed but in a real world scenario a real picture could have very different results. Thus the other program's goal is to test real pictures. This program cannot test accuracy and it's main function is to test the speed of the algorithm on a real picture and show the results.
+
 
 \subsection{Architecture}
 
@@ -12,6 +13,6 @@ The plan for the architecture was a simple Model View but its hard to differenti
 
 The model part contains the detectors themselves of which they can be all called whit a simple function call or class creation. Here because the differences between the algorithms and the fewness of them there's no need to create a pure abstraction over the detector themselves. For the algorithm I planed to make every part of the algorithms separate to be able to measure each step in the algorithm. This is slightly a bad move from the perspective of code optimization but we gain huge insight at what parts of the algorithm takes up the most time
 
-\section{Algorithms}
+\subsection{Algorithms}
 
-I will now 
+As we have discused in the earlea

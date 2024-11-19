@@ -5,6 +5,7 @@
 #include <implot.h>
 #include <filesystem>
 #include <random>
+#include <numeric>
 #include "Dog/cuda/cuda_dog_edge_detection.cuh"
 #include "spiral_indexer.h"
 #include "surface_painters.h"
@@ -262,7 +263,7 @@ void DogCudaTester::Test() {
         for (int x = 0; x < img->w; ++x) {
             for (int y = 0; y < img->h; ++y) {
                 RGBA* color = (RGBA*) (((uint8_t*) img->pixels) + (x * 4)
-                                       + (y * img->w * 4));
+                    + (y * img->w * 4));
                 if (lineColor == *color) {
                     SpiralIndexer indexer;
                     bool match = false;
@@ -276,7 +277,7 @@ void DogCudaTester::Test() {
 
                         RGBA* color2 =
                             (RGBA*) (((uint8_t*) detected->pixels) + (nX * 4)
-                                     + (nY * detected->w * 4));
+                                + (nY * detected->w * 4));
                         if (color2->r <= m_threshold) {
                             indexer++;
                             continue;
