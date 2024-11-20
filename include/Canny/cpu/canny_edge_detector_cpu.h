@@ -1,62 +1,13 @@
-//
-// Created by Palnit on 2024. 01. 21.
-//
+#ifndef BSC_THESIS_CANNY_EDGE_DETECTOR_CPU_H
+#define BSC_THESIS_CANNY_EDGE_DETECTOR_CPU_H
 
-#ifndef GPGPU_EDGE_DETECTOR_INCLUDE_CANNY_CPU_CANNY_EDGE_DETECTOR_CPU_H_
-#define GPGPU_EDGE_DETECTOR_INCLUDE_CANNY_CPU_CANNY_EDGE_DETECTOR_CPU_H_
+#include "Canny/canny_edge_detector.h"
+class CannyDetectorCPU;
 
-#include "Canny/canny_timings.h"
-#include "general/detector_base.h"
-
-/*!
- * \class CannyEdgeDetectorCPU
- * \brief Implementation of the DetectorBase class for Canny edge detection
- * on cpu
- *
- * It implements the base class and stores data related to the dog edge detection
- */
-class CannyEdgeDetectorCPU : public DetectorBase {
+class CannyEdgeDetectorCPU : public CannyEdgeDetector {
 public:
-    /*!
-     * Implementation of the base constructor
-     * \param picture The picture to be taken
-     * \param name The name of the detector
-     */
-    CannyEdgeDetectorCPU(SDL_Surface* base, std::string name)
-        : DetectorBase(base, std::move(name)),
-          m_w(m_base->w),
-          m_h(m_base->h) {}
-
-    /*!
-     * Implementation of the DetectEdge function class the detection functions
-     */
-    void DetectEdge() override;
-
-    /*!
-     * Implementation of the MainWindowDisplayImGui function displays the variables
-     * related to this edge detection method to be modified easily
-     */
-    void DisplayImGui() override;
-
-    /*!
-     * Implementation of the Display function displays the base and
-     * detected image
-     */
-    void Display() override;
-
-private:
-    int m_w;
-    int m_h;
-    int m_gaussKernelSize = 3;
-    float m_standardDeviation = 1;
-    float m_highTrashHold = 150;
-    float m_lowTrashHold = 100;
-    bool m_timingsReady = false;
-    float* m_pixels1;
-    float* m_pixels2;
-    float* m_kernel;
-    float* m_tangent;
-    CannyTimings m_timings;
+    CannyEdgeDetectorCPU() = default;
+    std::shared_ptr<uint8_t> Detect() override;
 };
 
 /*!
@@ -117,4 +68,5 @@ void DoubleThreshold(float* src,
  */
 void Hysteresis(float* src, float* dest, int w, int h);
 }// namespace DetectorsCPU
-#endif//GPGPU_EDGE_DETECTOR_INCLUDE_CANNY_CPU_CANNY_EDGE_DETECTOR_CPU_H_
+
+#endif//BSC_THESIS_CANNY_EDGE_DETECTOR_CPU_H

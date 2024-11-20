@@ -1,32 +1,12 @@
-#ifndef BSC_THESIS_INCLUDE_CANNY_OPENCL_CANNYEDGEDETECTOROPENCL_H_
-#define BSC_THESIS_INCLUDE_CANNY_OPENCL_CANNYEDGEDETECTOROPENCL_H_
+#ifndef BSC_THESIS_CANNY_EDGE_DETECTOR_OPEN_CL_H
+#define BSC_THESIS_CANNY_EDGE_DETECTOR_OPEN_CL_H
 
-#include "general/detector_base.h"
-#include "GL/glew.h"
-#include "general/OpenGL_SDL/element_buffer_object.h"
-#include "general/OpenGL_SDL/vertex_array_object.h"
-#include "general/OpenGL_SDL/shader_program.h"
-#include "Canny/canny_timings.h"
+#include "Canny/canny_edge_detector.h"
 
-class CannyEdgeDetectorOpenCl : public DetectorBase {
+class CannyEdgeDetectorOpenCl : public CannyEdgeDetector {
 public:
-    CannyEdgeDetectorOpenCl(SDL_Surface* base,
-                            std::string name) : DetectorBase(
-        base,
-        std::move(name)) {
-    }
-
-    void DetectEdge() override;
-    void DisplayImGui() override;
-    void Display() override;
-private:
-    int m_gaussKernelSize = 3;
-    float m_standardDeviation = 1;
-    float m_highTrashHold = 150;
-    float m_lowTrashHold = 100;
-    bool m_timingsReady = false;
-    CannyTimings m_timings;
-
+    CannyEdgeDetectorOpenCl() = default;
+    std::shared_ptr<uint8_t> Detect() override;
 };
 
-#endif //BSC_THESIS_INCLUDE_CANNY_OPENCL_CANNYEDGEDETECTOROPENCL_H_
+#endif//BSC_THESIS_CANNY_EDGE_DETECTOR_OPEN_CL_H

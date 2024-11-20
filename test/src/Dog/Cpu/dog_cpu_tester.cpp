@@ -3,7 +3,7 @@
 #include <filesystem>
 #include <numeric>
 #include <random>
-#include "Dog/cpu/dog_edge_detector_cpu.h"
+#include "Dog/cpu/dog_detector_cpu.h"
 #include "SDL_image.h"
 #include "SDL_surface.h"
 #include "general/cpu/gauss_blur_cpu.h"

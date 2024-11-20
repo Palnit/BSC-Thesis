@@ -1,71 +1,19 @@
 #include "Canny/OpenCl/canny_edge_detector_open_cl.h"
-#include "SDL_image.h"
 #include "general/OpenCL/get_devices.h"
 #include "general/OpenCL/kernel.h"
 #include "general/OpenCL/memory.h"
 #include "general/OpenCL/program.h"
-#include "general/cpu/gauss_blur_cpu.h"
-#include "imgui.h"
-void CannyEdgeDetectorOpenCl::DisplayImGui() {
 
-    if (ImGui::BeginTabItem(m_name.c_str())) {
-        if (OpenCLInfo::OPENCL_DEVICES[0]
-                .getInfo<CL_DEVICE_MAX_WORK_GROUP_SIZE>()
-            < 1024) {
-            ImGui::Text("Not Enough Work Group");
-            ImGui::EndTabItem();
-            return;
-        }
-
-        if (ImGui::SliderInt("Gauss Kernel Size", &m_gaussKernelSize, 3, 21)) {
-            if (m_gaussKernelSize % 2 == 0) { m_gaussKernelSize++; }
-        }
-        ImGui::SetItemTooltip("Only Odd Numbers");
-        ImGui::SliderFloat("Standard Deviation", &m_standardDeviation, 0.0001f,
-                           30.0f);
-        ImGui::SliderFloat("High Trash Hold", &m_highTrashHold, 0.0f, 255.0f);
-        ImGui::SliderFloat("Low Trash Hold", &m_lowTrashHold, 0.0f, 255.0f);
-        ImGui::Separator();
-        if (ImGui::Button("Detect")) { DetectEdge(); }
-        if (!m_timingsReady) {
-            ImGui::EndTabItem();
-            return;
-        }
-        ImGui::SameLine();
-        if (ImGui::Button("Save")) {
-            std::string save_path = "./" + m_name + ".png";
-            IMG_SavePNG(m_detected, save_path.c_str());
-        }
-
-        ImGui::Separator();
-        ImGui::TextColored(ImVec4(1, 0, 0, 1), "CannyTimings:");
-        ImGui::Text("Whole execution:         %f ms", m_timings.All_ms);
-        ImGui::Separator();
-        ImGui::Text("Gray Scaling:            %f ms", m_timings.GrayScale_ms);
-        ImGui::Text("Gauss Creation:          %f ms",
-                    m_timings.GaussCreation_ms);
-        ImGui::Text("Blur:                    %f ms", m_timings.Blur_ms);
-        ImGui::Text("Sobel Operator:          %f ms",
-                    m_timings.SobelOperator_ms);
-        ImGui::Text("Non Maximum Suppression: %f ms",
-                    m_timings.NonMaximumSuppression_ms);
-        ImGui::Text("Double Threshold:        %f ms",
-                    m_timings.DoubleThreshold_ms);
-        ImGui::Text("Hysteresis:              %f ms", m_timings.Hysteresis_ms);
-
-        ImGui::EndTabItem();
-    }
-}
-void CannyEdgeDetectorOpenCl::DetectEdge() {
+std::shared_ptr<uint8_t> CannyEdgeDetectorOpenCl::Detect() {
 
     ClWrapper::Program programTest(OpenCLInfo::OPENCL_DEVICES[0]);
 
     programTest.AddSource("OpenCLKernels/gauss_blur.cl");
     programTest.AddSource("OpenCLKernels/canny.cl");
-    size_t size = (m_base->w * m_base->h * m_base->format->BytesPerPixel);
+    size_t size = (m_w * m_h * m_stride);
 
-    ClWrapper::Memory<uint8_t, 0> image(programTest, (uint8_t*) m_base->pixels,
-                                        size, CL_MEM_READ_WRITE);
+    ClWrapper::Memory<uint8_t, 0> image(programTest, m_pixels, size,
+                                        CL_MEM_READ_WRITE);
     ClWrapper::Memory<float, 0> tmp(programTest, size, CL_MEM_READ_WRITE);
     ClWrapper::Memory<float, 0> tmp2(programTest, size, CL_MEM_READ_WRITE);
     ClWrapper::Memory<float, 0> tangent(programTest, size, CL_MEM_READ_WRITE);
@@ -76,13 +24,11 @@ void CannyEdgeDetectorOpenCl::DetectEdge() {
     ClWrapper::Memory<float, 1> sigma(programTest, m_standardDeviation,
                                       CL_MEM_READ_WRITE);
 
-    ClWrapper::Memory<int, 1> w(programTest, m_base->w, CL_MEM_READ_WRITE);
+    ClWrapper::Memory<int, 1> w(programTest, m_w, CL_MEM_READ_WRITE);
 
-    ClWrapper::Memory<int, 1> h(programTest, m_base->h, CL_MEM_READ_WRITE);
-    ClWrapper::Memory<float, 1> high(programTest, m_highTrashHold,
-                                     CL_MEM_READ_WRITE);
-    ClWrapper::Memory<float, 1> low(programTest, m_lowTrashHold,
-                                    CL_MEM_READ_WRITE);
+    ClWrapper::Memory<int, 1> h(programTest, m_h, CL_MEM_READ_WRITE);
+    ClWrapper::Memory<float, 1> high(programTest, m_high, CL_MEM_READ_WRITE);
+    ClWrapper::Memory<float, 1> low(programTest, m_low, CL_MEM_READ_WRITE);
 
     image.WriteToDevice();
     kernelSize.WriteToDevice();
@@ -101,31 +47,29 @@ void CannyEdgeDetectorOpenCl::DetectEdge() {
 
     ClWrapper::Kernel DoubleThreshold(programTest, "DoubleThreshold");
     ClWrapper::Kernel Hysteresis(programTest, "Hysteresis");
-    size_t width =
-        m_base->w + (m_base->w % 32 != 0 ? (32 - m_base->w % 32) : 0);
-    size_t height =
-        m_base->h + (m_base->h % 32 != 0 ? (32 - m_base->h % 32) : 0);
+    size_t width = m_w + (m_w % 32 != 0 ? (32 - m_w % 32) : 0);
+    size_t height = m_h + (m_h % 32 != 0 ? (32 - m_h % 32) : 0);
 
     size_t missingW =
         (width / 32) * (m_gaussKernelSize * 2 + (m_gaussKernelSize - 1 / 2));
     size_t missingH =
         (height / 32) * (m_gaussKernelSize * 2 + (m_gaussKernelSize - 1 / 2));
-    size_t widthNKernel = (m_base->w + missingW) % 32 != 0
-        ? m_base->w + missingW + (32 - (m_base->w + missingW) % 32)
-        : m_base->w + missingW;
-    size_t heightNKernel = (m_base->h + missingH) % 32 != 0
-        ? m_base->h + missingH + (32 - (m_base->h + missingH) % 32)
-        : m_base->h + missingH;
+    size_t widthNKernel = (m_w + missingW) % 32 != 0
+        ? m_w + missingW + (32 - (m_w + missingW) % 32)
+        : m_w + missingW;
+    size_t heightNKernel = (m_h + missingH) % 32 != 0
+        ? m_h + missingH + (32 - (m_h + missingH) % 32)
+        : m_h + missingH;
 
     size_t missing3W = (width / 32) * (3 * (2 + 1));
     size_t missing3H = (height / 32) * (3 * (2 + 1));
 
-    size_t width3Kernel = (m_base->w + missing3W) % 32 != 0
-        ? m_base->w + missing3W + (32 - (m_base->w + missing3W) % 32)
-        : m_base->w + missing3W;
-    size_t height3Kernel = (m_base->h + missing3H) % 32 != 0
-        ? m_base->h + missing3H + (32 - (m_base->h + missing3H) % 32)
-        : m_base->h + missing3H;
+    size_t width3Kernel = (m_w + missing3W) % 32 != 0
+        ? m_w + missing3W + (32 - (m_w + missing3W) % 32)
+        : m_w + missing3W;
+    size_t height3Kernel = (m_h + missing3H) % 32 != 0
+        ? m_h + missing3H + (32 - (m_h + missing3H) % 32)
+        : m_h + missing3H;
 
     auto t1 = std::chrono::high_resolution_clock::now();
 
@@ -165,21 +109,5 @@ void CannyEdgeDetectorOpenCl::DetectEdge() {
     auto t2 = std::chrono::high_resolution_clock::now();
     std::chrono::duration<float, std::milli> time = t2 - t1;
     m_timings.All_ms = time.count();
-    m_timingsReady = true;
-    std::copy(image.begin(), image.end(), (uint8_t*) m_detected->pixels);
-
-    glBindTexture(GL_TEXTURE_2D, tex);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_base->w, m_base->h, 0, GL_RGBA,
-                 GL_UNSIGNED_BYTE, image.begin());
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-}
-void CannyEdgeDetectorOpenCl::Display() {
-    shaderProgram.Bind();
-    VAO.Bind();
-    glBindTexture(GL_TEXTURE_2D, tex);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
-    VAO.UnBind();
-    shaderProgram.UnBind();
+    return std::shared_ptr<uint8_t>(image.begin());
 }

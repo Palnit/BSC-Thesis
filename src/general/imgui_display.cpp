@@ -1,13 +1,10 @@
-//
-// Created by Palnit on 2024. 01. 20.
-//
-
 #include "general/imgui_display.h"
 #include <imgui.h>
 #include "Canny/OpenCl/canny_edge_detector_open_cl.h"
+#include "Canny/canny_detector.h"
 #include "Canny/cpu/canny_edge_detector_cpu.h"
-#include "Dog/OpenCl/dog_edge_detector_open_cl.h"
 #include "Dog/cpu/dog_edge_detector_cpu.h"
+#include "Dog/dog_detector.h"
 #include "general/main_window.h"
 
 #ifdef CUDA_EXISTS
@@ -54,7 +51,8 @@ void ImGuiDisplay::DisplayImGui() {
 
         switch (m_add) {
             case 0:
-                detector = new CannyEdgeDetectorCPU(m_base, m_buf);
+                detector =
+                    new CannyDetector<CannyEdgeDetectorCPU>(m_base, m_buf);
                 break;
 #ifdef CUDA_EXISTS
             case 1:
@@ -62,7 +60,7 @@ void ImGuiDisplay::DisplayImGui() {
                 break;
 #endif
             case 2:
-                detector = new DogEdgeDetectorCPU(m_base, m_buf);
+                detector = new DogDetector<DogEdgeDetectorCPU>(m_base, m_buf);
                 break;
 #ifdef CUDA_EXISTS
             case 3:
@@ -70,10 +68,12 @@ void ImGuiDisplay::DisplayImGui() {
                 break;
 #endif
             case 4:
-                detector = new CannyEdgeDetectorOpenCl(m_base, m_buf);
+                detector =
+                    new CannyDetector<CannyEdgeDetectorOpenCl>(m_base, m_buf);
                 break;
             case 5:
-                detector = new DogEdgeDetectorOpenCl(m_base, m_buf);
+                detector =
+                    new DogDetector<DogEdgeDetectorOpenCl>(m_base, m_buf);
                 break;
         }
 

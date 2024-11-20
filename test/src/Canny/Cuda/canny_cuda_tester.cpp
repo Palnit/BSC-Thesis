@@ -1,22 +1,20 @@
 #include "Canny/Cuda/canny_cuda_tester.h"
+#include <cuda_runtime.h>
 #include <imgui.h>
 #include <implot.h>
 #include <filesystem>
+#include <numeric>
 #include <random>
 #include <thread>
 #include <vector>
-#include <numeric>
-#include <cuda_runtime.h>
-#include "Canny/cpu/canny_edge_detector_cpu.h"
+#include "Canny/cpu/canny_detector_cpu.h"
+#include "Canny/cuda/cuda_canny_edge_detection.cuh"
 #include "SDL_image.h"
 #include "general/cpu/gauss_blur_cpu.h"
 #include "spiral_indexer.h"
 #include "surface_painters.h"
-#include "Canny/cuda/cuda_canny_edge_detection.cuh"
 
-CannyCudaTester::CannyCudaTester() : TesterBase("Canny Cuda Tester") {
-
-}
+CannyCudaTester::CannyCudaTester() : TesterBase("Canny Cuda Tester") {}
 void CannyCudaTester::SpecializedDisplayImGui() {
     ImGui::SeparatorText("Canny Settings");
 
@@ -38,14 +36,10 @@ void CannyCudaTester::ResultDisplay() {
             if (ImGui::BeginTabItem("Error Rate")) {
                 if (ImPlot::BeginPlot("")) {
                     ImPlot::SetupAxes(
-                        "Iteration",
-                        "Avg closest true pixel",
+                        "Iteration", "Avg closest true pixel",
                         ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_RangeFit,
                         ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_RangeFit);
-                    ImPlot::PlotLine("",
-                                     x,
-                                     m_AVG.data(),
-                                     m_AVG.size());
+                    ImPlot::PlotLine("", x, m_AVG.data(), m_AVG.size());
                     ImPlot::EndPlot();
                 }
                 ImGui::EndTabItem();
@@ -53,13 +47,10 @@ void CannyCudaTester::ResultDisplay() {
             if (ImGui::BeginTabItem("Missing")) {
                 if (ImPlot::BeginPlot("")) {
                     ImPlot::SetupAxes(
-                        "Iteration",
-                        "No real pixel found",
+                        "Iteration", "No real pixel found",
                         ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_RangeFit,
                         ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_RangeFit);
-                    ImPlot::PlotLine("",
-                                     x2,
-                                     m_missing.data(),
+                    ImPlot::PlotLine("", x2, m_missing.data(),
                                      m_missing.size());
                     ImPlot::EndPlot();
                 }
@@ -76,14 +67,10 @@ void CannyCudaTester::ResultDisplay() {
                 }
                 if (ImPlot::BeginPlot("")) {
                     ImPlot::SetupAxes(
-                        "Iteration",
-                        "Time in ms",
+                        "Iteration", "Time in ms",
                         ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_RangeFit,
                         ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_RangeFit);
-                    ImPlot::PlotLine("",
-                                     x,
-                                     timing.data(),
-                                     timing.size());
+                    ImPlot::PlotLine("", x, timing.data(), timing.size());
                     ImPlot::EndPlot();
                 }
                 ImGui::EndTabItem();
@@ -96,14 +83,10 @@ void CannyCudaTester::ResultDisplay() {
                 }
                 if (ImPlot::BeginPlot("")) {
                     ImPlot::SetupAxes(
-                        "Iteration",
-                        "Time in ms",
+                        "Iteration", "Time in ms",
                         ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_RangeFit,
                         ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_RangeFit);
-                    ImPlot::PlotLine("",
-                                     x,
-                                     timing.data(),
-                                     timing.size());
+                    ImPlot::PlotLine("", x, timing.data(), timing.size());
                     ImPlot::EndPlot();
                 }
                 ImGui::EndTabItem();
@@ -116,14 +99,10 @@ void CannyCudaTester::ResultDisplay() {
                 }
                 if (ImPlot::BeginPlot("")) {
                     ImPlot::SetupAxes(
-                        "Iteration",
-                        "Time in ms",
+                        "Iteration", "Time in ms",
                         ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_RangeFit,
                         ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_RangeFit);
-                    ImPlot::PlotLine("",
-                                     x,
-                                     timing.data(),
-                                     timing.size());
+                    ImPlot::PlotLine("", x, timing.data(), timing.size());
                     ImPlot::EndPlot();
                 }
                 ImGui::EndTabItem();
@@ -136,14 +115,10 @@ void CannyCudaTester::ResultDisplay() {
                 }
                 if (ImPlot::BeginPlot("")) {
                     ImPlot::SetupAxes(
-                        "Iteration",
-                        "Time in ms",
+                        "Iteration", "Time in ms",
                         ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_RangeFit,
                         ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_RangeFit);
-                    ImPlot::PlotLine("",
-                                     x,
-                                     timing.data(),
-                                     timing.size());
+                    ImPlot::PlotLine("", x, timing.data(), timing.size());
                     ImPlot::EndPlot();
                 }
                 ImGui::EndTabItem();
@@ -156,14 +131,10 @@ void CannyCudaTester::ResultDisplay() {
                 }
                 if (ImPlot::BeginPlot("")) {
                     ImPlot::SetupAxes(
-                        "Iteration",
-                        "Time in ms",
+                        "Iteration", "Time in ms",
                         ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_RangeFit,
                         ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_RangeFit);
-                    ImPlot::PlotLine("",
-                                     x,
-                                     timing.data(),
-                                     timing.size());
+                    ImPlot::PlotLine("", x, timing.data(), timing.size());
                     ImPlot::EndPlot();
                 }
                 ImGui::EndTabItem();
@@ -176,14 +147,10 @@ void CannyCudaTester::ResultDisplay() {
                 }
                 if (ImPlot::BeginPlot("")) {
                     ImPlot::SetupAxes(
-                        "Iteration",
-                        "Time in ms",
+                        "Iteration", "Time in ms",
                         ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_RangeFit,
                         ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_RangeFit);
-                    ImPlot::PlotLine("",
-                                     x,
-                                     timing.data(),
-                                     timing.size());
+                    ImPlot::PlotLine("", x, timing.data(), timing.size());
                     ImPlot::EndPlot();
                 }
                 ImGui::EndTabItem();
@@ -196,14 +163,10 @@ void CannyCudaTester::ResultDisplay() {
                 }
                 if (ImPlot::BeginPlot("")) {
                     ImPlot::SetupAxes(
-                        "Iteration",
-                        "Time in ms",
+                        "Iteration", "Time in ms",
                         ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_RangeFit,
                         ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_RangeFit);
-                    ImPlot::PlotLine("",
-                                     x,
-                                     timing.data(),
-                                     timing.size());
+                    ImPlot::PlotLine("", x, timing.data(), timing.size());
                     ImPlot::EndPlot();
                 }
                 ImGui::EndTabItem();
@@ -216,14 +179,10 @@ void CannyCudaTester::ResultDisplay() {
                 }
                 if (ImPlot::BeginPlot("")) {
                     ImPlot::SetupAxes(
-                        "Iteration",
-                        "Time in ms",
+                        "Iteration", "Time in ms",
                         ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_RangeFit,
                         ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_RangeFit);
-                    ImPlot::PlotLine("",
-                                     x,
-                                     timing.data(),
-                                     timing.size());
+                    ImPlot::PlotLine("", x, timing.data(), timing.size());
                     ImPlot::EndPlot();
                 }
                 ImGui::EndTabItem();
@@ -285,23 +244,17 @@ void CannyCudaTester::Test() {
 
         uint8_t* d_pixel = nullptr;
 
-        cudaMalloc((void**) &d_pixel,
-                   sizeof(uint8_t) * img->w
-                       * img->h
-                       * img->format->BytesPerPixel);
+        cudaMalloc(
+            (void**) &d_pixel,
+            sizeof(uint8_t) * img->w * img->h * img->format->BytesPerPixel);
 
-        cudaMemcpy(d_pixel,
-                   img->pixels,
-                   sizeof(uint8_t) * img->w * img->h
-                       * img->format->BytesPerPixel,
-                   cudaMemcpyHostToDevice);
+        cudaMemcpy(
+            d_pixel, img->pixels,
+            sizeof(uint8_t) * img->w * img->h * img->format->BytesPerPixel,
+            cudaMemcpyHostToDevice);
 
-        CudaCannyDetector detector(d_pixel,
-                                   img->w,
-                                   img->h,
-                                   m_gaussKernelSize,
-                                   m_standardDeviation,
-                                   m_highTrashHold,
+        CudaCannyDetector detector(d_pixel, img->w, img->h, m_gaussKernelSize,
+                                   m_standardDeviation, m_highTrashHold,
                                    m_lowTrashHold);
         m_timings = detector.GetTimings();
         m_allTimings.push_back(m_timings);
@@ -310,8 +263,7 @@ void CannyCudaTester::Test() {
             0, img->w, img->h, img->format->BitsPerPixel, img->format->Rmask,
             img->format->Gmask, img->format->Bmask, img->format->Amask);
 
-        cudaMemcpy(detected->pixels,
-                   d_pixel,
+        cudaMemcpy(detected->pixels, d_pixel,
                    sizeof(uint8_t) * detected->w * detected->h
                        * detected->format->BytesPerPixel,
                    cudaMemcpyDeviceToHost);
@@ -341,7 +293,7 @@ void CannyCudaTester::Test() {
         for (int x = 0; x < detected->w; ++x) {
             for (int y = 0; y < detected->h; ++y) {
                 RGBA* color = (RGBA*) (((uint8_t*) detected->pixels) + (x * 4)
-                    + (y * detected->w * 4));
+                                       + (y * detected->w * 4));
                 if (color->r != 0 && color->b != 0 && color->g != 0) {
                     SpiralIndexer indexer;
                     bool match = false;
@@ -354,7 +306,7 @@ void CannyCudaTester::Test() {
                         }
 
                         RGBA* color2 = (RGBA*) (((uint8_t*) img->pixels)
-                            + (nX * 4) + (nY * img->w * 4));
+                                                + (nX * 4) + (nY * img->w * 4));
                         if (color2->r == 255) {
                             float dis = DistanceOfPixels(x, y, nX, nY);
                             distances.push_back(dis);
