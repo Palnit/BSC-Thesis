@@ -1,0 +1,40 @@
+@startuml
+abstract BasicWindow{
++ void virtual Render()
++ void virtual RenderImGui()
+}
+
+class MainWindow{
++ void Render()
++ void RenderImGui()
+- ImGuiDisplay m_display
+- std::vector<DetectorBase*> m_detectors
+}
+
+class ImGuiDisplay{
++ void DisplayImGui();
+- BasicWindow* m_parent
+- std::vector<DetectorBase*> m_detectors
+}
+
+abstract DetectorBase{
++ virtual void DetectEdge()
++ virtual void DisplayImGui()
++ virtual void Display()
+}
+
+class LanguageAndAlgorithmSpecificDetector{
++ void DetectEdge()
++ void DisplayImGui()
++ void Display()
+- LanguageAndAlgorithmSpecificDetector m_detector
+}
+
+BasicWindow <|-Right- MainWindow
+DetectorBase <|-Right- LanguageAndAlgorithmSpecificDetector
+MainWindow "1" *-- "1" ImGuiDisplay
+ImGuiDisplay "1" o-- "1" BasicWindow
+MainWindow "1" *-- "many" DetectorBase
+ImGuiDisplay "1" o-- "many" DetectorBase
+
+@enduml

@@ -1,0 +1,33 @@
+@startuml
+class LanguageAndAlgorithmSpecificDetector{
++ uint8_t* Detect()
++ CannyTimings/DogTimings GetTimings()
+- uint8_t* m_pixels
+- uint8_t* m_detected
+- CannyTimings/DogTimings m_timings
+}
+
+class CannyTimings{
++ float All_ms
++ float GrayScale_ms
++ float GaussCreation_ms
++ float Blur_ms
++ float SobelOperator_ms
++ float NonMaximumSuppression_ms
++ float DoubleThreshold_ms
++ float Hysteresis_ms
+}
+
+class DogTimings{
++ float All_ms
++ float GrayScale_ms
++ float Gauss1Creation_ms
++ float Gauss2Creation_ms
++ float DifferenceOfGaussian_ms
++ float Convolution_ms
+}
+
+LanguageAndAlgorithmSpecificDetector *-- DogTimings
+LanguageAndAlgorithmSpecificDetector *-- CannyTimings
+
+@enduml

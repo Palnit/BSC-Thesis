@@ -19,12 +19,16 @@
 \logo{elte_cimer_szines}
 
 \usepackage{acronym}
+\usepackage{pgfplotstable}
+\usepackage{pgfplots}
 
 \newcommand{\CC}{C\nolinebreak\hspace{-.05em}\raisebox{.4ex}{\tiny\bf +}\nolinebreak\hspace{-.10em}\raisebox{.4ex}{\tiny\bf +}}
 \def\CC{{C\nolinebreak[4]\hspace{-.05em}\raisebox{.4ex}{\tiny\bf ++}}}
 
 \newcommand{\GG}{G\nolinebreak\hspace{-.05em}\raisebox{.4ex}{\tiny\bf +}\nolinebreak\hspace{-.10em}\raisebox{.4ex}{\tiny\bf +}}
 \def\GG{{G\nolinebreak[4]\hspace{-.05em}\raisebox{.4ex}{\tiny\bf ++}}}
+
+\addbibresource{thesis.bib}
 
 \begin{document}
 \documentlang{english}
@@ -58,10 +62,18 @@
  \acro{ImGui}{Immediate mode graphics user interface library}
  \acro{ns}{Nano seconds}
 \end{acronym}
-\clearpage
+\cleardoublepage
 
 \phantomsection
 \addcontentsline{toc}{section}{\lstfigurelabel}
 \listoffigures
-\clearpage
+\cleardoublepage
+\phantomsection
+\addcontentsline{toc}{section}{\lstalgorithmlabel}
+\listofalgorithms
+\cleardoublepage
+\phantomsection
+\addcontentsline{toc}{section}{\biblabel}
+\printbibliography[title=\biblabel]
+\cleardoublepage
 \end{document}

@@ -8,8 +8,8 @@
 #include "general/main_window.h"
 
 #ifdef CUDA_EXISTS
-#include "Canny/cuda/canny_edge_detector_cuda.h"
-#include "Dog/cuda/dog_edge_detector_cuda.h"
+#include "Canny/cuda/canny_detector_cuda.h"
+#include "Dog/cuda/dog_detector_cuda.h"
 #endif
 
 void ImGuiDisplay::DisplayImGui() {

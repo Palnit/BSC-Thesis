@@ -57,19 +57,9 @@ public:
      */
     virtual void DisplayImGui() = 0;
 
-    /*!
-     * Unused function right now latter used to display more than one picture
-     * at a time
-     * \param counter The amount to be displayed
-     */
-    static void SetCounter(int counter) {
-        m_counter = counter;
-    }
 protected:
     SDL_Surface* m_base;
     SDL_Surface* m_detected;
-    static inline int m_counter;
-    int m_position;
     std::string m_name;
     GLuint tex;
     VertexArrayObject VAO;
