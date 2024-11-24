@@ -1,28 +1,17 @@
 kernel void DetectionOperator(global float* src,
-                                  global float* gradient,
+                                  global float* dest,
                                   global float* tangent,
                                   global int* iw,
                                   global int* ih) {
     int w = *iw;
     int h = *ih;
 
-    uint col = get_local_id(0) + get_group_id(0) * (get_local_size(0) - 3);
-    uint row = get_local_id(1) + get_group_id(1) * (get_local_size(1) - 3);
-    uint col_i = col - 1;
-    uint row_i = row - 1;
+    uint x = get_local_id(0) + get_group_id(0) * get_local_size(0);
+    uint y = get_local_id(1) + get_group_id(1) * get_local_size(1);
 
-    local float src_local[32][32];
-    uint index = col_i + (row_i * w);
-    barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
-
-
-    if (col_i >= 0 && col_i < w && row_i >= 0 && row_i < h) {
-        src_local[get_local_id(0)][get_local_id(1)] = src[index];
-    } else {
-        src_local[get_local_id(0)][get_local_id(1)] = 0;
+    if (x >= w || y >= h) {
+        return;
     }
-
-    barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
 
     float SobelX[] = {-1, 0, +1, -2, 0, +2, -1, 0, +1};
     float SobelY[] = {+1, +2, +1, 0, 0, 0, -1, -2, -1};
@@ -30,32 +19,37 @@ kernel void DetectionOperator(global float* src,
     float SumX = 0;
     float SumY = 0;
 
-    if (get_local_id(0) > 1 - 1 && get_local_id(1) > 1 - 1 && get_local_id(0) < 32 - 1
-        && get_local_id(1) < 32 - 1 && col_i < w && row_i < h) {
-        for (int i = -1; i < 2; i++) {
-            for (int j = -1; j < 2; j++) {
-            uint SumIndex =(i + 1) + ((j + 1) * 3);
-                SumX = fma(src_local[get_local_id(0) + i][get_local_id(1) + j],
-                            SobelX[SumIndex],
-                            SumX);
-                SumY = fma(src_local[get_local_id(0) + i][get_local_id(1) + j],
-                            SobelY[SumIndex],
-                            SumY);
-            }
+    for (int i = -1; i < 2; i++) {
+        for (int j = -1; j < 2; j++) {
+            int ix = x + i;
+            int jx = y + j;
+
+            if (ix < 0) { ix = 0; }
+            if (ix >= w) { ix = w - 1; }
+            if (jx < 0) { jx = 0; }
+            if (jx >= h) { jx = h - 1; }
+            uint index = ix + (jx * w);
+            uint index2 = (i + 1) + ((j + 1) * 3);
+            SumX = fma(src[index],
+                             SobelX[index2] , SumX);
+            SumY = fma(src[index],
+                             SobelY[index2], SumY);
         }
-        gradient[index] = hypot(SumX, SumY);
-        float angle = (atan2(SumX, SumY) * 180.f) / M_PI_F;
-        if (angle < 0) {
-            angle += 180;
-        }
-        tangent[index] = angle;
     }
+    *(dest + x + (y * w)) = hypot(SumX, SumY);
+    float angle = (atan2(SumX, SumY) * 180.f) / M_PI_F;
+    if (angle < 0) {
+        angle += 180;
+    }
+    uint index = x + (y * w);
+    tangent[index]  = angle;
+
 
 }
 
 
-kernel void NonMaximumSuppression( global float* gradient_in,
-                                      global float* gradient_out,
+kernel void NonMaximumSuppression( global float* src,
+                                      global float* dest,
                                       global float* tangent,
                                       global int* iw,
                                       global int* ih) {
@@ -63,54 +57,61 @@ kernel void NonMaximumSuppression( global float* gradient_in,
     int w = *iw;
     int h = *ih;
 
-    uint col = get_local_id(0) + get_group_id(0) * (get_local_size(0) - 3);
-    uint row = get_local_id(1) + get_group_id(1) * (get_local_size(1) - 3);
-    uint col_i = col - 1;
-    uint row_i = row - 1;
+    uint x = get_local_id(0) + get_group_id(0) * get_local_size(0);
+    uint y = get_local_id(1) + get_group_id(1) * get_local_size(1);
 
-    local float src_local[32][32];
-    uint index = col_i + (row_i * w);
-    barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
-
-
-    if (col_i >= 0 && col_i < w && row_i >= 0 && row_i < h) {
-        src_local[get_local_id(0)][get_local_id(1)] = gradient_in[index];
-    } else {
-        src_local[get_local_id(0)][get_local_id(1)] = 2000;
-    }
-
-    barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
-
-    if (get_local_id(0) <= 1 - 1 || get_local_id(1) <= 1 - 1 || get_local_id(0) >= 32 - 1
-        || get_local_id(1) >= 32 - 1 || col_i >= w || row_i >= h) {
+    uint index = x + (y * w);
+    if (x >= w || y >= h) {
         return;
     }
 
+
+    int yp;
+    int yn;
+    int xp;
+    int xn;
+
     float tangentA = tangent[index];
-    float gradientA = src_local[get_local_id(0)][get_local_id(1)];
+    float gradientA = src[index];
     float gradientP = 2000;
     float gradientN = 2000;
 
+    yp = y + 1;
+    if (yp >= h) { yp = h - 1; }
+    xp = x + 1;
+    if (xp >= h) { xp = h - 1; }
+    yn = y - 1;
+    if (yn < 0) { yn = 0; }
+    xn = x - 1;
+    if (xn < 0) { xn = 0; }
+
     if ((0 <= tangentA && tangentA < 22.5)
         || (157.5 <= tangentA && tangentA <= 180)) {
-        gradientP = src_local[get_local_id(0)][get_local_id(1) + 1];
-        gradientN = src_local[get_local_id(0)][get_local_id(1) - 1];
+        uint indexP = x + (yp * w);
+        uint indexN =x + (yn * w);
+        gradientP = src[indexP];
+        gradientN = src[indexN];
     } else if (22.5 <= tangentA && tangentA < 67.5) {
-        gradientP = src_local[get_local_id(0) + 1][get_local_id(1) - 1];
-        gradientN = src_local[get_local_id(0) - 1][get_local_id(1) + 1];
+        uint indexP = xp + (yn * w);
+        uint indexN =xn + (yp * w);
+        gradientP = src[indexP];
+        gradientN = src[indexN];
     } else if (67.5 <= tangentA && tangentA < 112.5) {
-        gradientP = src_local[get_local_id(0) + 1][get_local_id(1)];
-        gradientN = src_local[get_local_id(0) - 1][get_local_id(1)];
+        uint indexP = xp + (y * w);
+        uint indexN =xn + (y * w);
+        gradientP = src[indexP];
+        gradientN = src[indexN];
     } else if (112.5 <= tangentA && tangentA < 157.5) {
-        gradientP = src_local[get_local_id(0) - 1][get_local_id(1) - 1];
-        gradientN = src_local[get_local_id(0) + 1][get_local_id(1) + 1];
+        uint indexP = xn + (yn * w);
+        uint indexN = xp + (yp * w);
+        gradientP = src[indexP];
+        gradientN = src[indexN];
     }
 
     if (gradientA < gradientN || gradientA < gradientP) {
         gradientA = 0.f;
     }
-
-    gradient_out[index] = gradientA;
+    dest[index] = gradientA;
 }
 kernel void DoubleThreshold(global float* gradient_in,
                                 global float* gradient_out,
@@ -142,57 +143,41 @@ kernel void DoubleThreshold(global float* gradient_in,
 }
 
 
-kernel void Hysteresis(global float* gradient_in,
-                           global float* gradient_out,
+kernel void Hysteresis(global float* src,
+                           global float* dest,
                            global int* iw,
                            global int* ih) {
     int w = *iw;
     int h = *ih;
 
-    uint col = get_local_id(0) + get_group_id(0) * (get_local_size(0) - 3);
-    uint row = get_local_id(1) + get_group_id(1) * (get_local_size(1) - 3);
-    uint col_i = col - 1;
-    uint row_i = row - 1;
+    uint x = get_local_id(0) + get_group_id(0) * get_local_size(0);
+    uint y = get_local_id(1) + get_group_id(1) * get_local_size(1);
 
-    local float src_local[32][32];
-    uint index = col_i + (row_i * w);
-    barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
-
-
-    if (col_i >= 0 && col_i < w && row_i >= 0 && row_i < h) {
-        src_local[get_local_id(0)][get_local_id(1)] = gradient_in[index];
-    } else {
-        src_local[get_local_id(0)][get_local_id(1)] = 0;
-    }
-
-    barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
-
-    if (get_local_id(0) <= 1 - 1 || get_local_id(1) <= 1 - 1 || get_local_id(0) >= 32 - 1
-        || get_local_id(1) >= 32 - 1 || col_i >= w || row_i >= h) {
+    uint index = x + (y * w);
+    if (x >= w || y >= h) {
         return;
     }
-
 
     bool strong = false;
 
-    float gradientA = src_local[get_local_id(0)][get_local_id(1)];
-
-    gradient_out[index] = gradientA;
-    if (gradientA != 125.f) {
-        return;
-    }
+    dest[index] = src[index];
+    if (dest[index] != 125.f) { return; }
     for (int i = -1; i < 2; i++) {
         for (int j = -1; j < 2; j++) {
-            if (src_local[get_local_id(0) + j][get_local_id(1) + j] == 255.f) {
-                strong = true;
-            }
+            int ix = x + i;
+            int jy = y + j;
+            if (ix < 0) { ix = 0; }
+            if (ix >= w) { ix = w - 1; }
+            if (jy < 0) { jy = 0; }
+            if (jy >= h) { jy = h - 1; }
+            uint index2 = ix + (jy * w);
+
+            if (src[index2] == 255.f) { strong = true; }
         }
     }
     if (strong) {
-        gradientA = 255.f;
+         dest[index] = 255.f;
     } else {
-        gradientA = 0.f;
+        dest[index] = 0;
     }
-
-    gradient_out[index] = gradientA;
 }

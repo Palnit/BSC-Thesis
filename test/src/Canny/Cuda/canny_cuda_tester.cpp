@@ -8,7 +8,7 @@
 #include <thread>
 #include <vector>
 #include "Canny/cpu/canny_detector_cpu.h"
-#include "Canny/cuda/cuda_canny_edge_detection.cuh"
+#include "Canny/cuda/canny_edge_detector_cuda.cuh"
 #include "SDL_image.h"
 #include "general/cpu/gauss_blur_cpu.h"
 #include "spiral_indexer.h"
@@ -293,7 +293,7 @@ void CannyCudaTester::Test() {
         for (int x = 0; x < detected->w; ++x) {
             for (int y = 0; y < detected->h; ++y) {
                 RGBA* color = (RGBA*) (((uint8_t*) detected->pixels) + (x * 4)
-                                       + (y * detected->w * 4));
+                    + (y * detected->w * 4));
                 if (color->r != 0 && color->b != 0 && color->g != 0) {
                     SpiralIndexer indexer;
                     bool match = false;
@@ -306,7 +306,7 @@ void CannyCudaTester::Test() {
                         }
 
                         RGBA* color2 = (RGBA*) (((uint8_t*) img->pixels)
-                                                + (nX * 4) + (nY * img->w * 4));
+                            + (nX * 4) + (nY * img->w * 4));
                         if (color2->r == 255) {
                             float dis = DistanceOfPixels(x, y, nX, nY);
                             distances.push_back(dis);

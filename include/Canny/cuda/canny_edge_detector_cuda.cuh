@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <cuda_runtime.h>
 #include "Canny/canny_timings.h"
+#include "Canny/canny_edge_detector.h"
 
 /*!
  * This function uses the sobel operator to calculate the gradient and the
@@ -68,51 +69,12 @@ __global__ void Hysteresis(float* gradient_in,
                            int w,
                            int h);
 
-/*!
- * \class CudaDogDetector
- * \brief A utility class to temporarily store the data related to the algorithm
- *
- * This class simply exist so that the memory allocation on the cuda side
- * is taken care of and so that a class can call the cuda algorithms easily and
- * this keeps the normal cpp and cuda separate
- */
-class CudaCannyDetector {
+class CudaCannyDetector : public CannyEdgeDetector {
 public:
 
-    /*!
-     * Constructor
-     * \param src The source image
-     * \param w The width of the image
-     * \param h The height of the image
-     * \param gaussKernelSize The size of the gaussian filter
-     * \param standardDeviation The standard deviation of the gaussian filter
-     * \param high The high threshold for double thresholding
-     * \param low The low threshold for double thresholding
-     */
-    CudaCannyDetector(uint8_t* src,
-                      int w,
-                      int h,
-                      int gaussKernelSize,
-                      float standardDeviation,
-                      float high,
-                      float low)
-        : m_src(src),
-          m_w(w),
-          m_h(h),
-          m_gaussKernelSize(gaussKernelSize),
-          m_standardDeviation(standardDeviation),
-          m_high(high),
-          m_low(low) {
-        CannyEdgeDetection();
-    }
+    CudaCannyDetector() = default;
 
-    /*!
-     * Function to get the timings of the algorithms
-     * \return The timings that has been calculated
-     */
-    CannyTimings GetTimings() {
-        return m_timings;
-    }
+    std::shared_ptr<uint8_t> Detect() override;
 
 private:
 
@@ -129,22 +91,23 @@ private:
          * Constructor creates the cuda events
          */
         CudaTimers() {
-            cudaEventCreate(&GrayScale_start);
-            cudaEventCreate(&GrayScale_stop);
-            cudaEventCreate(&GaussCreation_start);
-            cudaEventCreate(&GaussCreation_stop);
-            cudaEventCreate(&Blur_start);
-            cudaEventCreate(&Blur_stop);
-            cudaEventCreate(&SobelOperator_start);
-            cudaEventCreate(&SobelOperator_stop);
-            cudaEventCreate(&NonMaximumSuppression_start);
-            cudaEventCreate(&NonMaximumSuppression_stop);
-            cudaEventCreate(&DoubleThreshold_start);
-            cudaEventCreate(&DoubleThreshold_stop);
-            cudaEventCreate(&Hysteresis_start);
-            cudaEventCreate(&Hysteresis_stop);
-            cudaEventCreate(&All_start);
-            cudaEventCreate(&All_stop);
+            cudaEventCreate(&GrayScale_start, cudaEventBlockingSync);
+            cudaEventCreate(&GrayScale_stop, cudaEventBlockingSync);
+            cudaEventCreate(&GaussCreation_start, cudaEventBlockingSync);
+            cudaEventCreate(&GaussCreation_stop, cudaEventBlockingSync);
+            cudaEventCreate(&Blur_start, cudaEventBlockingSync);
+            cudaEventCreate(&Blur_stop, cudaEventBlockingSync);
+            cudaEventCreate(&SobelOperator_start, cudaEventBlockingSync);
+            cudaEventCreate(&SobelOperator_stop, cudaEventBlockingSync);
+            cudaEventCreate(&NonMaximumSuppression_start,
+                            cudaEventBlockingSync);
+            cudaEventCreate(&NonMaximumSuppression_stop, cudaEventBlockingSync);
+            cudaEventCreate(&DoubleThreshold_start, cudaEventBlockingSync);
+            cudaEventCreate(&DoubleThreshold_stop, cudaEventBlockingSync);
+            cudaEventCreate(&Hysteresis_start, cudaEventBlockingSync);
+            cudaEventCreate(&Hysteresis_stop, cudaEventBlockingSync);
+            cudaEventCreate(&All_start, cudaEventBlockingSync);
+            cudaEventCreate(&All_stop, cudaEventBlockingSync);
         }
 
         /*!
@@ -186,20 +149,6 @@ private:
         cudaEvent_t All_stop;
     };
 
-    /*!
-     * The main function that class the cuda algorithms in order for the edge
-     * detection to happen
-     */
-    void CannyEdgeDetection();
-
-    uint8_t* m_src;
-    int m_w;
-    int m_h;
-    int m_gaussKernelSize;
-    float m_standardDeviation;
-    float m_high;
-    float m_low;
     CudaTimers m_timers;
-    CannyTimings m_timings;
 };
 #endif //GPGPU_EDGE_DETECTOR_CUDA_INCLUDE_CUDA_EDGE_DETECTION_CUH_

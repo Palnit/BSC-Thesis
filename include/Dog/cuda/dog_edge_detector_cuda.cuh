@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <cuda_runtime.h>
 #include "Dog/dog_timings.h"
+#include "Dog/dog_edge_detector.h"
 
 /*!
  * This cuda function calculates the difference of 2 gaussian kernels at every
@@ -22,48 +23,13 @@ __global__ void DifferenceOfGaussian(float* kernel1,
                                      float* finalKernel,
                                      int kernelSize);
 
-/*!
- * \class CudaDogDetector
- * \brief A utility class to temporarily store the data related to the algorithm
- *
- * This class simply exist so that the memory allocation on the cuda side
- * is taken care of and so that a class can call the cuda algorithms easily and
- * this keeps the normal cpp and cuda separate
- */
-class CudaDogDetector {
+class CudaDogDetector : public DogEdgeDetector {
 public:
 
-    /*!
-     * Constructor
-     * \param src The source image
-     * \param w The width of the image
-     * \param h The height of the image
-     * \param gaussKernelSize The size of the 2 gaussian kernels
-     * \param standardDeviation1 The standard deviation of the 1. kernel
-     * \param standardDeviation2 The standard deviation of the 2. kernel
-     */
-    CudaDogDetector(uint8_t* src,
-                    int w,
-                    int h,
-                    int gaussKernelSize,
-                    float standardDeviation1,
-                    float standardDeviation2) :
-        m_src(src),
-        m_w(w),
-        m_h(h),
-        m_gaussKernelSize(gaussKernelSize),
-        m_standardDeviation1(standardDeviation1),
-        m_standardDeviation2(standardDeviation2) {
-        DogDetect();
-    }
+    CudaDogDetector() = default;
 
-    /*!
-     * Function to get the timings of the algorithms
-     * \return The timings that has been calculated
-     */
-    DogTimings GetTimings() {
-        return m_timings;
-    }
+    std::shared_ptr<uint8_t> Detect() override;
+
 private:
 
     /*!
@@ -79,18 +45,18 @@ private:
          * Constructor creates the cuda events
          */
         CudaTimers() {
-            cudaEventCreate(&All_start);
-            cudaEventCreate(&All_stop);
-            cudaEventCreate(&GrayScale_start);
-            cudaEventCreate(&GrayScale_stop);
-            cudaEventCreate(&Gauss1Creation_start);
-            cudaEventCreate(&Gauss1Creation_stop);
-            cudaEventCreate(&Gauss2Creation_start);
-            cudaEventCreate(&Gauss2Creation_stop);
-            cudaEventCreate(&DifferenceOfGaussian_start);
-            cudaEventCreate(&DifferenceOfGaussian_stop);
-            cudaEventCreate(&Convolution_start);
-            cudaEventCreate(&Convolution_stop);
+            cudaEventCreate(&All_start, cudaEventBlockingSync);
+            cudaEventCreate(&All_stop, cudaEventBlockingSync);
+            cudaEventCreate(&GrayScale_start, cudaEventBlockingSync);
+            cudaEventCreate(&GrayScale_stop, cudaEventBlockingSync);
+            cudaEventCreate(&Gauss1Creation_start, cudaEventBlockingSync);
+            cudaEventCreate(&Gauss1Creation_stop, cudaEventBlockingSync);
+            cudaEventCreate(&Gauss2Creation_start, cudaEventBlockingSync);
+            cudaEventCreate(&Gauss2Creation_stop, cudaEventBlockingSync);
+            cudaEventCreate(&DifferenceOfGaussian_start, cudaEventBlockingSync);
+            cudaEventCreate(&DifferenceOfGaussian_stop, cudaEventBlockingSync);
+            cudaEventCreate(&Convolution_start, cudaEventBlockingSync);
+            cudaEventCreate(&Convolution_stop, cudaEventBlockingSync);
         }
 
         /*!
@@ -124,20 +90,7 @@ private:
         cudaEvent_t Convolution_stop;
     };
 
-    /*!
-     * The main function that class the cuda algorithms in order for the edge
-     * detection to happen
-     */
-    void DogDetect();
-
-    uint8_t* m_src;
-    int m_w;
-    int m_h;
-    int m_gaussKernelSize;
-    float m_standardDeviation1;
-    float m_standardDeviation2;
     CudaTimers m_timers;
-    DogTimings m_timings;
 };
 
 #endif //GPGPU_EDGE_DETECTOR_INCLUDE_CUDA_DOG_EDGE_DETECTION_CUH_

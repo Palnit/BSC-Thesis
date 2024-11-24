@@ -8,8 +8,8 @@
 #include "general/main_window.h"
 
 #ifdef CUDA_EXISTS
-#include "Canny/cuda/canny_detector_cuda.h"
-#include "Dog/cuda/dog_detector_cuda.h"
+#include "Canny/cuda/canny_edge_detector_cuda.cuh"
+#include "Dog/cuda/dog_edge_detector_cuda.cuh"
 #endif
 
 void ImGuiDisplay::DisplayImGui() {
@@ -56,7 +56,7 @@ void ImGuiDisplay::DisplayImGui() {
                 break;
 #ifdef CUDA_EXISTS
             case 1:
-                detector = new CannyEdgeDetectorCuda(m_base, m_buf);
+                detector = new CannyDetector<CudaCannyDetector>(m_base, m_buf);
                 break;
 #endif
             case 2:
@@ -64,7 +64,7 @@ void ImGuiDisplay::DisplayImGui() {
                 break;
 #ifdef CUDA_EXISTS
             case 3:
-                detector = new DogEdgeDetectorCuda(m_base, m_buf);
+                detector = new DogDetector<CudaDogDetector>(m_base, m_buf);
                 break;
 #endif
             case 4:

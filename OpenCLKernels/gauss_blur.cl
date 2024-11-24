@@ -68,51 +68,45 @@ kernel void GetGaussian(global float* out,global int* inKernelSize,global float*
 }
 
 
-kernel void GaussianFilter(global float* src,
+kernel void GaussianFilter(global float* img,
                            global float* dest,
                            global float* gauss,
                            global int* inKernelSize,global const int* iw, global const int* ih){
+
+
+
+
+    uint x = get_local_id(0) + get_group_id(0) * get_local_size(0);
+    uint y = get_local_id(1) + get_group_id(1) * get_local_size(1);
+
     int kernelSize = *inKernelSize;
 
     int w = *iw;
     int h = *ih;
+    uint index = x + (y * w);
 
-    uint col = get_local_id(0) + get_group_id(0) * (get_local_size(0) - kernelSize);
-    uint row = get_local_id(1) + get_group_id(1) * (get_local_size(1) - kernelSize);
+    if (x >= w || y >= h) {
+        return;
+    }
     int k = (kernelSize - 1) / 2;
-    uint col_i = col - k;
-    uint row_i = row - k;
 
-
-
-    local float src_local[32][32];
-    uint index = col_i + (row_i * w);
-    barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
-
-
-    if (col_i >= 0 && col_i < w && row_i >= 0 && row_i < h) {
-        src_local[get_local_id(0)][get_local_id(1)] = src[index];
-    } else {
-        src_local[get_local_id(0)][get_local_id(1)] = 0;
-    }
-
-    barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
     float sum = 0;
-
-
-    if (get_local_id(0) > k - 1 && get_local_id(1) > k - 1 && get_local_id(0) < 32 - k
-        && get_local_id(1) < 32 - k && col_i < w && row_i < h) {
-
-        for (int i = -k; i <= k; i++) {
-            for (int j = -k; j <= k; j++) {
-                uint gaussIndex = (i + k) + ((j + k) * kernelSize);
-                sum = fma(src_local[get_local_id(0) + i][get_local_id(1) + j],
-                           gauss[gaussIndex],
-                           sum);
-            }
+    for (int i = -k; i <= k; i++) {
+        for (int j = -k; j <= k; j++) {
+            int ix = x + i;
+            int jx = y + j;
+            if (ix < 0) { ix = 0; }
+            if (ix >= w) { ix = w - 1; }
+            if (jx < 0) { jx = 0; }
+            if (jx >= h) { jx = h - 1; }
+            uint index2 = ix + (jx * w);
+            uint index3 = (i + k)
+                                + ((j + k) * kernelSize);
+            sum = fma(img[index2],
+                            gauss[index3],
+                            sum);
         }
-        dest[index] = sum;
     }
-
+    dest[index] = sum;
 
 }

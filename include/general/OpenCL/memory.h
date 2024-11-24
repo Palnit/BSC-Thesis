@@ -266,8 +266,11 @@ public:
     }
 
     void ReadFromDevice() {
-        m_program.m_commandQueue.enqueueReadBuffer(m_buffer, CL_TRUE, 0,
-                                                   sizeof(T) * m_size, m_data);
+        m_program.m_commandQueue.enqueueReadBuffer(m_buffer,
+                                                          CL_TRUE,
+                                                          0,
+                                                          sizeof(T) * m_size,
+                                                          m_data);
     }
     friend class Kernel;
 

@@ -47,42 +47,35 @@ __global__ void GetGaussian(float* kernel, int kernelSize, float sigma) {
 
 }
 
-__global__ void GaussianFilter(float* src,
+__global__ void GaussianFilter(float* img,
                                float* dest,
                                float* gauss,
                                int kernelSize,
                                int w,
                                int h) {
-    int col = blockIdx.x * (blockDim.x - kernelSize) + threadIdx.x;
-    int row = blockIdx.y * (blockDim.y - kernelSize) + threadIdx.y;
+    uint32_t x = blockIdx.x * blockDim.x + threadIdx.x;
+    uint32_t y = blockIdx.y * blockDim.y + threadIdx.y;
+    if (x >= w || y >= h) {
+        return;
+    }
     int k = (kernelSize - 1) / 2;
-    int col_i = col - k;
-    int row_i = row - k;
 
-    __shared__ float src_shared[32][32];
-
-    if (col_i >= 0 && col_i < w && row_i >= 0 && row_i < h) {
-        src_shared[threadIdx.x][threadIdx.y] = *(src + col_i + (row_i * w));
-    } else {
-        src_shared[threadIdx.x][threadIdx.y] = 0;
-    }
-
-    __syncthreads();
     float sum = 0;
-
-    if (threadIdx.x > k - 1 && threadIdx.y > k - 1 && threadIdx.x < 32 - k
-        && threadIdx.y < 32 - k && col_i < w && row_i < h) {
-
-        for (int i = -k; i <= k; i++) {
-            for (int j = -k; j <= k; j++) {
-                sum = fmaf(src_shared[threadIdx.x + i][threadIdx.y + j],
-                           (*(gauss + (i + k) + ((j + k) * kernelSize))),
-                           sum);
-            }
+    for (int i = -k; i <= k; i++) {
+        for (int j = -k; j <= k; j++) {
+            int ix = x + i;
+            int jx = y + j;
+            if (ix < 0) { ix = 0; }
+            if (ix >= w) { ix = w - 1; }
+            if (jx < 0) { jx = 0; }
+            if (jx >= h) { jx = h - 1; }
+            sum = std::fmaf(*(img + ix + (jx * w)),
+                            *(gauss + (i + k)
+                                + ((j + k) * kernelSize)),
+                            sum);
         }
-        *(dest + col_i + (row_i * w)) = sum;
     }
-
+    *(dest + x + (y * w)) = sum;
 }
 
 __global__ void CopyBack(uint8_t* src, float* dest, int w, int h) {

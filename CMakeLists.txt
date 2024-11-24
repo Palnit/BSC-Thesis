@@ -59,27 +59,23 @@ set(SOURCE_FILES
         src/Dog/cpu/dog_edge_detector_cpu.cpp)
 
 set(CUDA_HEADER_FILES
-        include/Canny/cuda/cuda_canny_edge_detection.cuh
+        include/Canny/cuda/canny_edge_detector_cuda.cuh
         include/general/cuda/gauss_blur.cuh
-        include/Dog/cuda/cuda_dog_edge_detection.cuh
+        include/Dog/cuda/dog_edge_detector_cuda.cuh
 )
 
 set(CUDA_CPP_HEADER_FILES
-        include/Canny/cuda/canny_detector_cuda.h
-        include/Dog/cuda/dog_detector_cuda.h
         include/general/cuda/gpu_info.h
 )
 
 set(CUDA_SOURCE_FILES
-        src/Canny/cuda/cuda_canny_edge_detection.cu
+        src/Canny/cuda/canny_edge_detector_cuda.cu
         src/general/cuda/gauss_blur.cu
-        src/Dog/cuda/cuda_dog_edge_detection.cu
+        src/Dog/cuda/dog_edge_detector_cuda.cu
 )
 
 set(CUDA_CPP_SOURCE_FILES
-        src/Canny/cuda/canny_detector_cuda.cpp
         src/general/cuda/gpu_info.cpp
-        src/Dog/cuda/dog_detector_cuda.cpp
 )
 
 set(OPENCL_HEADER_FILES
@@ -166,6 +162,7 @@ if (CUDAToolkit_FOUND AND CUDA_FOUND)
             CUDA::toolkit
             CUDA::cudart
             CUDA::cuda_driver
+
     )
 
     set_target_properties(cuda_comp PROPERTIES

@@ -5,6 +5,8 @@
 #include "general/OpenCL/program.h"
 #include "general/cpu/gauss_blur_cpu.h"
 std::shared_ptr<uint8_t> DogEdgeDetectorOpenCl::Detect() {
+    m_detected =
+        static_cast<uint8_t*>(malloc(sizeof(uint8_t) * m_w * m_h * m_stride));
     ClWrapper::Program programTest(OpenCLInfo::OPENCL_DEVICES[0]);
     programTest.AddSource("OpenCLKernels/gauss_blur.cl");
     programTest.AddSource("OpenCLKernels/dog.cl");
@@ -50,16 +52,6 @@ std::shared_ptr<uint8_t> DogEdgeDetectorOpenCl::Detect() {
     size_t width = m_w + (m_w % 32 != 0 ? (32 - m_w % 32) : 0);
     size_t height = m_h + (m_h % 32 != 0 ? (32 - m_h % 32) : 0);
 
-    size_t missingW =
-        (width / 32) * (m_gaussKernelSize * 2 + (m_gaussKernelSize - 1 / 2));
-    size_t missingH =
-        (height / 32) * (m_gaussKernelSize * 2 + (m_gaussKernelSize - 1 / 2));
-    size_t widthNKernel = (m_w + missingW) % 32 != 0
-        ? m_w + missingW + (32 - (m_w + missingW) % 32)
-        : m_w + missingW;
-    size_t heightNKernel = (m_h + missingH) % 32 != 0
-        ? m_h + missingH + (32 - (m_h + missingH) % 32)
-        : m_h + missingH;
 
     auto t1 = std::chrono::high_resolution_clock::now();
 
@@ -83,12 +75,13 @@ std::shared_ptr<uint8_t> DogEdgeDetectorOpenCl::Detect() {
         finalGauss, kernelSize);
 
     m_timings.Convolution_ms = Detectors::TimerRunner(
-        GaussianFilter, cl::NDRange(widthNKernel, heightNKernel),
+        GaussianFilter, cl::NDRange(width, height),
         cl::NDRange(32, 32), tmp, tmp2, finalGauss, kernelSize, w, h);
 
     CopyBack(cl::NDRange(width, height), cl::NDRange(32, 32), tmp2, image, w,
              h);
     image.ReadFromDevice();
+    std::copy(image.begin(), image.begin() + size, m_detected );
     auto t2 = std::chrono::high_resolution_clock::now();
     std::chrono::duration<float, std::milli> time = t2 - t1;
     m_timings.All_ms = time.count();

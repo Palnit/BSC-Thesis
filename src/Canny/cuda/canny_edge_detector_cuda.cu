@@ -2,30 +2,21 @@
 // Created by Palnit on 2023. 11. 12.
 //
 
-#include "Canny/cuda/cuda_canny_edge_detection.cuh"
+#include "Canny/cuda/canny_edge_detector_cuda.cuh"
 #include <cstdio>
 #include <math_constants.h>
 #include "general/cuda/gauss_blur.cuh"
 
 __global__ void DetectionOperator(float* src,
-                                  float* gradient,
+                                  float* dest,
                                   float* tangent,
                                   int w,
                                   int h) {
-    int col = blockIdx.x * (blockDim.x - 3) + threadIdx.x;
-    int row = blockIdx.y * (blockDim.y - 3) + threadIdx.y;
-    int col_i = col - 1;
-    int row_i = row - 1;
-
-    __shared__ float src_shared[32][32];
-
-    if (col_i >= 0 && col_i < w && row_i >= 0 && row_i < h) {
-        src_shared[threadIdx.x][threadIdx.y] = *(src + col_i + (row_i * w));
-    } else {
-        src_shared[threadIdx.x][threadIdx.y] = 0;
+    uint32_t x = blockIdx.x * blockDim.x + threadIdx.x;
+    uint32_t y = blockIdx.y * blockDim.y + threadIdx.y;
+    if (x >= w || y >= h) {
+        return;
     }
-
-    __syncthreads();
 
     float SobelX[] = {-1, 0, +1, -2, 0, +2, -1, 0, +1};
     float SobelY[] = {+1, +2, +1, 0, 0, 0, -1, -2, -1};
@@ -33,80 +24,80 @@ __global__ void DetectionOperator(float* src,
     float SumX = 0;
     float SumY = 0;
 
-    if (threadIdx.x > 1 - 1 && threadIdx.y > 1 - 1 && threadIdx.x < 32 - 1
-        && threadIdx.y < 32 - 1 && col_i < w && row_i < h) {
-        for (int i = -1; i < 2; i++) {
-            for (int j = -1; j < 2; j++) {
-                SumX = fmaf(src_shared[threadIdx.x + i][threadIdx.y + j],
-                            (*(SobelX + (i + 1) + ((j + 1) * 3))),
-                            SumX);
-                SumY = fmaf(src_shared[threadIdx.x + i][threadIdx.y + j],
-                            (*(SobelY + (i + 1) + ((j + 1) * 3))),
-                            SumY);
-            }
+    for (int i = -1; i < 2; i++) {
+        for (int j = -1; j < 2; j++) {
+            int ix = x + i;
+            int jx = y + j;
+
+            if (ix < 0) { ix = 0; }
+            if (ix >= w) { ix = w - 1; }
+            if (jx < 0) { jx = 0; }
+            if (jx >= h) { jx = h - 1; }
+            SumX = std::fmaf(*(src + ix + (jx * w)),
+                             *(SobelX + (i + 1) + ((j + 1) * 3)), SumX);
+            SumY = std::fmaf(*(src + ix + (jx * w)),
+                             *(SobelY + (i + 1) + ((j + 1) * 3)), SumY);
         }
-        *(gradient + col_i + (row_i * w)) = hypotf(SumX, SumY);
-        float angle = (atan2(SumX, SumY) * 180.f) / CUDART_PI_F;
-        if (angle < 0) {
-            angle += 180;
-        }
-        *(tangent + col_i + (row_i * w)) = angle;
     }
+    *(dest + x + (y * w)) = hypotf(SumX, SumY);
+    float angle = (atan2(SumX, SumY) * 180.f) / CUDART_PI_F;
+    if (angle < 0) {
+        angle += 180;
+    }
+    *(tangent + x + (y * w)) = angle;
 
 }
 
-__global__ void NonMaximumSuppression(float* gradient_in,
-                                      float* gradient_out,
+__global__ void NonMaximumSuppression(float* src,
+                                      float* dest,
                                       float* tangent,
                                       int w,
                                       int h) {
 
-    int col = blockIdx.x * (blockDim.x - 3) + threadIdx.x;
-    int row = blockIdx.y * (blockDim.y - 3) + threadIdx.y;
-    int col_i = col - 1;
-    int row_i = row - 1;
-
-    __shared__ float src_shared[32][32];
-
-    if (col_i >= 0 && col_i < w && row_i >= 0 && row_i < h) {
-        src_shared[threadIdx.x][threadIdx.y] =
-            *(gradient_in + col_i + (row_i * w));
-    } else {
-        src_shared[threadIdx.x][threadIdx.y] = 2000;
-    }
-
-    __syncthreads();
-
-    if (threadIdx.x <= 1 - 1 || threadIdx.y <= 1 - 1 || threadIdx.x >= 32 - 1
-        || threadIdx.y >= 32 - 1 || col_i >= w || row_i >= h) {
+    uint32_t x = blockIdx.x * blockDim.x + threadIdx.x;
+    uint32_t y = blockIdx.y * blockDim.y + threadIdx.y;
+    if (x >= w || y >= h) {
         return;
     }
 
-    float* tangentA = (tangent + col_i + (row_i * w));
-    float gradientA = src_shared[threadIdx.x][threadIdx.y];
+    int yp;
+    int yn;
+    int xp;
+    int xn;
+
+    float* tangentA = (tangent + x + (y * w));
+    float gradientA = *(src + x + (y * w));
     float gradientP = 2000;
     float gradientN = 2000;
 
+    yp = y + 1;
+    if (yp >= h) { yp = h - 1; }
+    xp = x + 1;
+    if (xp >= h) { xp = h - 1; }
+    yn = y - 1;
+    if (yn < 0) { yn = 0; }
+    xn = x - 1;
+    if (xn < 0) { xn = 0; }
+
     if ((0 <= *tangentA && *tangentA < 22.5)
         || (157.5 <= *tangentA && *tangentA <= 180)) {
-        gradientP = src_shared[threadIdx.x][threadIdx.y + 1];
-        gradientN = src_shared[threadIdx.x][threadIdx.y - 1];
+        gradientP = *(src + x + (yp * w));
+        gradientN = *(src + x + (yn * w));
     } else if (22.5 <= *tangentA && *tangentA < 67.5) {
-        gradientP = src_shared[threadIdx.x + 1][threadIdx.y - 1];
-        gradientN = src_shared[threadIdx.x - 1][threadIdx.y + 1];
+        gradientP = *(src + xp + (yn * w));
+        gradientN = *(src + xn + (yp * w));
     } else if (67.5 <= *tangentA && *tangentA < 112.5) {
-        gradientP = src_shared[threadIdx.x + 1][threadIdx.y];
-        gradientN = src_shared[threadIdx.x - 1][threadIdx.y];
+        gradientP = *(src + xp + (y * w));
+        gradientN = *(src + xn + (y * w));
     } else if (112.5 <= *tangentA && *tangentA < 157.5) {
-        gradientP = src_shared[threadIdx.x - 1][threadIdx.y - 1];
-        gradientN = src_shared[threadIdx.x + 1][threadIdx.y + 1];
+        gradientP = *(src + xn + (yn * w));
+        gradientN = *(src + xp + (yp * w));
     }
 
     if (gradientA < gradientN || gradientA < gradientP) {
         gradientA = 0.f;
     }
-
-    *(gradient_out + col_i + (row_i * w)) = gradientA;
+    *(dest + x + (y * w)) = gradientA;
 }
 
 __global__ void DoubleThreshold(float* gradient_in,
@@ -131,56 +122,53 @@ __global__ void DoubleThreshold(float* gradient_in,
     }
 }
 
-__global__ void Hysteresis(float* gradient_in,
-                           float* gradient_out,
+__global__ void Hysteresis(float* src,
+                           float* dest,
                            int w,
                            int h) {
-    int col = blockIdx.x * (blockDim.x - 3) + threadIdx.x;
-    int row = blockIdx.y * (blockDim.y - 3) + threadIdx.y;
-    int col_i = col - 1;
-    int row_i = row - 1;
-
-    __shared__ float src_shared[32][32];
-
-    if (col_i >= 0 && col_i < w && row_i >= 0 && row_i < h) {
-        src_shared[threadIdx.x][threadIdx.y] =
-            *(gradient_in + col_i + (row_i * w));
-    } else {
-        src_shared[threadIdx.x][threadIdx.y] = 0;
-    }
-
-    __syncthreads();
-
-    if (threadIdx.x <= 1 - 1 || threadIdx.y <= 1 - 1 || threadIdx.x >= 32 - 1
-        || threadIdx.y >= 32 - 1 || col_i >= w || row_i >= h) {
+    int x = blockIdx.x * blockDim.x + threadIdx.x;
+    int y = blockIdx.y * blockDim.y + threadIdx.y;
+    if (x >= w || y >= h) {
         return;
     }
 
     bool strong = false;
 
-    float gradientA = src_shared[threadIdx.x][threadIdx.y];
-
-    *(gradient_out + col_i + (row_i * w)) = gradientA;
-    if (gradientA != 125.f) {
-        return;
-    }
+    *(dest + x + (y * w)) = *(src + x + (y * w));
+    if (*(src + x + (y * w)) != 125.f) { return; }
     for (int i = -1; i < 2; i++) {
         for (int j = -1; j < 2; j++) {
-            if (src_shared[threadIdx.x + j][threadIdx.y + j] == 255.f) {
-                strong = true;
-            }
+            int ix = x + i;
+            int jy = y + j;
+            if (ix < 0) { ix = 0; }
+            if (ix >= w) { ix = w - 1; }
+            if (jy < 0) { jy = 0; }
+            if (jy >= h) { jy = h - 1; }
+
+            if (*(src + ix + (jy * w)) == 255.f) { strong = true; }
         }
     }
     if (strong) {
-        gradientA = 255.f;
+        *(dest + x + (y * w)) = 255.f;
     } else {
-        gradientA = 0.f;
+        *(dest + x + (y * w)) = 0;
     }
-
-    *(gradient_out + col_i + (row_i * w)) = gradientA;
 }
 
-void CudaCannyDetector::CannyEdgeDetection() {
+std::shared_ptr<uint8_t> CudaCannyDetector::Detect() {
+    m_detected =
+        static_cast<uint8_t*>(malloc(sizeof(uint8_t) * m_w * m_h * m_stride));
+    uint8_t* d_pixel = nullptr;
+
+    cudaMalloc((void**) &d_pixel,
+               sizeof(uint8_t) * m_w * m_h
+                   * m_stride);
+
+    cudaMemcpy(
+        d_pixel, m_pixels,
+        sizeof(uint8_t) * m_w * m_h * m_stride,
+        cudaMemcpyHostToDevice);
+
     float* dest1;
     float* dest2;
 
@@ -193,16 +181,6 @@ void CudaCannyDetector::CannyEdgeDetection() {
          m_h / threads.y
              + (m_h % threads.y == 0 ? 0 : 1));
 
-    dim3 block2
-        ((m_w / (threads.x - m_gaussKernelSize))
-             + (m_w % (threads.x - m_gaussKernelSize) == 0 ? 0 : 1),
-         (m_h / (threads.y - m_gaussKernelSize))
-             + (m_h % (threads.y - m_gaussKernelSize) == 0 ? 0 : 1));
-    dim3 block3
-        ((m_w / (threads.x - 3)) + (m_w % (threads.x - 3) == 0 ? 0 : 1),
-         (m_h / (threads.y - 3))
-             + (m_h % (threads.y - 3) == 0 ? 0 : 1));
-
     cudaMalloc((void**) &kernel,
                sizeof(float) * m_gaussKernelSize * m_gaussKernelSize);
     cudaMalloc((void**) &dest1, sizeof(float) * m_w * m_h);
@@ -212,7 +190,7 @@ void CudaCannyDetector::CannyEdgeDetection() {
     cudaEventRecord(m_timers.All_start);
 
     cudaEventRecord(m_timers.GrayScale_start);
-    convertToGreyScale<<<block, threads>>>(m_src, dest1, m_w, m_h);
+    convertToGreyScale<<<block, threads>>>(d_pixel, dest1, m_w, m_h);
     cudaEventRecord(m_timers.GrayScale_stop);
     cudaEventSynchronize(m_timers.GrayScale_stop);
 
@@ -222,22 +200,22 @@ void CudaCannyDetector::CannyEdgeDetection() {
     cudaEventSynchronize(m_timers.GaussCreation_stop);
 
     cudaEventRecord(m_timers.Blur_start);
-    GaussianFilter<<<block2, threads>>>(dest1,
-                                        dest2,
-                                        kernel,
-                                        m_gaussKernelSize,
-                                        m_w,
-                                        m_h);
+    GaussianFilter<<<block, threads>>>(dest1,
+                                       dest2,
+                                       kernel,
+                                       m_gaussKernelSize,
+                                       m_w,
+                                       m_h);
     cudaEventRecord(m_timers.Blur_stop);
     cudaEventSynchronize(m_timers.Blur_stop);
 
     cudaEventRecord(m_timers.SobelOperator_start);
-    DetectionOperator<<<block3, threads>>>(dest2, dest1, tangent, m_w, m_h);
+    DetectionOperator<<<block, threads>>>(dest2, dest1, tangent, m_w, m_h);
     cudaEventRecord(m_timers.SobelOperator_stop);
     cudaEventSynchronize(m_timers.SobelOperator_stop);
 
     cudaEventRecord(m_timers.NonMaximumSuppression_start);
-    NonMaximumSuppression<<<block3, threads>>>(dest1, dest2, tangent, m_w, m_h);
+    NonMaximumSuppression<<<block, threads>>>(dest1, dest2, tangent, m_w, m_h);
     cudaEventRecord(m_timers.NonMaximumSuppression_stop);
     cudaEventSynchronize(m_timers.NonMaximumSuppression_stop);
 
@@ -247,11 +225,11 @@ void CudaCannyDetector::CannyEdgeDetection() {
     cudaEventSynchronize(m_timers.DoubleThreshold_stop);
 
     cudaEventRecord(m_timers.Hysteresis_start);
-    Hysteresis<<<block3, threads>>>(dest1, dest2, m_w, m_h);
+    Hysteresis<<<block, threads>>>(dest1, dest2, m_w, m_h);
     cudaEventRecord(m_timers.Hysteresis_stop);
     cudaEventSynchronize(m_timers.Hysteresis_stop);
 
-    CopyBack<<<block, threads>>>(m_src, dest2, m_w, m_h);
+    CopyBack<<<block, threads>>>(d_pixel, dest2, m_w, m_h);
     cudaEventRecord(m_timers.All_stop);
 
     cudaEventSynchronize(m_timers.All_stop);
@@ -288,9 +266,15 @@ void CudaCannyDetector::CannyEdgeDetection() {
                          m_timers.Hysteresis_start,
                          m_timers.Hysteresis_stop);
 
+    cudaMemcpy(m_detected, d_pixel,
+               sizeof(uint8_t) * m_w * m_h * m_stride,
+               cudaMemcpyDeviceToHost);
+
     cudaFree(dest1);
     cudaFree(dest2);
     cudaFree(kernel);
     cudaFree(tangent);
+    cudaFree(d_pixel);
     cudaDeviceSynchronize();
+    return std::shared_ptr<uint8_t>(m_detected);
 }

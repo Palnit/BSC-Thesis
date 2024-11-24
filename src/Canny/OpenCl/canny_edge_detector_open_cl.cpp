@@ -5,7 +5,8 @@
 #include "general/OpenCL/program.h"
 
 std::shared_ptr<uint8_t> CannyEdgeDetectorOpenCl::Detect() {
-
+    m_detected =
+        static_cast<uint8_t*>(malloc(sizeof(uint8_t) * m_w * m_h * m_stride));
     ClWrapper::Program programTest(OpenCLInfo::OPENCL_DEVICES[0]);
 
     programTest.AddSource("OpenCLKernels/gauss_blur.cl");
@@ -50,27 +51,6 @@ std::shared_ptr<uint8_t> CannyEdgeDetectorOpenCl::Detect() {
     size_t width = m_w + (m_w % 32 != 0 ? (32 - m_w % 32) : 0);
     size_t height = m_h + (m_h % 32 != 0 ? (32 - m_h % 32) : 0);
 
-    size_t missingW =
-        (width / 32) * (m_gaussKernelSize * 2 + (m_gaussKernelSize - 1 / 2));
-    size_t missingH =
-        (height / 32) * (m_gaussKernelSize * 2 + (m_gaussKernelSize - 1 / 2));
-    size_t widthNKernel = (m_w + missingW) % 32 != 0
-        ? m_w + missingW + (32 - (m_w + missingW) % 32)
-        : m_w + missingW;
-    size_t heightNKernel = (m_h + missingH) % 32 != 0
-        ? m_h + missingH + (32 - (m_h + missingH) % 32)
-        : m_h + missingH;
-
-    size_t missing3W = (width / 32) * (3 * (2 + 1));
-    size_t missing3H = (height / 32) * (3 * (2 + 1));
-
-    size_t width3Kernel = (m_w + missing3W) % 32 != 0
-        ? m_w + missing3W + (32 - (m_w + missing3W) % 32)
-        : m_w + missing3W;
-    size_t height3Kernel = (m_h + missing3H) % 32 != 0
-        ? m_h + missing3H + (32 - (m_h + missing3H) % 32)
-        : m_h + missing3H;
-
     auto t1 = std::chrono::high_resolution_clock::now();
 
     m_timings.GrayScale_ms = ConvertToGreyScale(
@@ -81,15 +61,15 @@ std::shared_ptr<uint8_t> CannyEdgeDetectorOpenCl::Detect() {
                     cl::NDRange(m_gaussKernelSize, m_gaussKernelSize), gauss,
                     kernelSize, sigma);
     m_timings.Blur_ms =
-        GaussianFilter(cl::NDRange(widthNKernel, heightNKernel),
+        GaussianFilter(cl::NDRange(width, height),
                        cl::NDRange(32, 32), tmp, tmp2, gauss, kernelSize, w, h);
 
     m_timings.SobelOperator_ms =
-        DetectionOperator(cl::NDRange(width3Kernel, height3Kernel),
+        DetectionOperator(cl::NDRange(width, height),
                           cl::NDRange(32, 32), tmp2, tmp, tangent, w, h);
 
     m_timings.NonMaximumSuppression_ms =
-        NonMaximumSuppression(cl::NDRange(width3Kernel, height3Kernel),
+        NonMaximumSuppression(cl::NDRange(width, height),
                               cl::NDRange(32, 32), tmp, tmp2, tangent, w, h);
 
     m_timings.DoubleThreshold_ms =
@@ -97,17 +77,16 @@ std::shared_ptr<uint8_t> CannyEdgeDetectorOpenCl::Detect() {
                         tmp, w, h, high, low);
 
     m_timings.Hysteresis_ms =
-        Hysteresis(cl::NDRange(width3Kernel, height3Kernel),
+        Hysteresis(cl::NDRange(width, height),
                    cl::NDRange(32, 32), tmp, tmp2, w, h);
 
     CopyBack(cl::NDRange(width, height), cl::NDRange(32, 32), tmp2, image, w,
              h);
-
-    CopyBack(cl::NDRange(width, height), cl::NDRange(32, 32), tmp2, image, w,
-             h);
     image.ReadFromDevice();
+
+    std::copy(image.begin(), image.begin() + size, m_detected);
     auto t2 = std::chrono::high_resolution_clock::now();
     std::chrono::duration<float, std::milli> time = t2 - t1;
     m_timings.All_ms = time.count();
-    return std::shared_ptr<uint8_t>(image.begin());
+    return std::shared_ptr<uint8_t>(m_detected);
 }

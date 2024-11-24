@@ -6,7 +6,7 @@
 #include <filesystem>
 #include <random>
 #include <numeric>
-#include "Dog/cuda/cuda_dog_edge_detection.cuh"
+#include "Dog/cuda/dog_edge_detector_cuda.cuh"
 #include "spiral_indexer.h"
 #include "surface_painters.h"
 
