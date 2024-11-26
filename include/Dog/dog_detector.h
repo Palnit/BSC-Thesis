@@ -37,7 +37,7 @@ public:
         if (ImGui::BeginTabItem(m_name.c_str())) {
             if (std::is_same_v<DogEdgeDetectorOpenCl, T>) {
                 if (OpenCLInfo::OPENCL_DEVICES[0]
-                        .getInfo<CL_DEVICE_MAX_WORK_GROUP_SIZE>()
+                    .getInfo<CL_DEVICE_MAX_WORK_GROUP_SIZE>()
                     < 1024) {
                     ImGui::Text("Not Enough Work Group");
                     ImGui::EndTabItem();
@@ -56,7 +56,8 @@ public:
                                    30.0f)) {
                 if (*m_detector.getStandardDeviation1()
                     >= *m_detector.getStandardDeviation2()) {
-                    *m_detector.getStandardDeviation1() -= 1;
+                    *m_detector.getStandardDeviation1() =
+                        *m_detector.getStandardDeviation2() - 0.1f;
                 }
             }
             ImGui::SetItemTooltip(
@@ -66,7 +67,8 @@ public:
                                    30.0f)) {
                 if (*m_detector.getStandardDeviation1()
                     >= *m_detector.getStandardDeviation2()) {
-                    *m_detector.getStandardDeviation2() += 1;
+                    *m_detector.getStandardDeviation2() =
+                        *m_detector.getStandardDeviation1() + 0.1f;
                 }
             }
             if (ImGui::Button("Detect")) { DetectEdge(); }

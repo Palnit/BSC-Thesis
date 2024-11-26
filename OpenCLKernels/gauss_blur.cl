@@ -33,7 +33,14 @@ kernel void CopyBack(global const float* src, global uchar* out, global const in
     }
 
     RGBA* color = (RGBA*) (out + (x * 4) + (y * w * 4));
-    color->r = color->g = color->b = *(src + x + (y * w));
+    float value = round(*(src + x + (y * w)));
+    if (value < 0) {
+        value = 0;
+    }
+    if (value > 255) {
+        value = 255;
+    }
+    color->r = color->g = color->b = value;
 }
 
 global float sumG = 0;

@@ -3,6 +3,7 @@
 //
 #include "general/cpu/gauss_blur_cpu.h"
 #include <cmath>
+#include <iostream>
 #include "general/OpenGL_SDL/generic_structs.h"
 #define M_PI_F 3.141592654F
 
@@ -11,7 +12,14 @@ void DetectorsCPU::CopyBack(uint8_t* dest, float* src, int w, int h) {
     for (int x = 0; x < w; ++x) {
         for (int y = 0; y < h; ++y) {
             color = (RGBA*) (dest + (x * 4) + (y * w * 4));
-            color->r = color->g = color->b = *(src + x + (y * w));
+            float value = roundf(*(src + x + (y * w)));
+            if (value < 0) {
+                value = 0;
+            }
+            if (value > 255) {
+                value = 255;
+            }
+            color->r = color->g = color->b = value;
         }
     }
 }

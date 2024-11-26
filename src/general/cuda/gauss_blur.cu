@@ -17,7 +17,6 @@ __global__ void convertToGreyScale(uint8_t* base, float* dest, int w, int h) {
     *(dest + x + (y * w)) = 0.299 * color->r
         + 0.587 * color->g
         + 0.114 * color->b;
-
 }
 
 __global__ void GetGaussian(float* kernel, int kernelSize, float sigma) {
@@ -85,5 +84,12 @@ __global__ void CopyBack(uint8_t* src, float* dest, int w, int h) {
         return;
     }
     RGBA* color = (RGBA*) (src + (x * 4) + (y * w * 4));
-    color->r = color->g = color->b = *(dest + x + (y * w));
+    float value = roundf(*(dest + x + (y * w)));
+    if (value < 0) {
+        value = 0;
+    }
+    if (value > 255) {
+        value = 255;
+    }
+    color->r = color->g = color->b = value;
 }
