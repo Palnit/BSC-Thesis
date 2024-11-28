@@ -226,6 +226,23 @@ I basically already wrote the algorithm previously. First I use algorithm \ref{a
 
 My plans for the testing is simple. Since both programs is designed in a way to compare the algorithms and libraries I will just use them to test the code. Since the visualization is very rudimentary and the code for it is is even simpler there's no need for it to be tested. There's only one vector of failure is that if someone deletes one of the pre defined pictures, OpenCl kernels or OpenGl shaders. These are assumed to exists at all time since the programs cannot function without it.
 
+Some of these tests will be concluded on two machines to compare how hardware effects performance I will not these when it comes up the specifications of the two machines used can be seen in \autoref{tab:machine}. If a test does not state which machine its concluded than it was done on Machine1.
+
+\begin{table}[H]
+\centering
+\resizebox{\textwidth}{!}{\begin{tabular}{| c | c | c | c | c | c | c |}
+\hline
+Name & Cpu & Gpu & VRam & Ram\\
+\hline\hline
+Machine1 & AMD Ryzen 9 3900x & Nvidia GeForce RTX 3070 & 8Gb & 32Gb \\
+\hline 
+Machine2 & AMD Ryzen 5 7535HS & Nvidia GeForce RTX 4050 Laptop & 6Gb & 16Gb\\
+\hline
+\end{tabular}}
+\caption{Specifications of the machines used in testing}
+\label{tab:machine}
+\end{table}
+
 \subsection{Real picture tester}
 
 First I will show results about the real picture tester since it is more focused on the visual aspects and not hard data like the synthetic tester. My plans for testing this is to compare bot \ac{DoG} and \ac{Canny} algorithms in all three implementations based on how they look and what we can see as differences and how much time it takes them. As I have mentioned in \autoref{chap:real_pic_tester} I only used pre defined pictures the sizes and names of the pictures are shown below in \autoref{tab:pictures}. I will only show timings if they are relevant but how picture and settings size effect timing will be discussed in \autoref{chap:test_synt_test}.
@@ -256,28 +273,28 @@ lines & 100 & 100 \\
 \includegraphics[width=\linewidth]{gem}
 \addtocounter{figure}{-1}
 \captionsetup{labelformat=empty}
-\caption{gem}
+\caption[]{gem}
 \end{minipage}
 \begin{minipage}[t]{.49\textwidth}
 \centering
 \includegraphics[width=\linewidth]{house}
 \addtocounter{figure}{-1}
 \captionsetup{labelformat=empty}
-\caption{house}
+\caption[]{house}
 \end{minipage}
 \begin{minipage}[t]{.49\textwidth}
 \centering
 \includegraphics[width=\linewidth]{monkey}
 \addtocounter{figure}{-1}
 \captionsetup{labelformat=empty}
-\caption{monkey}
+\caption[]{monkey}
 \end{minipage}
 \begin{minipage}[t]{.49\textwidth}
 \centering
 \includegraphics[width=\linewidth, height=.85\linewidth]{lines}
 \addtocounter{figure}{-1}
 \captionsetup{labelformat=empty}
-\caption{lines}
+\caption[]{lines}
 \end{minipage}
 \caption{The pictures base}
 \label{fig:pictures}
@@ -302,7 +319,7 @@ lines & 100 & 100 \\
 \centering
 \resizebox{\textwidth}{!}{\begin{tabular}{| c | c | c | c | c |}
 \hline
-& Name & Gauss kernel size & Standard deviation one & Standard deviation two \\
+& Name & Gauss kernel size & First standard deviation & Second standard deviation two \\
 \hline \hline
 1 & lines & $7$ & $0.1$ & $10.0$ \\
 \hline
@@ -311,7 +328,7 @@ lines & 100 & 100 \\
 \label{tab:real_pic_dog}
 \end{table}
 
-The tests in both algorithms case serve to show the same difference so I will explain both of them tougher. The first test is to show what the algorithm looks like exactly this is show in \autoref{fig:test1}. The slight color difference we can detect in the \ac{DoG} algorithm is because of floating point precisions.
+The tests in both algorithms case serve to show the same difference so I will explain both of them tougher. The first test is to show what the algorithm looks like exactly this is show in \autoref{fig:test1c}. The slight color difference we can detect in the \ac{DoG} algorithm is because of floating point precisions.
 
 
 \begin{figure}[H]
@@ -321,42 +338,42 @@ The tests in both algorithms case serve to show the same difference so I will ex
 \includegraphics[width=\linewidth]{test1/canny_cpu}
 \addtocounter{figure}{-1}
 \captionsetup{labelformat=empty}
-\caption{Cpu Canny}
+\caption[]{Canny Cpu}
 \end{minipage}
 \begin{minipage}[t]{.325\textwidth}
 \centering
 \includegraphics[width=\linewidth]{test1/canny_cuda}
 \addtocounter{figure}{-1}
 \captionsetup{labelformat=empty}
-\caption{Cuda Canny}
+\caption[]{Canny Cuda}
 \end{minipage}
 \begin{minipage}[t]{.325\textwidth}
 \centering
 \includegraphics[width=\linewidth]{test1/canny_open_cl}
 \addtocounter{figure}{-1}
 \captionsetup{labelformat=empty}
-\caption{OpenCl Canny}
+\caption[]{Canny OpenCl}
 \end{minipage}
 \begin{minipage}[t]{.325\textwidth}
 \centering
 \includegraphics[width=\linewidth]{test1/dog_cpu}
 \addtocounter{figure}{-1}
 \captionsetup{labelformat=empty}
-\caption{Cpu DoG}
+\caption[]{DoG Cpu}
 \end{minipage}
 \begin{minipage}[t]{.325\textwidth}
 \centering
 \includegraphics[width=\linewidth]{test1/dog_cuda}
 \addtocounter{figure}{-1}
 \captionsetup{labelformat=empty}
-\caption{Cuda DoG}
+\caption[]{DoG Cuda}
 \end{minipage}
 \begin{minipage}[t]{.325\textwidth}
 \centering
 \includegraphics[width=\linewidth]{test1/dog_open_cl}
 \addtocounter{figure}{-1}
 \captionsetup{labelformat=empty}
-\caption{OpenCl DoG}
+\caption[]{DoG OpenCl}
 \end{minipage}
 \caption{Pictures of the first test for real pictures}
 \label{fig:test1c}
@@ -369,24 +386,24 @@ The tests in both algorithms case serve to show the same difference so I will ex
 \hline
 Name & Whole & Grey & Gauss & Blur & Sobel & Non Max & Threshold & Hysteresis \\
 \hline \hline
-Cpu Canny& $3.517$ & $0.0525$ & $0.0065$ & $1.1203$ & $1.9339$ & $0.1452$ & $0.0548$ & $0.038$ \\
+ Canny Cpu& $3.517$ & $0.0525$ & $0.0065$ & $1.1203$ & $1.9339$ & $0.1452$ & $0.0548$ & $0.038$ \\
 \hline
-Cuda Canny& $1.10387$ & $0.095232$ & $0.042784$ & $0.047104$ & $0.410624$ & $0.04288$ & $0.0408$ & $0.053248$ \\
+ Canny Cuda& $1.10387$ & $0.095232$ & $0.042784$ & $0.047104$ & $0.410624$ & $0.04288$ & $0.0408$ & $0.053248$ \\
 \hline
-OpenCl Canny& $9.7643$ & $0.00816$ & $0.006144$ & $0.005184$ & $0.006144$ & $0.006144$ & $0.006144$ & $0.00416$\\
+ Canny OpenCl& $9.7643$ & $0.00816$ & $0.006144$ & $0.005184$ & $0.006144$ & $0.006144$ & $0.006144$ & $0.00416$\\
 \hline
 \end{tabular}}
 \resizebox{\textwidth}{!}{\begin{tabular}{| c | c | c | c | c | c | c |}
 \hline
-Name & Whole & Grey & Gauss creation 1 & Gauss creation 2 & DoG & Convolution \\
+Name & Whole & Grey & First Gauss creation & Second Gauss creation & DoG & Convolution \\
 \hline \hline
-Cpu DoG& $6.3464$ & $0.0478$ & $0.0056$ & $0.001$ & $0.0003$ & $6.0298$  
+ DoG Cpu& $6.3464$ & $0.0478$ & $0.0056$ & $0.001$ & $0.0003$ & $6.0298$  
  \\
 \hline
-Cuda DoG& $0.83456$ & $0.16384$ & $0.044032$ & $0.014336$ & $0.25904$ & $0.062464$  
+ DoG Cuda& $0.83456$ & $0.16384$ & $0.044032$ & $0.014336$ & $0.25904$ & $0.062464$  
  \\
 \hline
-OpenCl DoG&$4.4794$ & $4.155$ & $0.0661$ & $0.0414$ & $0.0577$ & $0.0599$ 
+ DoG OpenCl&$4.4794$ & $4.155$ & $0.0661$ & $0.0414$ & $0.0577$ & $0.0599$ 
 \\
 \hline
 \end{tabular}}
@@ -394,13 +411,15 @@ OpenCl DoG&$4.4794$ & $4.155$ & $0.0661$ & $0.0414$ & $0.0577$ & $0.0599$
 \label{tab:test1c}
 \end{table}
 
+\label{chap:reason}
 The first thing to note is that the OpenCl timings will look strange. That's because I used the platform specific timing functions in every case and while Cuda offers a timing method with events. OpenCl on the other hand only offers method to time the execution time of a kernel. This results in the unfortunate fact that the timing whole execution is impossible with platform specific method. For this reason I choose to time it with the chorons built in \CC\ library but this includes the time it took for the kernel to start and other synchronization and function call timing.
 
 
 \subsection{Synthetic tester}
 \label{chap:test_synt_test}
 
-As for the synthetic tester I will now focus on what effects the size of the picture and the kernel size has on execution time. And I will show what effect does someone's machine has on the program. Lastly what we can say about the error rate of these algorithms and their accuracy. Just like previously all the tests are listed below in \autoref{tab:sync_pic_canny} and \autoref{tab:sync_pic_dog}.
+As for the synthetic tester I will now focus on what effects the size of the picture and the kernel size has on execution time. And I will show what effect does someone's machine has on the program. Lastly what we can say about the error rate of these algorithms and their accuracy. Just like previously all the tests are listed below in \autoref{tab:sync_pic_canny} and \autoref{tab:sync_pic_dog}. As mentioned in \autoref{chap:reason} the timings for the whole execution is impacted by many factor thus I will only plot the timings for each step of the algorithms.
+
 \begin{table}[H]
 \centering
 \resizebox{\textwidth}{!}{\begin{tabular}{| c | c | c | c | c | c | c |}
@@ -414,50 +433,66 @@ As for the synthetic tester I will now focus on what effects the size of the pic
 \label{tab:sync_pic_canny}
 \end{table}
 
+\begin{table}[H]
+\centering
+\resizebox{\textwidth}{!}{\begin{tabular}{| c | c | c | c | c | c | c |}
+\hline
+&Iterations & Width $\times$ Height & Gauss kernel size & First standard deviation & Second standard deviation & Simple threshold\\
+\hline\hline
+1 & 100& $100\times 100$st & $3$ & $0.1$ & $10.0$ & $5.0$ \\ 
+\hline
+\end{tabular}}
+\caption{Test plans for the  Synthetic tester for \ac{DoG} algorithm}
+\label{tab:sync_pic_dog}
+\end{table}
+
+
 \begin{figure}[H]
 \centering
-\begin{minipage}[t]{.325\textwidth}
+\begin{minipage}[t]{.49\textwidth}
 \centering
-\includegraphics[width=\linewidth]{test1/canny_cpu}
+\includegraphics[width=\linewidth]{stest1/canny_cpu}
 \addtocounter{figure}{-1}
 \captionsetup{labelformat=empty}
-\caption{Cpu Canny}
+\caption[]{Canny Cpu}
 \end{minipage}
-\begin{minipage}[t]{.325\textwidth}
+\begin{minipage}[t]{.49\textwidth}
 \centering
-\includegraphics[width=\linewidth]{test1/dog_open_cl}
+\includegraphics[width=\linewidth]{stest1/dog_cpu}
 \addtocounter{figure}{-1}
 \captionsetup{labelformat=empty}
-\caption{Cuda Canny}
+\caption[]{DoG Cpu}
 \end{minipage}
-\begin{minipage}[t]{.325\textwidth}
+\begin{minipage}[t]{.49\textwidth}
 \centering
-\includegraphics[width=\linewidth]{test1/dog_open_cl}
+\includegraphics[width=\linewidth]{stest1/canny_cuda}
 \addtocounter{figure}{-1}
 \captionsetup{labelformat=empty}
-\caption{OpenCl Canny}
+\caption[]{Canny Cuda}
 \end{minipage}
-\begin{minipage}[t]{.325\textwidth}
+\begin{minipage}[t]{.49\textwidth}
 \centering
-\includegraphics[width=\linewidth]{test1/dog_open_cl}
+\includegraphics[width=\linewidth]{stest1/dog_cuda}
 \addtocounter{figure}{-1}
 \captionsetup{labelformat=empty}
-\caption{Cpu DoG}
+\caption[]{DoG Cuda}
 \end{minipage}
-\begin{minipage}[t]{.325\textwidth}
+\begin{minipage}[t]{.49\textwidth}
 \centering
-\includegraphics[width=\linewidth]{test1/dog_open_cl}
+\includegraphics[width=\linewidth]{stest1/canny_open_cl}
 \addtocounter{figure}{-1}
 \captionsetup{labelformat=empty}
-\caption{Cuda DoG}
+\caption[]{Canny OpenCl}
 \end{minipage}
-\begin{minipage}[t]{.325\textwidth}
+\begin{minipage}[t]{.49\textwidth}
 \centering
-\includegraphics[width=\linewidth]{test1/dog_open_cl}
+\includegraphics[width=\linewidth]{stest1/dog_open_cl}
 \addtocounter{figure}{-1}
 \captionsetup{labelformat=empty}
-\caption{OpenCl DoG}
+\caption[]{DoG OpenCl}
 \end{minipage}
-\caption{Pictures of the first test for real pictures}
-\label{fig:test1d}
+\caption{Graphs for the first synthetic test results}
+\label{fig:test1s}
 \end{figure}
+
+
