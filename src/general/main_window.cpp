@@ -21,8 +21,8 @@ void MainWindow::Render() {
     glViewport(0, 0, m_width, m_height);
     glCullFace(GL_BACK);
     glClear(GL_COLOR_BUFFER_BIT);
-    for (DetectorBase* detector : m_detectors) {
-        detector->Display();
+    if (m_detector != nullptr) {
+        m_detector->Display();
     }
 }
 
@@ -31,21 +31,21 @@ void MainWindow::RenderImGui() {
 
 }
 MainWindow::~MainWindow() {
-    for (DetectorBase* detector : m_detectors) {
-        free(detector);
+    if (m_detector != nullptr) {
+        delete m_detector;
     }
 }
-void MainWindow::AddDetector(DetectorBase* Detector) {
-    m_detectors.push_back(Detector);
-}
-void MainWindow::RemoveDetector(DetectorBase* Detector) {
-    auto position = std::find(m_detectors.begin(), m_detectors.end(), Detector);
-    if (position != m_detectors.end()) {
-        free(*position);
-        m_detectors.erase(position);
+void MainWindow::SetDetector(DetectorBase* Detector) {
+    if (m_detector != nullptr) {
+        delete m_detector;
     }
+    m_detector = Detector;
 }
+
 void MainWindow::Resize() {
     BasicWindow::Resize();
     m_display.Resize(m_width, m_height);
+}
+DetectorBase* MainWindow::GetDetector() {
+    return m_detector;
 }

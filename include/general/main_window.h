@@ -32,17 +32,17 @@ public:
      * is always appended
      */
     MainWindow(const char* title,
-                           int x,
-                           int y,
-                           int w,
-                           int h,
-                           Uint32 flags) : BasicWindow(title,
-                                                       x,
-                                                       y,
-                                                       w,
-                                                       h,
-                                                       flags),
-                                           m_display(m_width, m_height, this) {
+               int x,
+               int y,
+               int w,
+               int h,
+               Uint32 flags) : BasicWindow(title,
+                                           x,
+                                           y,
+                                           w,
+                                           h,
+                                           flags),
+                               m_display(m_width, m_height, this) {
     }
 
     /*!
@@ -72,13 +72,9 @@ public:
      * the detector will use
      * \param Detector The detector
      */
-    void AddDetector(DetectorBase* Detector);
+    void SetDetector(DetectorBase* Detector);
 
-    /*!
-     * Removes a detector from the classes internal storage
-     * \param Detector The detector to be removed
-     */
-    void RemoveDetector(DetectorBase* Detector);
+    DetectorBase* GetDetector();
 
     /*!
      * Implementation of the Resize function of the base class
@@ -86,7 +82,7 @@ public:
     void Resize() override;
 
 private:
-    std::vector<DetectorBase*> m_detectors;
+    DetectorBase* m_detector = nullptr;
     ImGuiDisplay m_display;
 
 };

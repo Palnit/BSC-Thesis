@@ -1,12 +1,13 @@
 #include "testing_window.h"
-#include "Canny/Cpu/canny_cpu_tester.h"
-#include "Canny/OpenCl/canny_open_cl_tester.h"
-#include "Dog/Cpu/dog_cpu_tester.h"
-#include "Dog/OpenCl/dog_open_cl_tester.h"
+
+#include "Dog/dog_tester.h"
+#include "Dog/cpu/dog_edge_detector_cpu.h"
+#include "Canny/canny_tester.h"
+#include "Canny/cpu/canny_edge_detector_cpu.h"
 
 #ifdef CUDA_EXISTS
-#include "Canny/Cuda/canny_cuda_tester.h"
-#include "Dog/Cuda/dog_cuda_tester.h"
+#include "Dog/cuda/dog_edge_detector_cuda.cuh"
+#include "Canny/cuda/canny_edge_detector_cuda.cuh"
 #endif
 
 void TestingWindow::RenderImGui() { m_imGuiWindow.DisplayImGui(); }
@@ -24,16 +25,25 @@ void TestingWindow::Resize() {
     m_imGuiWindow.Resize(m_width, m_height);
 }
 int TestingWindow::Init() {
-    m_testers.push_back(new CannyCpuTester());
+    m_testers
+        .push_back(new CannyTester<CannyEdgeDetectorCPU>("Canny Cpu",
+                                                         "canny_cpu"));
 #ifdef CUDA_EXISTS
-    m_testers.push_back(new CannyCudaTester());
+    m_testers
+        .push_back(new CannyTester<CannyEdgeDetectorCuda>("Canny Cuda",
+                                                          "canny_cuda"));
 #endif
-    m_testers.push_back(new CannyOpenClTester());
-    m_testers.push_back(new DogCpuTester());
+    m_testers.push_back(new CannyTester<CannyEdgeDetectorOpenCl>("Canny OpenCl",
+                                                                 "canny_open_cl"));
+
+    m_testers
+        .push_back(new DogTester<DogEdgeDetectorCPU>("DoG Cpu", "dog_cpu"));
 #ifdef CUDA_EXISTS
-    m_testers.push_back(new DogCudaTester());
+    m_testers
+        .push_back(new DogTester<DogEdgeDetectorCuda>("DoG Cuda", "dog_cuda"));
 #endif
-    m_testers.push_back(new DogOpenClTester);
+    m_testers.push_back(new DogTester<DogEdgeDetectorOpenCl>("DoG OpenCl",
+                                                             "dog_open_cl"));
     return 0;
 }
 TestingWindow::~TestingWindow() {

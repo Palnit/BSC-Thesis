@@ -69,10 +69,10 @@ __global__ void Hysteresis(float* gradient_in,
                            int w,
                            int h);
 
-class CudaCannyDetector : public CannyEdgeDetector {
+class CannyEdgeDetectorCuda : public CannyEdgeDetector {
 public:
 
-    CudaCannyDetector() = default;
+    CannyEdgeDetectorCuda() = default;
 
     std::shared_ptr<uint8_t> Detect() override;
 

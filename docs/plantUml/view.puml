@@ -14,7 +14,6 @@ class MainWindow{
 class ImGuiDisplay{
 + void DisplayImGui();
 - BasicWindow* m_parent
-- std::vector<DetectorBase*> m_detectors
 }
 
 abstract DetectorBase{
@@ -36,5 +35,8 @@ MainWindow "1" *-- "1" ImGuiDisplay
 ImGuiDisplay "1" o-- "1" BasicWindow
 MainWindow "1" *-- "many" DetectorBase
 ImGuiDisplay "1" o-- "many" DetectorBase
-
+note Right of MainWindow::m_detectors
+    The picture detector has
+    a single pointer not an array
+end note
 @enduml

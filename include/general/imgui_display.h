@@ -61,18 +61,14 @@ public:
     }
 private:
     std::vector<DetectorBase*> m_detectors;
-    std::vector<std::string> m_names;
     BasicWindow* m_parent;
     int m_width;
     int m_height;
     int m_add = 0;
-    int m_remove = 0;
     int m_picture = 0;
-    char m_buf[300] = "Name Detector";
     std::vector<std::string>
         m_pictures
-        {"d2.png", "d2_90.jpg", "img.jpg", "test.jpg", "github.PNG", "d4.gif",
-         "base2.png"};
+        {"gem.png", "house.jpg", "monkey.jpg", "lines.png"};
 };
 
 #endif //GPGPU_EDGE_DETECTOR_SRC_GENERAL_IMGUI_DISPLAY_H_

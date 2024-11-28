@@ -16,9 +16,10 @@ public:
      * Implementation of the base constructor
      * \param picture The picture to be taken
      * \param name The name of the detector
+     * \param internal The internal name of the detector
      */
-    DogDetector(SDL_Surface* base, std::string name)
-        : DetectorBase(base, std::move(name)) {}
+    DogDetector(SDL_Surface* base, std::string name, std::string internal)
+        : DetectorBase(base, std::move(name), std::move(internal)) {}
 
     /*!
      * Implementation of the Display function displays the base and
@@ -34,71 +35,80 @@ public:
     }
 
     void DisplayImGui() override {
-        if (ImGui::BeginTabItem(m_name.c_str())) {
-            if (std::is_same_v<DogEdgeDetectorOpenCl, T>) {
-                if (OpenCLInfo::OPENCL_DEVICES[0]
-                    .getInfo<CL_DEVICE_MAX_WORK_GROUP_SIZE>()
-                    < 1024) {
-                    ImGui::Text("Not Enough Work Group");
-                    ImGui::EndTabItem();
-                    return;
-                }
-            }
-            if (ImGui::SliderInt("Gauss Kernel Size",
-                                 m_detector.getGaussKernelSize(), 3, 21)) {
-                if (*m_detector.getGaussKernelSize() % 2 == 0) {
-                    *m_detector.getGaussKernelSize() += 1;
-                }
-            }
-            ImGui::SetItemTooltip("Only Odd Numbers");
-            if (ImGui::SliderFloat("Standard Deviation 1",
-                                   m_detector.getStandardDeviation1(), 0.0001f,
-                                   30.0f)) {
-                if (*m_detector.getStandardDeviation1()
-                    >= *m_detector.getStandardDeviation2()) {
-                    *m_detector.getStandardDeviation1() =
-                        *m_detector.getStandardDeviation2() - 0.1f;
-                }
-            }
-            ImGui::SetItemTooltip(
-                "Standard Deviation 1 should be smaller than 2");
-            if (ImGui::SliderFloat("Standard Deviation 2",
-                                   m_detector.getStandardDeviation2(), 0.0001f,
-                                   30.0f)) {
-                if (*m_detector.getStandardDeviation1()
-                    >= *m_detector.getStandardDeviation2()) {
-                    *m_detector.getStandardDeviation2() =
-                        *m_detector.getStandardDeviation1() + 0.1f;
-                }
-            }
-            if (ImGui::Button("Detect")) { DetectEdge(); }
-            if (!m_timingsReady) {
-                ImGui::EndTabItem();
+        if (std::is_same_v<DogEdgeDetectorOpenCl, T>) {
+            if (OpenCLInfo::OPENCL_DEVICES[0]
+                .getInfo<CL_DEVICE_MAX_WORK_GROUP_SIZE>()
+                < 1024) {
+                ImGui::Text("Not Enough Work Group");
                 return;
             }
-            ImGui::SameLine();
-            if (ImGui::Button("Save")) {
-                std::string save_path = "./" + m_name + ".png";
-                IMG_SavePNG(m_detected, save_path.c_str());
-            }
-
-            ImGui::Separator();
-            ImGui::TextColored(ImVec4(1, 0, 0, 1), "DogTimings:");
-            ImGui::Text("Whole execution:               %f ms",
-                        m_detector.GetTimings().All_ms);
-            ImGui::Separator();
-            ImGui::Text("Gray Scaling:                  %f ms",
-                        m_detector.GetTimings().GrayScale_ms);
-            ImGui::Text("Gauss 1 Creation:              %f ms",
-                        m_detector.GetTimings().Gauss1Creation_ms);
-            ImGui::Text("Gauss 2 Creation:              %f ms",
-                        m_detector.GetTimings().Gauss1Creation_ms);
-            ImGui::Text("Difference of gaussian:        %f ms",
-                        m_detector.GetTimings().DifferenceOfGaussian_ms);
-            ImGui::Text("Convolution:                   %f ms",
-                        m_detector.GetTimings().Convolution_ms);
-            ImGui::EndTabItem();
         }
+        std::string text = "Detector Options for " + m_name;
+        ImGui::SeparatorText(text.c_str());
+
+        if (ImGui::SliderInt("Gauss Kernel Size",
+                             m_detector.getGaussKernelSize(), 3, 21)) {
+            if (*m_detector.getGaussKernelSize() % 2 == 0) {
+                *m_detector.getGaussKernelSize() += 1;
+            }
+        }
+        ImGui::SetItemTooltip("Only Odd Numbers");
+        if (ImGui::SliderFloat("Standard Deviation 1",
+                               m_detector.getStandardDeviation1(), 0.0001f,
+                               30.0f)) {
+            if (*m_detector.getStandardDeviation1()
+                >= *m_detector.getStandardDeviation2()) {
+                *m_detector.getStandardDeviation1() =
+                    *m_detector.getStandardDeviation2() - 0.1f;
+            }
+        }
+        ImGui::SetItemTooltip(
+            "Standard Deviation 1 should be smaller than 2");
+        if (ImGui::SliderFloat("Standard Deviation 2",
+                               m_detector.getStandardDeviation2(), 0.0001f,
+                               30.0f)) {
+            if (*m_detector.getStandardDeviation1()
+                >= *m_detector.getStandardDeviation2()) {
+                *m_detector.getStandardDeviation2() =
+                    *m_detector.getStandardDeviation1() + 0.1f;
+            }
+        }
+        if (ImGui::Button("Detect")) { DetectEdge(); }
+        if (!m_timingsReady) {
+            return;
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Save")) {
+            std::string save_path = "./" + m_internalName + ".png";
+            IMG_SavePNG(m_detected, save_path.c_str());
+            std::string save_path2 = "./" + m_internalName + ".txt";
+            std::ofstream out(save_path2);
+            out << "$" << m_detector.GetTimings().All_ms << "$ & "
+                << "$" << m_detector.GetTimings().GrayScale_ms << "$ & "
+                << "$" << m_detector.GetTimings().Gauss1Creation_ms << "$ & "
+                << "$" << m_detector.GetTimings().Gauss2Creation_ms << "$ & "
+                << "$" << m_detector.GetTimings().DifferenceOfGaussian_ms
+                << "$ & "
+                << "$" << m_detector.GetTimings().Convolution_ms << "$"
+                << std::endl;
+            out.close();
+        }
+
+        ImGui::Separator();
+        ImGui::TextColored(ImVec4(1, 0, 0, 1), "DogTimings:");
+        ImGui::Text("Whole execution:               %f ms",
+                    m_detector.GetTimings().All_ms);
+        ImGui::Separator();
+        ImGui::Text("Gray Scaling:                  %f ms",
+                    m_detector.GetTimings().GrayScale_ms);
+        ImGui::Text("Gauss 1 Creation:              %f ms",
+                    m_detector.GetTimings().Gauss1Creation_ms);
+        ImGui::Text("Gauss 2 Creation:              %f ms",
+                    m_detector.GetTimings().Gauss1Creation_ms);
+        ImGui::Text("Difference of gaussian:        %f ms",
+                    m_detector.GetTimings().DifferenceOfGaussian_ms);
+        ImGui::Text("Convolution:                   %f ms",
+                    m_detector.GetTimings().Convolution_ms);
     }
 
     void DetectEdge() override {
@@ -124,7 +134,6 @@ public:
 
 protected:
     T m_detector;
-    bool m_timingsReady = false;
 };
 
 #endif//BSC_THESIS_DOG_DETECTOR_H

@@ -17,7 +17,7 @@ __global__ void DifferenceOfGaussian(float* kernel1,
 
 }
 
-std::shared_ptr<uint8_t> CudaDogDetector::Detect() {
+std::shared_ptr<uint8_t> DogEdgeDetectorCuda::Detect() {
 
     m_detected =
         static_cast<uint8_t*>(malloc(sizeof(uint8_t) * m_w * m_h * m_stride));

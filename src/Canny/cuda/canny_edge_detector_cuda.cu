@@ -155,7 +155,7 @@ __global__ void Hysteresis(float* src,
     }
 }
 
-std::shared_ptr<uint8_t> CudaCannyDetector::Detect() {
+std::shared_ptr<uint8_t> CannyEdgeDetectorCuda::Detect() {
     m_detected =
         static_cast<uint8_t*>(malloc(sizeof(uint8_t) * m_w * m_h * m_stride));
     uint8_t* d_pixel = nullptr;

@@ -29,21 +29,19 @@ void ImGuiDisplay::DisplayImGui() {
     ImGui::SameLine();
     ImGui::RadioButton("Canny OpenCL GPU", &m_add, 4);
 
-    ImGui::RadioButton("DOG CPU", &m_add, 2);
+    ImGui::RadioButton("DoG CPU", &m_add, 2);
 #ifdef CUDA_EXISTS
     ImGui::SameLine();
-    ImGui::RadioButton("DOG Cuda GPU", &m_add, 3);
+    ImGui::RadioButton("DoG Cuda GPU", &m_add, 3);
 #endif
     ImGui::SameLine();
-    ImGui::RadioButton("DOG OpenCL GPU", &m_add, 5);
-
-    ImGui::InputText("Detector Name", m_buf, 300);
+    ImGui::RadioButton("DoG OpenCL GPU", &m_add, 5);
 
     ImGui::ListBox("Choose picture", &m_picture, VectorOfStringGetter,
                    (void*) &m_pictures, (int) m_pictures.size());
 
+    auto* parent = dynamic_cast<MainWindow*>(m_parent);
     if (ImGui::Button("Add")) {
-        auto* parent = dynamic_cast<MainWindow*>(m_parent);
         std::string file = "pictures/" + m_pictures.at(m_picture);
         SDL_Surface* m_base = FileHandling::LoadImage(file.c_str());
 
@@ -52,49 +50,50 @@ void ImGuiDisplay::DisplayImGui() {
         switch (m_add) {
             case 0:
                 detector =
-                    new CannyDetector<CannyEdgeDetectorCPU>(m_base, m_buf);
+                    new CannyDetector<CannyEdgeDetectorCPU>(m_base, "Canny Cpu",
+                                                            "canny_cpu");
                 break;
 #ifdef CUDA_EXISTS
             case 1:
-                detector = new CannyDetector<CudaCannyDetector>(m_base, m_buf);
+                detector =
+                    new CannyDetector<CannyEdgeDetectorCuda>(m_base,
+                                                             "Canny Cuda",
+                                                             "canny_cuda");
                 break;
 #endif
             case 2:
-                detector = new DogDetector<DogEdgeDetectorCPU>(m_base, m_buf);
+                detector =
+                    new DogDetector<DogEdgeDetectorCPU>(m_base,
+                                                        "DoG Cpu",
+                                                        "dog_cpu");
                 break;
 #ifdef CUDA_EXISTS
             case 3:
-                detector = new DogDetector<CudaDogDetector>(m_base, m_buf);
+                detector =
+                    new DogDetector<DogEdgeDetectorCuda>(m_base,
+                                                         "DoG Cuda",
+                                                         "dog_cuda");
                 break;
 #endif
             case 4:
                 detector =
-                    new CannyDetector<CannyEdgeDetectorOpenCl>(m_base, m_buf);
+                    new CannyDetector<CannyEdgeDetectorOpenCl>(m_base,
+                                                               "Canny OpenCl",
+                                                               "canny_open_cl");
                 break;
             case 5:
                 detector =
-                    new DogDetector<DogEdgeDetectorOpenCl>(m_base, m_buf);
+                    new DogDetector<DogEdgeDetectorOpenCl>(m_base, "DoG OpenCl",
+                                                           "dog_open_cl");
                 break;
         }
 
-        m_detectors.push_back(detector);
-        parent->AddDetector(m_detectors.back());
-        m_names.emplace_back(m_buf);
+        parent->SetDetector(detector);
     }
 
-    ImGui::ListBox("Detectors", &m_remove, VectorOfStringGetter,
-                   (void*) &m_names, (int) m_names.size());
-
-    if (ImGui::Button("Remove")) {
-        auto* parent = dynamic_cast<MainWindow*>(m_parent);
-        parent->RemoveDetector(m_detectors.at(m_remove));
-        m_detectors.erase(m_detectors.begin() + m_remove);
-        m_names.erase(m_names.begin() + m_remove);
-    }
-    ImGui::Separator();
-    if (ImGui::BeginTabBar("Detector Options")) {
-        for (DetectorBase* detector : m_detectors) { detector->DisplayImGui(); }
-        ImGui::EndTabBar();
+    auto detector = parent->GetDetector();
+    if (detector != nullptr) {
+        detector->DisplayImGui();
     }
     ImGui::End();
 }

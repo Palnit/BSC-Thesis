@@ -15,7 +15,7 @@ void TestingImGuiDisplay::DisplayImGui() {
 
     if (ImGui::BeginTabBar("Test Detector")) {
         auto* window = dynamic_cast<TestingWindow*>(m_parent);
-        for (auto tester : window->m_testers) {
+        for (auto tester : window->GetTesters()) {
             tester->MainWindowDisplayImGui();
         }
         ImGui::EndTabBar();
@@ -32,6 +32,6 @@ void TestingImGuiDisplay::DisplayImGui() {
     }
 
     auto* window = dynamic_cast<TestingWindow*>(m_parent);
-    for (auto tester : window->m_testers) { tester->ResultDisplay(); }
+    for (auto tester : window->GetTesters()) { tester->ResultDisplay(); }
     ImGui::End();
 }

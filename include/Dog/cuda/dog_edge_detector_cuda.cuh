@@ -23,10 +23,10 @@ __global__ void DifferenceOfGaussian(float* kernel1,
                                      float* finalKernel,
                                      int kernelSize);
 
-class CudaDogDetector : public DogEdgeDetector {
+class DogEdgeDetectorCuda : public DogEdgeDetector {
 public:
 
-    CudaDogDetector() = default;
+    DogEdgeDetectorCuda() = default;
 
     std::shared_ptr<uint8_t> Detect() override;
 

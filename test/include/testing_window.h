@@ -19,7 +19,9 @@ public:
     void Resize() override;
     int Init() override;
 
-    friend class TestingImGuiDisplay;
+    const std::vector<TesterBase*>& GetTesters() {
+        return m_testers;
+    }
 
 private:
     TestingImGuiDisplay m_imGuiWindow;

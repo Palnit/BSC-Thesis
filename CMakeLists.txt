@@ -98,13 +98,10 @@ set(OPENCL_SOURCE_FILES
         src/Dog/OpenCl/dog_edge_detector_open_cl.cpp)
 
 set(RESOURCES
-        pictures/img.jpg
-        pictures/test.jpg
-        pictures/d2.png
-        pictures/d2_90.jpg
-        pictures/github.PNG
-        pictures/d4.gif
-        pictures/base2.png
+        pictures/lines.png
+        pictures/monkey.jpg
+        pictures/house.jpg
+        pictures/gem.png
 
         shaders/default_fragment.frag
         shaders/default_vertex.vert

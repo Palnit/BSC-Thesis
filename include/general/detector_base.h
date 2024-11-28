@@ -29,7 +29,7 @@ public:
      * \param picture The picture to be taken
      * \param name The name of the detector
      */
-    DetectorBase(SDL_Surface* picture, std::string name);
+    DetectorBase(SDL_Surface* picture, std::string name, std::string internal);
 
     /*!
      * Destructor that frees the SDL_Surfaces of the pictures
@@ -61,6 +61,7 @@ protected:
     SDL_Surface* m_base;
     SDL_Surface* m_detected;
     std::string m_name;
+    std::string m_internalName;
     GLuint tex;
     VertexArrayObject VAO;
     VertexBufferObject<float> VBO;
@@ -68,6 +69,7 @@ protected:
     GLuint vertexShader;
     GLuint fragmentShader;
     ShaderProgram shaderProgram;
+    bool m_timingsReady = false;
 
 };
 
