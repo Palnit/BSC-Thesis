@@ -158,7 +158,6 @@ if (CUDAToolkit_FOUND AND CUDA_FOUND)
     target_link_libraries(cuda_comp PRIVATE
             CUDA::toolkit
             CUDA::cudart
-            CUDA::cuda_driver
 
     )
 
