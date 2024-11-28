@@ -1,5 +1,6 @@
 #include "Dog/cpu/dog_edge_detector_cpu.h"
 #include <chrono>
+#include <stdlib.h>
 #include "general/cpu/gauss_blur_cpu.h"
 
 void DetectorsCPU::DifferenceOfGaussian(float* kernel1,

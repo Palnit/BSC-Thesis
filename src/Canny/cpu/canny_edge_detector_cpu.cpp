@@ -2,6 +2,7 @@
 #include <chrono>
 #include <functional>
 #include <memory>
+#include <cmath>
 #include "general/cpu/gauss_blur_cpu.h"
 #define M_PI_F 3.141592654F
 

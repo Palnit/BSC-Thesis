@@ -269,5 +269,7 @@ foreach (file ${RESOURCES})
     ADD_DEPENDENCIES(${CMAKE_PROJECT_NAME} copy_${n_file}_file)
 endforeach ()
 
+install(TARGETS BSC_Thesis_Tests BSC_Thesis
+)
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/copy.cmake DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
