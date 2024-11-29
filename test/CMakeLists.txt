@@ -24,9 +24,28 @@ set(TEST_RESOURCES
         OpenCLKernels/gauss_blur.cl
 )
 
+if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+    configure_file(
+            ${CMAKE_CURRENT_SOURCE_DIR}/../win/version.rc.in
+            ${CMAKE_CURRENT_BINARY_DIR}/win/version.rc
+            @ONLY)
+
+    enable_language("RC")
+    set(WIN32_RESOURCES_TESTS
+            ${CMAKE_CURRENT_BINARY_DIR}/win/version.rc
+            ${CMAKE_CURRENT_SOURCE_DIR}/../win/BSC_Thesis.exe.manifest
+    )
+    set(CMAKE_INSTALL_LIBDIR ${CMAKE_INSTALL_PREFIX})
+    set(CMAKE_INSTALL_LIBDIR ${CMAKE_INSTALL_PREFIX})
+    set(CMAKE_INSTALL_BINDIR ${CMAKE_INSTALL_PREFIX})
+else ()
+    include(GNUInstallDirs)
+endif ()
+
 add_executable(BSC_Thesis_Tests
         ${TEST_SOURCE_FILES}
         ${TEST_INCLUDES_FILES}
+        ${WIN32_RESOURCES_TESTS}
 )
 
 

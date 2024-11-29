@@ -41,6 +41,7 @@ kernel void CopyBack(global const float* src, global uchar* out, global const in
         value = 255;
     }
     color->r = color->g = color->b = value;
+    color->a = 255;
 }
 
 global float sumG = 0;

@@ -3,12 +3,13 @@
 In this chapter I will explain what was my plan going into the development of my thesis, how I handled problems during development, and I will finally show the test conducted to compare the libraries.
 
 \section{Development plan}
+\label{chap:plan}
 
 For my planing I choose to do my project using the \CC\ programming language. To visualize the data I choose to use \ac{SDL2} with \ac{ImGui} and OpenGL and obviously for \ac{GPGPU} libraries CUDA and OpenCL. The main plan was to implement the two edge detection algorithms. I could have choose to do only the algorithm implementation without a user interface but I decided against it. The reason simply being that goal of the thesis is to show the difference of \ac{GPGPU} libraries speed and be a helpful tool for people to test them out themselves. Thus the plan for the Gui was to have two programs one for synthetic testing environment pure library speed. The result from those test are for pictures that only contain two colors and have simple lines and curves on them. This proves a good way of testing for accuracy and speed but in a real world scenario a real picture could have very different results. Thus the other program's goal is to test real pictures. This program cannot test accuracy and it's main function is to test the speed of the algorithm on a real picture and show the results.
 
 
 \subsection{Architecture and Classes}
-
+\label{chap:dev}
 The plan for the architecture was a simple Model View but its hard to differentiate what's part of a Model and View since there's no library elements or event management system in \CC\ and the aforementioned libraries. The plan was to write an abstraction layer over \ac{SDL2} to use as the base for displaying the \ac{ImGui} and the pictures. Obviously this contains some logic but these logic are mainly related to displaying the images and the Gui.
 
 I will only describe the plans for the picture detector and will only go into the details of the synthetic tester when the plans differed because the basic structure of the two program is the same.
@@ -212,13 +213,33 @@ After I'm done with the Hysteresis I'm done with the algorithm and got my final 
 
 This algorithm is much simpler then the previous while the \ac{Canny} have a lot of steps to get a fine tuned image it requires a per image fine tuning to get the best results. In comparison to that the \ac{DoG} algorithm requires much less fine toning but its less accurate too.
 
-I basically already wrote the algorithm previously. First I use algorithm \ref{alg:grey} to gray scale the image. Than I only need algorithm \ref{alg:gauss} to use this. The only difference is that instead of supplying the algorithm a normal Gaussian kernel I first take the difference of two Gaussian kernels and I supply that kernel to the function. The resulting image will contain the edge lines of our image.
+I basically already wrote the algorithm previously. First I use algorithm \ref{alg:grey} to gray scale the image. Than I only need algorithm \ref{alg:gauss} to use this. The only difference is that instead of supplying the algorithm a normal Gaussian kernel I first take the difference of two Gaussian kernels and I supply that kernel to the function\cite{dog}. The resulting image will contain the edge lines of our image.
 
 \section{Implementation}
 
 \subsection{Architecture and Classes}
 \label{chap:Imp_Arc}
+When I started to start programming I started following the plans and realized that I overestimated the amount of classes I needed as seen in \autoref{fig:class_view_real}. Instead of using a separate class for each algorithm and library I can use only two classes for the view. Since the algorithms are the same the visualization for them is the same and I only need to use different detectors for the different libraries.
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\linewidth]{view_real}
+\caption{Class diagram of view implementation}
+\label{fig:class_view_real}
+\end{figure}
+
+As I show in \autoref{fig:class_view_real} I used \CC\ templates to achieve this. Using this language element I can reuse huge amounts of the code while keeping the View-Model architecture that I defined in \autoref{chap:dev}.
+
+On the other side the model part I needed to make some adjustments as well to accommodate this new design instead of just having all the language and algorithm specific classes there's now a base class. This class abstracts out all the common functionality and defines a virtual function. After this there's two implementation classes of this that further abstracts out things that are common between algorithms. Finally the language specific detectors that only implement the Detect function.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{model_real}
+\caption{Class diagram of model implementation}
+\label{fig:class_model_real}
+\end{figure}
+
+As for the algorithms during implementation there was no need to change anything about them. The only difference between the languages is that on Cuda and OpenCl because they are run on the \ac{GPU} I'm not using double for loops. Instead of for loops in both cases we launch threads grouped into $32 \times 32$ work groups. With this we can maximize the usage of most modern \ac{GPU} which have typically $1024$ threads available. We can use language specific functions to query what number of thread we on whit this we can go over all the pixels in an image much faster then if we used the \ac{CPU}. 
 
 
 \section{Testing}
@@ -227,6 +248,8 @@ I basically already wrote the algorithm previously. First I use algorithm \ref{a
 My plans for the testing is simple. Since both programs is designed in a way to compare the algorithms and libraries I will just use them to test the code. Since the visualization is very rudimentary and the code for it is is even simpler there's no need for it to be tested. There's only one vector of failure is that if someone deletes one of the pre defined pictures, OpenCl kernels or OpenGl shaders. These are assumed to exists at all time since the programs cannot function without it.
 
 Some of these tests will be concluded on two machines to compare how hardware effects performance I will not these when it comes up the specifications of the two machines used can be seen in \autoref{tab:machine}. If a test does not state which machine its concluded than it was done on Machine1.
+
+I expect the Cuda version to be the fastest because Cuda has the advantage of only having to build to Nvidia \ac{GPU}. OpenCl will be the second fastest if not in some cases faster since it too runs on the \ac{GPU}. Lastly the \ac{CPU} version while on smaller pictures be fast on larger pictures will fall of rapidly.
 
 \begin{table}[H]
 \centering
@@ -244,6 +267,7 @@ Machine2 & AMD Ryzen 5 7535HS & Nvidia GeForce RTX 4050 Laptop & 6Gb & 16Gb\\
 \end{table}
 
 \subsection{Real picture tester}
+\label{chap:reason}
 
 First I will show results about the real picture tester since it is more focused on the visual aspects and not hard data like the synthetic tester. My plans for testing this is to compare bot \ac{DoG} and \ac{Canny} algorithms in all three implementations based on how they look and what we can see as differences and how much time it takes them. As I have mentioned in \autoref{chap:real_pic_tester} I only used pre defined pictures the sizes and names of the pictures are shown below in \autoref{tab:pictures}. I will only show timings if they are relevant but how picture and settings size effect timing will be discussed in \autoref{chap:test_synt_test}.
 
@@ -310,6 +334,14 @@ lines & 100 & 100 \\
 \hline\hline
 1 & lines & $3$ & $1.0$ & $20.0$ & $10.0$ \\ 
 \hline
+2 & monkey & $21$ & $1.0$ & $150.0$ & $100.0$ \\ 
+\hline
+3 & house & $3$ & $1.0$ & $150.0$ & $100.0$ \\
+\hline
+4 & house & $3$ & $20.0$ & $150.0$ & $100.0$ \\
+\hline
+5 & house & $11$ & $1.0$ & $150.0$ & $100.0$ \\
+\hline
 \end{tabular}}
 \caption{Test plans for the Real picture tester for \ac{Canny} algorithm}
 \label{tab:real_pic_canny}
@@ -322,6 +354,12 @@ lines & 100 & 100 \\
 & Name & Gauss kernel size & First standard deviation & Second standard deviation two \\
 \hline \hline
 1 & lines & $7$ & $0.1$ & $10.0$ \\
+\hline
+2 & monkey &  $21$ & $0.1$ & $10.0$ \\ 
+\hline
+3 & lines & $7$ & $0.1$ & $10.0$ \\
+\hline
+4 & lines & $15$ & $0.1$ & $20.0$ \\
 \hline
 \end{tabular}}
 \caption{Test plans for the Real picture tester for \ac{DoG} algorithm}
@@ -411,14 +449,242 @@ Name & Whole & Grey & First Gauss creation & Second Gauss creation & DoG & Convo
 \label{tab:test1c}
 \end{table}
 
-\label{chap:reason}
+
 The first thing to note is that the OpenCl timings will look strange. That's because I used the platform specific timing functions in every case and while Cuda offers a timing method with events. OpenCl on the other hand only offers method to time the execution time of a kernel. This results in the unfortunate fact that the timing whole execution is impossible with platform specific method. For this reason I choose to time it with the chorons built in \CC\ library but this includes the time it took for the kernel to start and other synchronization and function call timing.
+
+
+\begin{figure}[H]
+\centering
+
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{test2/canny_cuda}
+\addtocounter{figure}{-1}
+\captionsetup{labelformat=empty}
+\caption[]{Canny Cuda}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{test2/dog_cuda}
+\addtocounter{figure}{-1}
+\captionsetup{labelformat=empty}
+\caption[]{DoG Cuda}
+\end{minipage}
+\caption{Cuda pictures of the second test for real pictures}
+\label{fig:test2c}
+\end{figure}
+
+
+\begin{table}[H]
+\centering
+\resizebox{\textwidth}{!}{\begin{tabular}{| c | c | c | c | c | c | c | c | c |}
+\hline
+Name & Whole & Grey & Gauss & Blur & Sobel & Non Max & Threshold & Hysteresis \\
+\hline \hline
+ Canny Cpu& $102957$ & $356.18$ & $0.0046$ & $91340.7$ & $8827.39$ & $866.149$ & $337.775$ & $348.165$\\
+\hline
+ Canny Cuda&$176.116$ & $8.24525$ & $0.099328$ & $123.817$ & $12.8072$ & $10.753$ & $7.64006$ & $7.6329$ \\
+\hline
+ Canny OpenCl& $188.599$ & $1.97203$ & $0.017408$ & $28.5286$ & $1.10899$ & $1.01171$ & $0.746592$ & $0.7424$\\
+\hline
+\end{tabular}}
+\resizebox{\textwidth}{!}{\begin{tabular}{| c | c | c | c | c | c | c |}
+\hline
+Name & Whole & Grey & First Gauss creation & Second Gauss creation & DoG & Convolution \\
+\hline \hline
+ DoG Cpu& $92683.5$ & $356.98$ & $0.0344$ & $0.0033$ & $0.0032$ & $91244.7$\\
+\hline
+ DoG Cuda& $118.493$ & $8.02509$ & $0.052224$ & $0.053248$ & $0.420864$ & $108.655$\\
+\hline
+ DoG OpenCl&$111.162$ & $35.8827$ & $0.1015$ & $0.0544$ & $0.0623$ & $43.9247$ \\
+\hline
+\end{tabular}}
+\caption{Timings of the second test for real pictures}
+\label{tab:test2c}
+\end{table}
+
+The second tests is the last that we can directly compare the \ac{Canny} and \ac{DoG} implementations. It's main reason is to show the difference between the time it takes for the \ac{CPU} implementations compared to the \ac{GPU} implementations. Due to size of the original picture the details of the detectors I only show the Cuda versions of the \ac{Canny} and \ac{DoG} pictures. From the third tests forward there will be no timings since I will analyse what impacts timings in details in \autoref{chap:test_synt_test}. Moreover I will use the house picture from going forward since that has the most edge lines from all the pictures. This allowed me to show the differences between the settings and what their impact.
+
+\begin{figure}[H]
+\centering
+\begin{minipage}[t]{.325\textwidth}
+\centering
+\includegraphics[width=\linewidth]{test3/canny_cpu}
+\addtocounter{figure}{-1}
+\captionsetup{labelformat=empty}
+\caption[]{Canny Cpu}
+\end{minipage}
+\begin{minipage}[t]{.325\textwidth}
+\centering
+\includegraphics[width=\linewidth]{test3/canny_cuda}
+\addtocounter{figure}{-1}
+\captionsetup{labelformat=empty}
+\caption[]{Canny Cuda}
+\end{minipage}
+\begin{minipage}[t]{.325\textwidth}
+\centering
+\includegraphics[width=\linewidth]{test3/canny_open_cl}
+\addtocounter{figure}{-1}
+\captionsetup{labelformat=empty}
+\caption[]{Canny OpenCl}
+\end{minipage}
+\caption{Pictures of the third test in \ac{Canny} for real pictures}
+\label{fig:test3c}
+\end{figure}
+
+Notice that on the pictures in \autoref{fig:test3c} that the images are very noisy especially the \ac{CPU} picture the differences as I have mentioned before are because of floating point calculation differences between Cuda/OpenCl and normal \CC\ . I will now show two ways as to how to reduce the noise.
+
+\begin{figure}[H]
+\centering
+\begin{minipage}[t]{.325\textwidth}
+\centering
+\includegraphics[width=\linewidth]{test4/canny_cpu}
+\addtocounter{figure}{-1}
+\captionsetup{labelformat=empty}
+\caption[]{Canny Cpu}
+\end{minipage}
+\begin{minipage}[t]{.325\textwidth}
+\centering
+\includegraphics[width=\linewidth]{test4/canny_cuda}
+\addtocounter{figure}{-1}
+\captionsetup{labelformat=empty}
+\caption[]{Canny Cuda}
+\end{minipage}
+\begin{minipage}[t]{.325\textwidth}
+\centering
+\includegraphics[width=\linewidth]{test4/canny_open_cl}
+\addtocounter{figure}{-1}
+\captionsetup{labelformat=empty}
+\caption[]{Canny OpenCl}
+\end{minipage}
+\caption{Pictures of the forth test in \ac{Canny} for real pictures}
+\label{fig:test4c}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}[t]{.325\textwidth}
+\centering
+\includegraphics[width=\linewidth]{test5/canny_cpu}
+\addtocounter{figure}{-1}
+\captionsetup{labelformat=empty}
+\caption[]{Canny Cpu}
+\end{minipage}
+\begin{minipage}[t]{.325\textwidth}
+\centering
+\includegraphics[width=\linewidth]{test5/canny_cuda}
+\addtocounter{figure}{-1}
+\captionsetup{labelformat=empty}
+\caption[]{Canny Cuda}
+\end{minipage}
+\begin{minipage}[t]{.325\textwidth}
+\centering
+\includegraphics[width=\linewidth]{test5/canny_open_cl}
+\addtocounter{figure}{-1}
+\captionsetup{labelformat=empty}
+\caption[]{Canny OpenCl}
+\end{minipage}
+\caption{Pictures of the fifth test in \ac{Canny} for real pictures}
+\label{fig:test5c}
+\end{figure}
+
+As seen in \autoref{fig:test4c} and \autoref{fig:test5c} if we use a bigger blur ether with increasing the kernel size or the standard deviation. this results in less noise on the images and we can get more accurate edge lines I can further define the edges lines if I adjust the last two settings as seen in \autoref{fig:test6c}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}[t]{.325\textwidth}
+\centering
+\includegraphics[width=\linewidth]{test6/canny_cpu}
+\addtocounter{figure}{-1}
+\captionsetup{labelformat=empty}
+\caption[]{Canny Cpu}
+\end{minipage}
+\begin{minipage}[t]{.325\textwidth}
+\centering
+\includegraphics[width=\linewidth]{test6/canny_cuda}
+\addtocounter{figure}{-1}
+\captionsetup{labelformat=empty}
+\caption[]{Canny Cuda}
+\end{minipage}
+\begin{minipage}[t]{.325\textwidth}
+\centering
+\includegraphics[width=\linewidth]{test6/canny_open_cl}
+\addtocounter{figure}{-1}
+\captionsetup{labelformat=empty}
+\caption[]{Canny OpenCl}
+\end{minipage}
+\caption{Pictures of the sixth test in \ac{Canny} for real pictures}
+\label{fig:test6c}
+\end{figure}
+
+As show on \autoref{fig:test6c} if we use the thresholds to reduce the edges we get much clearer image with less noise reduction.
+
+Now to test the \ac{DoG} algorithm I will first show how it looks whit the default settings.
+\begin{figure}[H]
+\centering
+\begin{minipage}[t]{.325\textwidth}
+\centering
+\includegraphics[width=\linewidth]{test3/dog_cpu}
+\addtocounter{figure}{-1}
+\captionsetup{labelformat=empty}
+\caption[]{DoG Cpu}
+\end{minipage}
+\begin{minipage}[t]{.325\textwidth}
+\centering
+\includegraphics[width=\linewidth]{test3/dog_cuda}
+\addtocounter{figure}{-1}
+\captionsetup{labelformat=empty}
+\caption[]{DoG Cuda}
+\end{minipage}
+\begin{minipage}[t]{.325\textwidth}
+\centering
+\includegraphics[width=\linewidth]{test3/dog_open_cl}
+\addtocounter{figure}{-1}
+\captionsetup{labelformat=empty}
+\caption[]{DoG OpenCl}
+\end{minipage}
+\caption{Pictures of the third test in \ac{DoG} for real pictures}
+\label{fig:test3cg}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}[t]{.325\textwidth}
+\centering
+\includegraphics[width=\linewidth]{test4/dog_cpu}
+\addtocounter{figure}{-1}
+\captionsetup{labelformat=empty}
+\caption[]{DoG Cpu}
+\end{minipage}
+\begin{minipage}[t]{.325\textwidth}
+\centering
+\includegraphics[width=\linewidth]{test4/dog_cuda}
+\addtocounter{figure}{-1}
+\captionsetup{labelformat=empty}
+\caption[]{DoG Cuda}
+\end{minipage}
+\begin{minipage}[t]{.325\textwidth}
+\centering
+\includegraphics[width=\linewidth]{test4/dog_open_cl}
+\addtocounter{figure}{-1}
+\captionsetup{labelformat=empty}
+\caption[]{DoG OpenCl}
+\end{minipage}
+\caption{Pictures of the forth test in \ac{DoG} for real pictures}
+\label{fig:test4cg}
+\end{figure}
+
+The \ac{DoG} algorithm is much simpler than the \ac{Canny} as I demonstrate on the pictures in \autoref{fig:test3cg}. The \ac{DoG} algorithm unlike the \ac{Canny} will find much more edge lines but its less controllable we can make edges lines more prominent by increasing the kernel size or the standard deviation difference as seen in \autoref{fig_test4cg} but that's it. Some include a simple threshold for the picture to make the lines more easy to detect but I choose to not add this step. Other way we could have done the algorithm is instead of just taking the differences of the kernels we could take the difference of the blurred images.
+\clearpage
+
 
 
 \subsection{Synthetic tester}
 \label{chap:test_synt_test}
 
-As for the synthetic tester I will now focus on what effects the size of the picture and the kernel size has on execution time. And I will show what effect does someone's machine has on the program. Lastly what we can say about the error rate of these algorithms and their accuracy. Just like previously all the tests are listed below in \autoref{tab:sync_pic_canny} and \autoref{tab:sync_pic_dog}. As mentioned in \autoref{chap:reason} the timings for the whole execution is impacted by many factor thus I will only plot the timings for each step of the algorithms.
+As for the synthetic tester I will now focus on what effects the size of the picture and the kernel size has on execution time. And I will show what effect does someone's machine has on the program. Lastly what we can say about the error rate of these algorithms and their accuracy. Just like previously all the tests are listed below in \autoref{tab:sync_pic_canny} and \autoref{tab:sync_pic_dog}. As mentioned in \autoref{chap:reason} the timings for the whole execution is impacted by many factor thus while it's data is important it needs to be taken with a grain of salt.
+
+To test the correctness of the pictures as mentioned in \autoref{chap:plan} the synthetic tester generates pictures with lines and curves. I do this two different way the error rate and the missing pixels. Because of the nature of the \ac{Canny} algorithm it cannot detect a single edge line while the \ac{DoG} algorithm should always find the exact lines. The error rate is used to calculate how far away the detected edge lines are from the original picture. In the \ac{Canny} algorithm this will not be exact because it cannot find the exact line. While in the \ac{DoG} algorithm it should always be zero. Next the missing pixels is calculated based on if we find a pixel near the original to be exact a maximum of 5 pixels away in the case of the \ac{Canny} algorithm while in the case of the \ac{DoG} the exact pixel is used.
 
 \begin{table}[H]
 \centering
@@ -426,7 +692,7 @@ As for the synthetic tester I will now focus on what effects the size of the pic
 \hline
 &Iterations & Width $\times$ Height & Gauss kernel size & Standard deviation & High Threshold & Low Threshold\\
 \hline\hline
-1 & 100& $100\times 100$st & $3$ & $1.0$ & $20.0$ & $10.0$ \\ 
+1 & 100& $1000\times 1000$ & $21$ & $1.0$ & $20.0$ & $10.0$ \\ 
 \hline
 \end{tabular}}
 \caption{Test plans for the  Synthetic tester for \ac{Canny} algorithm}
@@ -439,7 +705,9 @@ As for the synthetic tester I will now focus on what effects the size of the pic
 \hline
 &Iterations & Width $\times$ Height & Gauss kernel size & First standard deviation & Second standard deviation & Simple threshold\\
 \hline\hline
-1 & 100& $100\times 100$st & $3$ & $0.1$ & $10.0$ & $5.0$ \\ 
+1 & 100& $100\times 100$ & $3$ & $0.1$ & $10.0$ & $5.0$ \\ 
+\hline
+2 & 100& $1000\times 1000$ & $21$ & $0.1$ & $10.0$ & $5.0$ \\ 
 \hline
 \end{tabular}}
 \caption{Test plans for the  Synthetic tester for \ac{DoG} algorithm}
@@ -452,47 +720,31 @@ As for the synthetic tester I will now focus on what effects the size of the pic
 \begin{minipage}[t]{.49\textwidth}
 \centering
 \includegraphics[width=\linewidth]{stest1/canny_cpu}
-\addtocounter{figure}{-1}
-\captionsetup{labelformat=empty}
-\caption[]{Canny Cpu}
 \end{minipage}
 \begin{minipage}[t]{.49\textwidth}
 \centering
 \includegraphics[width=\linewidth]{stest1/dog_cpu}
-\addtocounter{figure}{-1}
-\captionsetup{labelformat=empty}
-\caption[]{DoG Cpu}
 \end{minipage}
 \begin{minipage}[t]{.49\textwidth}
 \centering
 \includegraphics[width=\linewidth]{stest1/canny_cuda}
-\addtocounter{figure}{-1}
-\captionsetup{labelformat=empty}
-\caption[]{Canny Cuda}
 \end{minipage}
 \begin{minipage}[t]{.49\textwidth}
 \centering
 \includegraphics[width=\linewidth]{stest1/dog_cuda}
-\addtocounter{figure}{-1}
-\captionsetup{labelformat=empty}
-\caption[]{DoG Cuda}
 \end{minipage}
 \begin{minipage}[t]{.49\textwidth}
 \centering
 \includegraphics[width=\linewidth]{stest1/canny_open_cl}
-\addtocounter{figure}{-1}
-\captionsetup{labelformat=empty}
-\caption[]{Canny OpenCl}
 \end{minipage}
 \begin{minipage}[t]{.49\textwidth}
 \centering
 \includegraphics[width=\linewidth]{stest1/dog_open_cl}
-\addtocounter{figure}{-1}
-\captionsetup{labelformat=empty}
-\caption[]{DoG OpenCl}
 \end{minipage}
 \caption{Graphs for the first synthetic test results}
 \label{fig:test1s}
 \end{figure}
 
+As seen in \autoref{fig:test1s} some of the time especially in the Cuda version there's a huge spike in the time it took to complete the algorithm. I expect this to be because the Cuda timing function puts events into the queue so its not completely exact timing and if the \ac{GPU}'s scheduler decides to work on an other process and not my program the timing will be strange. While on the OpenCl version the documentation doesn't explain how it captures the timing but I have a guess that its in the same process and not in a queue like on Cuda thus the \ac{GPU}'s scheduler cannot influence the timings this is why it's timings are less spiky. 
 
+Still if we compare the timings its clear that the Cuda and the OpenCl version is very close when it comes to how long it took to finish. While the \ac{CPU} version fall of rapidly. Its interesting to note that while the OpenCl version is faster than the Cuda version if we factor in the whole execution the Cuda version is almost always finishes faster.

@@ -1,0 +1,78 @@
+@startuml
+class CannyEdgeDetector<<CannyTimings>>{
++ uint8_t* virtual Detect()
++ int* getGaussKernelSize()
++ float* getStandardDeviation()
++ float* getHigh()
++ float* getLow()
+- int m_gaussKernelSize
+- float m_standardDeviation
+- float m_high
+- float m_low
+}
+
+class LanguageSpecificCannyEdgeDetector{
++ uint8_t* Detect()
+}
+
+class DogEdgeDetector<<DogTimings>>{
++ uint8_t* virtual Detect()
++ int* getGaussKernelSize()
++ float* getStandardDeviation1()
++ float* getStandardDeviation2()
+- int m_gaussKernelSize
+- float m_standardDeviation1
+- float m_standardDeviation2
+}
+
+class LanguageSpecificDogEdgeDetector{
++ uint8_t* Detect()
+}
+
+class EdgeDetectorBase<<TimingsBase T>>{
++ uint8_t* virtual Detect()
++ void setPixels(uint_8t*)
++ void setW(int)
++ void setH(int)
++ void setStride(int)
++ T GetTimings()
+- uint8_t* m_pixels;
+- uint8_t* m_detected;
+- int m_w;
+- int m_h;
+- int m_stride;
+- T m_timings;
+}
+
+class CannyTimings{
++ float GrayScale_ms
++ float GaussCreation_ms
++ float Blur_ms
++ float SobelOperator_ms
++ float NonMaximumSuppression_ms
++ float DoubleThreshold_ms
++ float Hysteresis_ms
+}
+
+class DogTimings{
++ float GrayScale_ms
++ float Gauss1Creation_ms
++ float Gauss2Creation_ms
++ float DifferenceOfGaussian_ms
++ float Convolution_ms
+}
+
+class TimingsBase{
++ float All_ms
+}
+
+TimingsBase <|-down- DogTimings
+TimingsBase <|-down- CannyTimings
+EdgeDetectorBase <|-down-DogEdgeDetector
+EdgeDetectorBase <|-down-CannyEdgeDetector
+DogEdgeDetector <|-down- LanguageSpecificDogEdgeDetector
+CannyEdgeDetector <|-down- LanguageSpecificCannyEdgeDetector
+DogEdgeDetector *-- DogTimings
+CannyEdgeDetector *-- CannyTimings
+
+@enduml

@@ -1,0 +1,50 @@
+@startuml
+abstract BasicWindow{
++ void virtual Render()
++ void virtual RenderImGui()
+}
+
+class MainWindow{
++ void Render()
++ void RenderImGui()
+- ImGuiDisplay m_display
+- std::vector<DetectorBase*> m_detectors
+}
+
+class ImGuiDisplay{
++ void DisplayImGui();
+- BasicWindow* m_parent
+}
+
+abstract DetectorBase{
++ virtual void DetectEdge()
++ virtual void DisplayImGui()
++ virtual void Display()
+}
+
+class CannyDetector <<CannyEdgeDetector T>>{
++ void DetectEdge()
++ void DisplayImGui()
++ void Display()
+- T m_detector
+}
+
+class DoGDetector <<DoGEdgeDetector T>>{
++ void DetectEdge()
++ void DisplayImGui()
++ void Display()
+- T m_detector
+}
+
+MainWindow <|-up- BasicWindow
+DetectorBase <|-Right- CannyDetector
+DetectorBase <|-Left- DoGDetector
+MainWindow "1" *-Left- "1" ImGuiDisplay
+ImGuiDisplay "1" o-up- "1" BasicWindow
+MainWindow "1" *-- "many" DetectorBase
+ImGuiDisplay "1" o-- "many" DetectorBase
+note Right of MainWindow::m_detectors
+    The picture detector has
+    a single pointer not an array
+end note
+@enduml

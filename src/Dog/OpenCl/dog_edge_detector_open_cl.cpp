@@ -52,36 +52,48 @@ std::shared_ptr<uint8_t> DogEdgeDetectorOpenCl::Detect() {
     size_t width = m_w + (m_w % 32 != 0 ? (32 - m_w % 32) : 0);
     size_t height = m_h + (m_h % 32 != 0 ? (32 - m_h % 32) : 0);
 
-
     auto t1 = std::chrono::high_resolution_clock::now();
 
     m_timings.GrayScale_ms =
-        Detectors::TimerRunner(ConvertToGreyScale, cl::NDRange(width, height),
-                               cl::NDRange(32, 32), image, tmp, w, h);
+        ConvertToGreyScale(cl::NDRange(width, height),
+                           cl::NDRange(32, 32), image, tmp, w, h);
 
-    m_timings.Gauss1Creation_ms = Detectors::TimerRunner(
-        GetGaussian, cl::NDRange(m_gaussKernelSize, m_gaussKernelSize),
-        cl::NDRange(m_gaussKernelSize, m_gaussKernelSize), gauss1, kernelSize,
-        sigma1);
+    m_timings.Gauss1Creation_ms =
+        GetGaussian(cl::NDRange(m_gaussKernelSize, m_gaussKernelSize),
+                    cl::NDRange(m_gaussKernelSize, m_gaussKernelSize),
+                    gauss1,
+                    kernelSize,
+                    sigma1);
 
-    m_timings.Gauss2Creation_ms = Detectors::TimerRunner(
-        GetGaussian, cl::NDRange(m_gaussKernelSize, m_gaussKernelSize),
-        cl::NDRange(m_gaussKernelSize, m_gaussKernelSize), gauss2, kernelSize,
-        sigma2);
+    m_timings.Gauss2Creation_ms =
+        GetGaussian(cl::NDRange(m_gaussKernelSize, m_gaussKernelSize),
+                    cl::NDRange(m_gaussKernelSize, m_gaussKernelSize),
+                    gauss2,
+                    kernelSize,
+                    sigma2);
 
-    m_timings.DifferenceOfGaussian_ms = Detectors::TimerRunner(
-        DifferenceOfGaussian, cl::NDRange(m_gaussKernelSize, m_gaussKernelSize),
-        cl::NDRange(m_gaussKernelSize, m_gaussKernelSize), gauss1, gauss2,
-        finalGauss, kernelSize);
+    m_timings.DifferenceOfGaussian_ms =
+        DifferenceOfGaussian(cl::NDRange(m_gaussKernelSize, m_gaussKernelSize),
+                             cl::NDRange(m_gaussKernelSize, m_gaussKernelSize),
+                             gauss1,
+                             gauss2,
+                             finalGauss,
+                             kernelSize);
 
-    m_timings.Convolution_ms = Detectors::TimerRunner(
-        GaussianFilter, cl::NDRange(width, height),
-        cl::NDRange(32, 32), tmp, tmp2, finalGauss, kernelSize, w, h);
+    m_timings.Convolution_ms =
+        GaussianFilter(cl::NDRange(width, height),
+                       cl::NDRange(32, 32),
+                       tmp,
+                       tmp2,
+                       finalGauss,
+                       kernelSize,
+                       w,
+                       h);
 
     CopyBack(cl::NDRange(width, height), cl::NDRange(32, 32), tmp2, image, w,
              h);
     image.ReadFromDevice();
-    std::copy(image.begin(), image.begin() + size, m_detected );
+    std::copy(image.begin(), image.begin() + size, m_detected);
     auto t2 = std::chrono::high_resolution_clock::now();
     std::chrono::duration<float, std::milli> time = t2 - t1;
     m_timings.All_ms = time.count();

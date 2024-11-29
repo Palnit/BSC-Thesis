@@ -92,4 +92,5 @@ __global__ void CopyBack(uint8_t* src, float* dest, int w, int h) {
         value = 255;
     }
     color->r = color->g = color->b = value;
+    color->a = 255;
 }

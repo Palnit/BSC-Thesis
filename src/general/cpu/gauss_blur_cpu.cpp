@@ -20,6 +20,7 @@ void DetectorsCPU::CopyBack(uint8_t* dest, float* src, int w, int h) {
                 value = 255;
             }
             color->r = color->g = color->b = value;
+            color->a = 255;
         }
     }
 }

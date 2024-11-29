@@ -58,7 +58,7 @@ public:
         if (ImGui::SliderInt("Gauss Kernel Size",
                              m_detector.getGaussKernelSize(), 3, 21)) {
             if (*m_detector.getGaussKernelSize() % 2 == 0) {
-                *m_detector.getGaussKernelSize() += 2;
+                *m_detector.getGaussKernelSize() += 1;
             }
         }
         ImGui::SetItemTooltip("Only Odd Numbers");
