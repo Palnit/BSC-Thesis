@@ -690,7 +690,7 @@ To test the correctness of the pictures as mentioned in \autoref{chap:plan} the 
 \centering
 \resizebox{\textwidth}{!}{\begin{tabular}{| c | c | c | c | c | c | c | c | c |}
 \hline
-&Iterations & Normal lines & Curved Lines & Width $\times$ Height & Gauss kernel size & Standard deviation & High Threshold & Low Threshold\\
+&Iterations  & W $\times$ H & Normal& Curved & kernel size & Standard deviation & High Threshold & Low Threshold\\
 \hline\hline
 1 & 100& $1000\times 1000$ & $5$ & $5$ & $3$ & $1.0$ & $20.0$ & $10.0$ \\ 
 \hline
@@ -699,10 +699,6 @@ To test the correctness of the pictures as mentioned in \autoref{chap:plan} the 
 3 & 100& $100\times 100$ & $20$ & $5$ & $3$ & $1.0$ & $20.0$ & $10.0$ \\ 
 \hline
 4 & 100& $100\times 100$ & $5$ & $20$ & $3$ & $1.0$ & $20.0$ & $10.0$ \\ 
-\hline
-5 & 100& $1000\times 1000$ & $20$ & $5$ & $3$ & $1.0$ & $20.0$ & $10.0$ \\ 
-\hline
-6 & 100& $1000\times 1000$ & $5$ & $20$ & $3$ & $1.0$ & $20.0$ & $10.0$ \\ 
 \hline
 \end{tabular}}
 \caption{Test plans for the  Synthetic tester for \ac{Canny} algorithm}
@@ -713,7 +709,7 @@ To test the correctness of the pictures as mentioned in \autoref{chap:plan} the 
 \centering
 \resizebox{\textwidth}{!}{\begin{tabular}{| c | c | c | c | c | c | c | c | c |}
 \hline
-&Iterations & Width $\times$ Height & Normal lines & Curved Lines & Gauss kernel size & First standard deviation & Second standard deviation & Simple threshold\\
+&Iterations & W $\times$ H & Normal& Curved &  kernel size & First standard deviation & Second standard deviation & Simple threshold\\
 \hline\hline
 1 & 100& $100\times 100$ & $5$ & $5$ & $3$ & $0.1$ & $10.0$ & $5.0$ \\ 
 \hline
@@ -722,10 +718,6 @@ To test the correctness of the pictures as mentioned in \autoref{chap:plan} the 
 3 & 100& $100\times 100$ & $20$ & $5$ & $3$ & $0.1$ & $10.0$ & $5.0$ \\ 
 \hline
 4 & 100& $100\times 100$ & $5$ & $20$ & $3$ & $0.1$ & $10.0$ & $5.0$ \\ 
-\hline
-5 & 100& $1000\times 1000$ & $20$ & $5$ & $3$ & $0.1$ & $10.0$ & $5.0$ \\ 
-\hline
-6 & 100& $1000\times 1000$ & $5$ & $20$ & $3$ & $0.1$ & $10.0$ & $5.0$ \\ 
 \hline
 \end{tabular}}
 \caption{Test plans for the  Synthetic tester for \ac{DoG} algorithm}
