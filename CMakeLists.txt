@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.22)
 
 include(FetchContent)
 FetchContent_Declare(vcpkg
@@ -16,7 +16,7 @@ project(BSC_Thesis
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CUDA_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(CUDA_VERSION_BUILD ON)
+set(CUDA_VERSION_BUILD OFF  )
 
 set(HEADER_FILES
         include/general/OpenGL_SDL/basic_window.h
