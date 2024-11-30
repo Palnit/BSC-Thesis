@@ -1,0 +1,5 @@
+\chapter{Summary and future possibilities}
+
+In conclusion looking at the tests its kind of unclear which is faster OpenCl or Cuda but it's clear that if one were to do anything with image processing they should go for one of these two.Even fairly strong video cards like the one in machine one can struggle a little if it's a huge picture or we do a lot of convolution. This is why it's really important to use the best and fastest tools available to us. My programs offered good ways to compare both the output and the speed of these algorithms and libraries they are not perfect. 
+
+Sadly because of time constraints I had no time to implement more algorithm or test data. In the future implement testing to see how the transfer speed or how well are the \ac{GPU}s resources are used up could be beneficial. I could even extend the program so that the algorithms itself are more optimized. For example both algorithms use some version of the Gaussian kernel this kernel is a separable kernel. This means I could take the kernel matrix and divide it to two vectors thus reducing the halo needed for the convolution.

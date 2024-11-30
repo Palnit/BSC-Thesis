@@ -2,7 +2,7 @@
 // Created by Palnit on 2024. 01. 21.
 //
 
-#include "include/general/cuda/gauss_blur.cuh"
+#include "general/cuda/gauss_blur.cuh"
 #include <math_constants.h>
 #include <cstdio>
 
@@ -17,7 +17,6 @@ __global__ void convertToGreyScale(uint8_t* base, float* dest, int w, int h) {
     *(dest + x + (y * w)) = 0.299 * color->r
         + 0.587 * color->g
         + 0.114 * color->b;
-
 }
 
 __global__ void GetGaussian(float* kernel, int kernelSize, float sigma) {
@@ -47,42 +46,35 @@ __global__ void GetGaussian(float* kernel, int kernelSize, float sigma) {
 
 }
 
-__global__ void GaussianFilter(float* src,
+__global__ void GaussianFilter(float* img,
                                float* dest,
                                float* gauss,
                                int kernelSize,
                                int w,
                                int h) {
-    int col = blockIdx.x * (blockDim.x - kernelSize + 1) + threadIdx.x;
-    int row = blockIdx.y * (blockDim.y - kernelSize + 1) + threadIdx.y;
+    uint32_t x = blockIdx.x * blockDim.x + threadIdx.x;
+    uint32_t y = blockIdx.y * blockDim.y + threadIdx.y;
+    if (x >= w || y >= h) {
+        return;
+    }
     int k = (kernelSize - 1) / 2;
-    int col_i = col - k;
-    int row_i = row - k;
 
-    __shared__ float src_shared[32][32];
-
-    if (col_i >= 0 && col_i < w && row_i >= 0 && row_i < h) {
-        src_shared[threadIdx.x][threadIdx.y] = *(src + col_i + (row_i * w));
-    } else {
-        src_shared[threadIdx.x][threadIdx.y] = 0;
-    }
-
-    __syncthreads();
     float sum = 0;
-
-    if (threadIdx.x > k - 1 && threadIdx.y > k - 1 && threadIdx.x < 32 - k
-        && threadIdx.y < 32 - k && col_i < w && row_i < h) {
-
-        for (int i = -k; i <= k; i++) {
-            for (int j = -k; j <= k; j++) {
-                sum = fmaf(src_shared[threadIdx.x + i][threadIdx.y + j],
-                           (*(gauss + (i + k) + ((j + k) * kernelSize))),
-                           sum);
-            }
+    for (int i = -k; i <= k; i++) {
+        for (int j = -k; j <= k; j++) {
+            int ix = x + i;
+            int jx = y + j;
+            if (ix < 0) { ix = 0; }
+            if (ix >= w) { ix = w - 1; }
+            if (jx < 0) { jx = 0; }
+            if (jx >= h) { jx = h - 1; }
+            sum = std::fmaf(*(img + ix + (jx * w)),
+                            *(gauss + (i + k)
+                                + ((j + k) * kernelSize)),
+                            sum);
         }
-        *(dest + col_i + (row_i * w)) = sum;
     }
-
+    *(dest + x + (y * w)) = sum;
 }
 
 __global__ void CopyBack(uint8_t* src, float* dest, int w, int h) {
@@ -92,5 +84,13 @@ __global__ void CopyBack(uint8_t* src, float* dest, int w, int h) {
         return;
     }
     RGBA* color = (RGBA*) (src + (x * 4) + (y * w * 4));
-    color->r = color->g = color->b = *(dest + x + (y * w));
+    float value = roundf(*(dest + x + (y * w)));
+    if (value < 0) {
+        value = 0;
+    }
+    if (value > 255) {
+        value = 255;
+    }
+    color->r = color->g = color->b = value;
+    color->a = 255;
 }

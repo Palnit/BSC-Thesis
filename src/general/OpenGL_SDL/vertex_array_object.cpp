@@ -2,11 +2,14 @@
 // Created by Palnit on 2024. 01. 17.
 //
 
-#include "include/general/OpenGL_SDL/vertex_array_object.h"
+#include "general/OpenGL_SDL/vertex_array_object.h"
 
-void VertexArrayObject::Bind() const {
+void VertexArrayObject::Bind() {
+    if (!m_VAO) {
+        glGenVertexArrays(1, &m_VAO);
+    }
     glBindVertexArray(m_VAO);
 }
-void VertexArrayObject::UnBind() const {
+void VertexArrayObject::UnBind() {
     glBindVertexArray(0);
 }

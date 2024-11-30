@@ -5,10 +5,9 @@
 #ifndef GPGPU_EDGE_DETECTOR_INCLUDE_MAIN_WINDOW_H_
 #define GPGPU_EDGE_DETECTOR_INCLUDE_MAIN_WINDOW_H_
 
-#include "include/general/OpenGL_SDL/basic_window.h"
-#include "include/general/detector_base.h"
-#include "include/Canny/cuda/canny_edge_detector_cuda.h"
-#include "include/general/OpenGL_SDL/file_handling.h"
+#include "general/OpenGL_SDL/basic_window.h"
+#include "general/detector_base.h"
+#include "general/OpenGL_SDL/file_handling.h"
 #include "imgui_display.h"
 
 /*!
@@ -33,17 +32,17 @@ public:
      * is always appended
      */
     MainWindow(const char* title,
-                           int x,
-                           int y,
-                           int w,
-                           int h,
-                           Uint32 flags) : BasicWindow(title,
-                                                       x,
-                                                       y,
-                                                       w,
-                                                       h,
-                                                       flags),
-                                           m_display(m_width, m_height, this) {
+               int x,
+               int y,
+               int w,
+               int h,
+               Uint32 flags) : BasicWindow(title,
+                                           x,
+                                           y,
+                                           w,
+                                           h,
+                                           flags),
+                               m_display(m_width, m_height, this) {
     }
 
     /*!
@@ -73,13 +72,9 @@ public:
      * the detector will use
      * \param Detector The detector
      */
-    void AddDetector(DetectorBase* Detector);
+    void SetDetector(DetectorBase* Detector);
 
-    /*!
-     * Removes a detector from the classes internal storage
-     * \param Detector The detector to be removed
-     */
-    void RemoveDetector(DetectorBase* Detector);
+    DetectorBase* GetDetector();
 
     /*!
      * Implementation of the Resize function of the base class
@@ -87,8 +82,7 @@ public:
     void Resize() override;
 
 private:
-    std::vector<DetectorBase*> m_detectors;
-    CannyEdgeDetectorCuda* m_det;
+    DetectorBase* m_detector = nullptr;
     ImGuiDisplay m_display;
 
 };

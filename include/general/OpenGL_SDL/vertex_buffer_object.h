@@ -24,17 +24,14 @@ public:
     /*!
      * Default constructor generates the buffer
      */
-    VertexBufferObject() : m_usage(GL_STATIC_DRAW) {
-        glGenBuffers(1, &m_VBO);
+    VertexBufferObject() : m_VBO(0), m_usage(GL_STATIC_DRAW) {
     }
 
     /*!
      * Constructor generates the buffer and stores the usage type
      * \param usage The usage type
      */
-    VertexBufferObject(GLenum usage) : m_usage(usage) {
-        glGenBuffers(1, &m_VBO);
-    };
+    VertexBufferObject(GLenum usage) : m_VBO(0), m_usage(usage){};
 
     /*!
      * Constructor that takes an array as it's initial data and a usage type
@@ -43,9 +40,8 @@ public:
      * \param usage The usage type
      */
     template<auto size>
-    VertexBufferObject(T (& elements)[size],
-                       GLenum usage) : m_usage(usage) {
-        glGenBuffers(1, &m_VBO);
+    VertexBufferObject(T (&elements)[size],
+                       GLenum usage) : m_VBO(0), m_usage(usage) {
         m_elements.insert(m_elements.end(),
                           elements,
                           elements + size);
@@ -58,8 +54,7 @@ public:
      * \param usage The usage type
      */
     VertexBufferObject(std::initializer_list<T> list,
-                       GLenum usage) : m_usage(usage) {
-        glGenBuffers(1, &m_VBO);
+                       GLenum usage) : m_VBO(0), m_usage(usage) {
         m_elements.insert(m_elements.end(),
                           list.begin(),
                           list.end());
@@ -71,7 +66,9 @@ public:
     ~VertexBufferObject() {
         m_elements.clear();
         m_desc.clear();
-        glDeleteBuffers(1, &m_VBO);
+        if (m_VBO) {
+            glDeleteBuffers(1, &m_VBO);
+        }
     }
 
     /*!
@@ -97,7 +94,7 @@ public:
      * \param elements The array of elements
      */
     template<auto size>
-    void AddElement(T (& elements)[size]) {
+    void AddElement(T (&elements)[size]) {
         m_elements.insert(m_elements.end(),
                           elements,
                           elements + size);
@@ -133,6 +130,9 @@ public:
      * Bind the VBO
      */
     void Bind() {
+        if (!m_VBO) {
+            glGenBuffers(1, &m_VBO);
+        }
         glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
         if (!m_set) {
             glBufferData(GL_ARRAY_BUFFER,
@@ -141,7 +141,6 @@ public:
                          m_usage);
             m_set = true;
         }
-
     }
 
     /*!
@@ -167,10 +166,7 @@ public:
          * \param normalized Should it be normalized or not
          * \param offset The offset of the data
          */
-        AttributeDescriptor(GLint size, GLsizei stride,
-                            GLenum type,
-                            GLboolean normalized,
-                            const GLvoid* offset)
+        AttributeDescriptor(GLint size, GLsizei stride, GLenum type, GLboolean normalized, const GLvoid* offset)
             : size(size),
               stride(stride),
               type(type),
@@ -194,7 +190,6 @@ public:
               type(type),
               normalized(GL_FALSE),
               offset(offset) {
-
         }
 
         /*!
@@ -224,6 +219,7 @@ public:
     const std::vector<AttributeDescriptor>& GetDescriptors() {
         return m_desc;
     }
+
 private:
     std::vector<T> m_elements;
     GLuint m_VBO;

@@ -2,14 +2,14 @@
 // Created by Palnit on 2023. 11. 11.
 //
 
-#include "include/general/cuda/gpu_info.h"
+#include "general/cuda/gpu_info.h"
 
 #include <cuda_runtime.h>
 #include <cuda.h>
 
 #include <cstdio>
 
-void GetGpuInfo() {
+void GetGpuInfoCuda() {
     int deviceCount = 0;
     cudaError_t error_id = cudaGetDeviceCount(&deviceCount);
 
@@ -22,7 +22,6 @@ void GetGpuInfo() {
     }
     if (deviceCount == 0) {
         fprintf(stderr, "There are no CUDA capabile devices.\n");
-        exit(EXIT_SUCCESS);
     } else {
         fprintf(stderr,
                 "Found %d CUDA Capable device(s) supporting CUDA\n",

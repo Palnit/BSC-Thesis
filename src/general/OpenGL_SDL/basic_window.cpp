@@ -2,9 +2,9 @@
 // Created by Palnit on 2023. 11. 11.
 //
 
-#include "include/general/OpenGL_SDL/basic_window.h"
-#include "include/general/OpenGL_SDL/SDL_GLDebugMessageCallback.h"
-#include "include/general/OpenGL_SDL/generic_structs.h"
+#include "general/OpenGL_SDL/basic_window.h"
+#include "general/OpenGL_SDL/SDL_GLDebugMessageCallback.h"
+#include "general/OpenGL_SDL/generic_structs.h"
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
@@ -12,8 +12,8 @@
 #include <GL/glew.h>
 
 #include <imgui.h>
-#include <imgui_impl_sdl2.h>
 #include <imgui_impl_opengl3.h>
+#include <imgui_impl_sdl2.h>
 #include <implot.h>
 
 BasicWindow::BasicWindow(const char* title,
@@ -30,7 +30,6 @@ BasicWindow::BasicWindow(const char* title,
       m_flags(flags),
       m_running(true) {
     SDL_LogSetPriority(SDL_LOG_CATEGORY_ERROR, SDL_LOG_PRIORITY_ERROR);
-
 }
 int BasicWindow::run() {
     if (InitWindow()) {

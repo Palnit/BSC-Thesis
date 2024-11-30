@@ -2,11 +2,15 @@
 // Created by Palnit on 2024. 01. 14.
 //
 
-#include "include/general/detector_base.h"
-#include "include/general/OpenGL_SDL/file_handling.h"
+#include "general/detector_base.h"
+#include "general/OpenGL_SDL/file_handling.h"
 
-DetectorBase::DetectorBase(SDL_Surface* picture, std::string name)
-    : m_base(picture), m_name(std::move(name)) {
+DetectorBase::DetectorBase(SDL_Surface* picture,
+                           std::string name,
+                           std::string internal)
+    : m_base(picture),
+      m_name(std::move(name)),
+      m_internalName(std::move(internal)) {
     m_detected = SDL_CreateRGBSurface(0,
                                       m_base->w,
                                       m_base->h,

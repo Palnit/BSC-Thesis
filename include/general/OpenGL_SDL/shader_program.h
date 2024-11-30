@@ -5,8 +5,8 @@
 #ifndef GPGPU_EDGE_DETECTOR_INCLUDE_GENERAL_OPENGL_SDL_SHADER_PROGRAM_H_
 #define GPGPU_EDGE_DETECTOR_INCLUDE_GENERAL_OPENGL_SDL_SHADER_PROGRAM_H_
 
-#include "GL/glew.h"
 #include <vector>
+#include "GL/glew.h"
 
 /*!
  * \class ShaderProgram
@@ -47,6 +47,9 @@ public:
      * UnBinds the shader program
      */
     void UnBind();
+
+    void CreateProgram();
+
 private:
     GLuint m_program;
     std::vector<GLuint> m_shaders;

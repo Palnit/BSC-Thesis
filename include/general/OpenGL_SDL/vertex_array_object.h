@@ -6,8 +6,8 @@
 #define GPGPU_EDGE_DETECTOR_SRC_GENERAL_OPENGL_SDL_VERTEXARRAYOBJECT_H_
 
 #include "GL/glew.h"
-#include "vertex_buffer_object.h"
 #include "element_buffer_object.h"
+#include "vertex_buffer_object.h"
 
 /*!
  * \class VertexArrayObject
@@ -18,23 +18,27 @@
  */
 class VertexArrayObject {
 public:
-
     /*!
      * Constructor that generates the vertex arrays
      */
-    VertexArrayObject() : m_count(0) {
-        glGenVertexArrays(1, &m_VAO);
+    VertexArrayObject() : m_VAO(0), m_count(0) {
+    }
+
+    ~VertexArrayObject() {
+        if (m_VAO) {
+            glDeleteBuffers(1, &m_VAO);
+        }
     }
 
     /*!
      * Binds the vertex array
      */
-    void Bind() const;
+    void Bind();
 
     /*!
      * UnBinds the vertex array
      */
-    void UnBind() const;
+    void UnBind();
 
     /*!
      * Function to add a vertex buffer to the array and gets the attribute pointers
@@ -42,7 +46,7 @@ public:
      * \param VBO The Vbo to be added
      */
     template<typename T>
-    void AddVertexBuffer(VertexBufferObject<T> VBO) {
+    void AddVertexBuffer(VertexBufferObject<T>& VBO) {
         Bind();
         VBO.Bind();
         for (unsigned int i = 0; i < VBO.GetDescriptors().size(); i++) {
@@ -55,24 +59,24 @@ public:
             glEnableVertexAttribArray(m_count);
             m_count++;
         }
-        VBO.UnBind();
         UnBind();
+        VBO.UnBind();
     }
 
     /*!
      * Adds an element buffer to the vertex array
      * \param EBO
      */
-    void AddElementBuffer(ElementBufferObject EBO) {
+    void AddElementBuffer(ElementBufferObject& EBO) {
         Bind();
         EBO.Bind();
         UnBind();
+        EBO.UnBind();
     }
 
 private:
     GLuint m_VAO;
     GLuint m_count;
-
 };
 
 #endif //GPGPU_EDGE_DETECTOR_SRC_GENERAL_OPENGL_SDL_VERTEXARRAYOBJECT_H_

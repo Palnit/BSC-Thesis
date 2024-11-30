@@ -2,12 +2,14 @@
 // Created by Palnit on 2024. 01. 16.
 //
 
-#include <string>
-#include <fstream>
-#include <sstream>
-#include <iostream>
-#include "include/general/OpenGL_SDL/file_handling.h"
+#include "general/OpenGL_SDL/file_handling.h"
+#include "general/OpenCL/file_handling.h"
+
 #include <SDL2/SDL_image.h>
+#include <fstream>
+#include <iostream>
+#include <sstream>
+#include <string>
 
 SDL_Surface* FileHandling::LoadImage(const char* file) {
     SDL_Surface* LoadedImg = IMG_Load(file);
@@ -32,8 +34,7 @@ GLuint FileHandling::LoadShader(GLenum shaderType, const char* filename) {
         shaderStream << shaderFile.rdbuf();
         shaderFile.close();
         shaderCode = shaderStream.str();
-    }
-    catch (std::ifstream::failure e) {
+    } catch (std::ifstream::failure e) {
         std::cout << "Error" << std::endl;
     }
     const char* shaderCodeCStr = shaderCode.c_str();
@@ -42,4 +43,3 @@ GLuint FileHandling::LoadShader(GLenum shaderType, const char* filename) {
     glCompileShader(shader);
     return shader;
 }
-

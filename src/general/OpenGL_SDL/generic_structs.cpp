@@ -2,7 +2,7 @@
 // Created by Palnit on 2024. 01. 17.
 //
 
-#include "include/general/OpenGL_SDL/generic_structs.h"
+#include "general/OpenGL_SDL/generic_structs.h"
 
 #include <SDL2/SDL.h>
 
