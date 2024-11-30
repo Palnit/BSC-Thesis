@@ -34,6 +34,10 @@ public:
         shaderProgram.UnBind();
     }
 
+    /*!
+     * Implementation of the MainWindowDisplayImGui function displays the variables
+     * related to this edge detection method to be modified easily
+     */
     void DisplayImGui() override {
         if (std::is_same_v<DogEdgeDetectorOpenCl, T>) {
             if (OpenCLInfo::OPENCL_DEVICES[0]
@@ -84,7 +88,7 @@ public:
         }
 
         ImGui::Separator();
-        ImGui::TextColored(ImVec4(1, 0, 0, 1), "DogTimings:");
+        ImGui::TextColored(ImVec4(1, 0, 0, 1), "Dog Timings:");
         ImGui::Text("Whole execution:               %f ms",
                     m_detector.GetTimings().All_ms);
         ImGui::Separator();

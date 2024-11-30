@@ -5,16 +5,33 @@
 #include "general/OpenCL/program.h"
 namespace ClWrapper {
 
+/*!
+ * Open cl memory abstraction
+ * \tparam T the type of the memory
+ * \tparam N the size of the memory
+ */
 template<typename T, size_t N>
 class Memory {
 public:
     Memory() = delete;
+    /*!
+     * Constructor
+     * \param program the program it's connected to
+     * \param memType memory flags
+     */
     Memory(ClWrapper::Program& program, cl_mem_flags memType)
         : m_program(program),
           m_data(new T[N]),
           m_memType(memType),
           m_buffer(program.m_context, memType, sizeof(T) * N) {}
 
+    /*!
+     * Constructor
+     * \param program the program it's connected to
+     * \param data the initial data
+     * \param size the size of the initial data
+     * \param memType memory flags
+     */
     Memory(ClWrapper::Program& program,
            T* data,
            size_t size,
@@ -28,6 +45,12 @@ public:
         std::copy(data, data + size, m_data);
     }
 
+    /*!
+     * Constructor
+     * \param program the program it's connected to
+     * \param data the initial dat
+     * \param memType memory flags
+     */
     Memory(ClWrapper::Program& program, T (& data)[N], cl_mem_flags memType)
         : m_program(program),
           m_memType(memType),
@@ -37,6 +60,10 @@ public:
         std::copy(data, data + N, m_data);
     }
 
+/*!
+ * Copy constructor
+ * \param other other memory
+ */
     Memory(const ClWrapper::Memory<T, N>& other)
         : m_program(other.m_program),
           m_memType(other.m_memType),
@@ -45,6 +72,10 @@ public:
         std::copy(other.m_data, other.m_data + N, m_data);
     }
 
+    /*!
+     * Move constructor
+     * \param other other memory
+     */
     Memory(ClWrapper::Memory<T, N>&& other) noexcept
         : m_program(other.m_program),
           m_memType(other.m_memType),
@@ -53,6 +84,11 @@ public:
         other.m_data = nullptr;
     }
 
+    /*!
+     * copy assignment operator
+     * \param other other memory
+     * \return the assignment
+     */
     Memory& operator=(const ClWrapper::Memory<T, N>& other) {
         if (this == other) { return *this; }
         m_program = other.m_program;
@@ -62,6 +98,11 @@ public:
         return *this;
     }
 
+/*!
+ * move assignment operator
+ * \param other other memory
+ * \return the assignment
+ */
     Memory& operator=(ClWrapper::Memory<T, N>&& other) noexcept {
         if (this == other) { return *this; }
         m_program = other.m_program;
@@ -71,15 +112,35 @@ public:
         return *this;
     }
 
+    /*!
+     * Access operator
+     * \param position the position of the data
+     * \return the data reference
+     */
     T& operator[](size_t position) {
         assert(N > position);
         return *(m_data + position);
     }
 
+    /*!
+     * destructor
+     */
     ~Memory() { delete m_data; }
 
+    /*!
+     * Iterator begin
+     * \return start iterator of the memory
+     */
     T* begin() { return m_data[0]; }
+    /*!
+     * const iterator begin
+     * \return star iterator of the memory
+     */
     const T* begin() const { return m_data[0]; }
+    /*!
+     * Iterator end
+     * \return iterator pointing to the last element
+     */
     T* end() { return m_data[N]; }
     const T* end() const { return m_data[N]; }
 
@@ -267,10 +328,10 @@ public:
 
     void ReadFromDevice() {
         m_program.m_commandQueue.enqueueReadBuffer(m_buffer,
-                                                          CL_TRUE,
-                                                          0,
-                                                          sizeof(T) * m_size,
-                                                          m_data);
+                                                   CL_TRUE,
+                                                   0,
+                                                   sizeof(T) * m_size,
+                                                   m_data);
     }
     friend class Kernel;
 

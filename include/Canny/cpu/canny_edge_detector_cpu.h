@@ -7,6 +7,10 @@ class CannyDetectorCPU;
 class CannyEdgeDetectorCPU : public CannyEdgeDetector {
 public:
     CannyEdgeDetectorCPU() = default;
+    /*!
+     * Implementation of the detect virtual function
+     * \return the detected pixels
+     */
     std::shared_ptr<uint8_t> Detect() override;
 };
 

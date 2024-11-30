@@ -18,6 +18,7 @@ public:
           m_standardDeviation(standardDeviation),
           m_high(high),
           m_low(low) {}
+         
     int* getGaussKernelSize() { return &m_gaussKernelSize; }
     float* getStandardDeviation() { return &m_standardDeviation; }
     float* getHigh() { return &m_high; }

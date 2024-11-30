@@ -71,7 +71,7 @@ target_include_directories(BSC_Thesis_Tests
 )
 
 
-if (CUDAToolkit_FOUND AND CUDA_FOUND)
+if (CUDAToolkit_FOUND AND CUDA_FOUND AND CUDA_VERSION_BUILD)
     enable_language(CUDA)
     add_compile_definitions(CUDA_EXISTS)
 

@@ -2,6 +2,10 @@
 #define BSC_THESIS_INCLUDE_GENERAL_CPU_MORPHOLOGY_CPU_H_
 
 #include <cstdint>
+
+/*!
+ * Unused Morphology functions right now
+ */
 namespace DetectorsCPU {
 
 void Dilation(uint8_t* image,

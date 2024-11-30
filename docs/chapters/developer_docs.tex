@@ -5,16 +5,16 @@ In this chapter I will explain what was my plan going into the development of my
 \section{Development plan}
 \label{chap:plan}
 
-For my planing I choose to do my project using the \CC\ programming language. To visualize the data I choose to use \ac{SDL2} with \ac{ImGui} and OpenGL and obviously for \ac{GPGPU} libraries CUDA and OpenCL. The main plan was to implement the two edge detection algorithms. I could have choose to do only the algorithm implementation without a user interface but I decided against it. The reason simply being that goal of the thesis is to show the difference of \ac{GPGPU} libraries speed and be a helpful tool for people to test them out themselves. Thus the plan for the Gui was to have two programs one for synthetic testing environment pure library speed. The result from those test are for pictures that only contain two colors and have simple lines and curves on them. This proves a good way of testing for accuracy and speed but in a real world scenario a real picture could have very different results. Thus the other program's goal is to test real pictures. This program cannot test accuracy and it's main function is to test the speed of the algorithm on a real picture and show the results.
+For my planning I chose to do my project using the \CC\ programming language. To visualize the data I chose to use \ac{SDL2} with \ac{ImGui} and OpenGl and obviously for \ac{GPGPU} libraries Cuda and OpenCl. The main plan was to implement the two edge detection algorithms. I could have chosen to do only the algorithm implementation without a user interface but I decided against it. The reason simply being that the goal of the thesis is to show the difference of \ac{GPGPU} libraries speed and be a helpful tool for people to test them out themselves. Thus the plan for the Gui was to have two programs one for synthetic testing, the other for real picture testing. The synthetic tester is an environment for pure library speed testing. The result from those test are for pictures that only contain two colors and have simple lines and curves on them. This proves a good way of testing for accuracy and speed but in a real world scenario a real picture could have very different results. Thus the other program's goal is to test real pictures. This program cannot test accuracy and it's main function is to test the speed of the algorithm on a real picture and show the results.
 
 
 \subsection{Architecture and Classes}
 \label{chap:dev}
 The plan for the architecture was a simple Model View but its hard to differentiate what's part of a Model and View since there's no library elements or event management system in \CC\ and the aforementioned libraries. The plan was to write an abstraction layer over \ac{SDL2} to use as the base for displaying the \ac{ImGui} and the pictures. Obviously this contains some logic but these logic are mainly related to displaying the images and the Gui.
 
-I will only describe the plans for the picture detector and will only go into the details of the synthetic tester when the plans differed because the basic structure of the two program is the same.
+I will only describe the plans for the picture detector and will only go into the details of the synthetic tester when the plans differed, because the basic structure of the two program is the same.
 
-I will only explain the part of the plan for the View which is relevant to the thesis. I use my own \ac{SDL2}-OpenGl pipeline abstraction that is very generalised and could be changed to any library for example Qt to show images and the Gui. I choose to use my own abstraction because I wanted a light weight program and didn't want to depend on a huge library. 
+I will only explain the part of the plan for the View which is relevant to the thesis. I use my own \ac{SDL2}-OpenGl pipeline abstraction that is very generalised and could be changed to any library for example Qt to show images and the Gui. I chose to use my own abstraction because I wanted a lightweight program and didn't want to depend on a huge library. 
 
 \begin{figure}[H]
 \centering
@@ -23,9 +23,9 @@ I will only explain the part of the plan for the View which is relevant to the t
 \label{fig:class_view_plan}
 \end{figure}
 
-As I demonstrate in \autoref{fig:class_view_plan} the plan was that I have a basic abstract window class named \textit{BasicWindow} in my own pipeline abstraction and implement a main window from that. Because of the complexity of the ImGui display I choose to use a class to abstract out the common elements. Lastly the detectors themselves are implementing a base class so I can store them in the main window but still have different implementation for all the algorithms in all the languages. This means that I would have six of these classes because of this as I will show later in \autoref{chap:Imp_Arc} this changed while developing and I will explain the reason for it in that subsection. As I have stated above there was no plan for the synthetic tester to have different class structure so the only difference is how the ImGui looks.
+As I demonstrate in \autoref{fig:class_view_plan} the plan was that I have a basic abstract window class named \textit{BasicWindow} in my own pipeline abstraction and implement a main window from that. Because of the complexity of the ImGui display I chose to use a class to abstract out the common elements. Lastly the detectors themselves are implementing a base class so I can store them in the main window, but still have different implementation for all the algorithms in all the languages. This means that I would have six of these classes because of this (as I will show later in \autoref{chap:Imp_Arc}) the plan changed while developing (and I will explain the reason for it in that subsection). As I have stated above there was no plan for the synthetic tester to have different class structure, so the only difference is how the ImGui looks.
 
-As for the models architecturally I use the two libraries that I'm testing to implement the algorithms on the \ac{GPU} and I used no external libraries to implement the algorithm on the \ac{CPU}
+As for the models architecturally, I use the two libraries that I'm testing to implement the algorithms on the \ac{GPU} and I used no external libraries to implement the algorithm on the \ac{CPU}.
 
 \begin{figure}[H]
 \centering
@@ -34,42 +34,42 @@ As for the models architecturally I use the two libraries that I'm testing to im
 \label{fig:class_model_plan}
 \end{figure}
 
-For the plan of the class structure because on CUDA I need separate functions, and for OpenCl I need separate kernel files, I thought that I cannot abstract out any common element except for the struct for the timings, I choose to just create separate classes for them. As shown on the Class diagram in \autoref{fig:class_model_plan} but as with the View as I started implementing it this planed changed slightly and I will discuss this latter at \autoref{chap:Imp_Arc}.
+For the plan of the class structure because on Cuda I need separate functions, and for OpenCl I need separate kernel files, I thought that I cannot abstract out any common element except for the struct for the timings, thus I chose to just create separate classes for them (as shown on the Class diagram in \autoref{fig:class_model_plan}). Same with the View as I started implementing it this plan changed slightly and I will discuss this later at \autoref{chap:Imp_Arc}.
 
 \subsection{Algorithms}
 \label{chap:algo}
 
-So far I only talked about my plans for the view and class structure but by an early stage I know which edge detection algorithms I want to implement and as I have already talked about in \autoref{chap:intro} they are: \ac{Canny} and \ac{DoG}. In this subsection I will demonstrate my plan for the algorithms.
+So far I only talked about my plans for the view and class structure, but by an early stage I know which edge detection algorithms I want to implement and as I have already talked about in \autoref{chap:intro} that are: \ac{Canny} and \ac{DoG}. In this subsection I will demonstrate my plan for the algorithms.
 
 \subsubsection{Canny edge detection}
 
 According to the original article\cite{canny:paper} the \ac{Canny} algorithm has four steps
 
 \begin{enumerate}[nolistsep]
-\item Filter out any noise. I choose to use the most popular Gaussian filter for this porous.
+\item Filter out any noise. I chose to use the most popular Gaussian filter for this purpose.
 \item Find the intensity gradients of the image. For this purpose I use the Sobel filter.
 \item Non-maximum suppression. This removes pixels that are not connected to any edge.
-\item Hysteresis with double thresh holding. I choose to do this in two steps.
+\item Hysteresis with double thresh holding. I chose to do this in two steps.
 \end{enumerate}
 
-The original article\cite{canny:paper} is very detailed but it's a hard read thus I used other sources\cite{canny:imp}\cite{canny:imp2} to understand the concept better and formulate the algorithms.
+The original article\cite{canny:paper} is very detailed, but it's a hard read thus I used other sources\cite{canny:imp}\cite{canny:imp2} to understand the concept better and formulate the algorithms.
 
-Firstly before I can do anything I have to grey scale the image. This is a very simple algorithm as shown in algorithm \ref{alg:grey} I just take the RGB pixel values and multiply them by 0.2999, 0.587, 0.114 accordingly,
+Firstly before I can do anything I have to greyscale the image. This is a very simple algorithm as shown in algorithm \ref{alg:grey}, I just take the RGB pixel values and multiply them by 0.2999, 0.587, 0.114 accordingly,
 
 \begin{algorithm}[H]
-\caption{Grey scaling algorithm}
+\caption{Greyscaling algorithm}
 \label{alg:grey}
 \begin{algorithmic}
 \State \textbf{Data:} $I$ the RGB pixels of the image
-\State \textbf{Result:} $I2$ the grey scaled value of the pixels
+\State \textbf{Result:} $I2$ the greyscaled value of the pixels
 \For{$r \; g \; b$ pixel values in $I$ image}
 \State $p = 0.299 * r + 0.587 * g + 0.114 * b$
-\State where $p$ is the pixel value cores ponding in $I2$
+\State where $p$ is the pixel values corresponding in $I2$
 \EndFor
 \end{algorithmic}
 \end{algorithm}
 
-Now I can focus on the edge detection algorithm properly first is the Gaussian blur. I could use other blurring methods but this is the simplest for our purpose and I can later reuse this in the \ac{DoG} algorithm.
+Now I can focus on the edge detection algorithm properly first is the Gaussian blur. I could use other blurring methods, but this is the simplest for our purpose and I can later reuse this in the \ac{DoG} algorithm.
 
 \begin{algorithm}[H]
 \caption{Gaussian blur}
@@ -89,7 +89,7 @@ Now I can focus on the edge detection algorithm properly first is the Gaussian b
 \end{algorithmic}
 \end{algorithm}
 
-In the next step I'm going to calculate the intensity gradient and the edge direction for the image. This step is where I will final get edge lines before this I was only doing preliminary work. The gradient will be our edges and I can calculate the edge directions too which I will use in the next step when I do the Non-maximum suppression to find a single edge line. I use the two directional Sobel filters which are:
+In the next step I'm going to calculate the intensity gradient and the edge direction for the image. This step is where I will finally get edge lines before this I was only doing preliminary work. The gradient will be our edges and I can calculate the edge directions too, which I will use in the next step when I do the Non-maximum suppression to find a single edge line. I use the two directional Sobel filters which are:
 \[
 \begin{bmatrix}
 -1 & 0 & +1 \\
@@ -131,10 +131,10 @@ In the next step I'm going to calculate the intensity gradient and the edge dire
 \end{algorithm}
 \clearpage
 
-Next comes the non maximum suppression in this step I will filter out the gradient so that only continuous edges remain for this purpose I will use the edge direction's I got from the previous step.
+Next comes the Non-Maximum Suppression. In this step I will filter out the gradient so that only continuous edges remain. For this purpose I will use the edge directions I got from the previous step.
 
 \begin{algorithm}[H]
-\caption{Non-Maximum suppression}
+\caption{Non-Maximum Suppression}
 \label{alg:max}
 \begin{algorithmic}
 \State \textbf{Data:} $I$ the intensity gradient of the image $I2$ the edge direction of the pixels 
@@ -163,7 +163,7 @@ Next comes the non maximum suppression in this step I will filter out the gradie
 \end{algorithmic}
 \end{algorithm}
 
-The next step I choose to do separately into two separate because of the nature of the  algorithms but in reality they are just one the hysteresis. In the first step the double thresh holding where I categorize the edges into two groups weak edges and strong edges. Based on this then I take all the weak pixels and transform them into strong pixels only in the case when the week pixel have atleast one strong pixel sounding it.
+The next step I chose to separate into two steps because of the nature of the  algorithms but in reality they are just one the hysteresis. In the first step the double thresholding where I categorize the edges into two groups: weak edges and strong edges. Based on this I take all the weak pixels and transform them into strong pixels only in the case when the week pixel have atleast one strong pixel surrounding it.
 
 \begin{algorithm}[H]
 \caption{Double threshold}
@@ -211,15 +211,15 @@ After I'm done with the Hysteresis I'm done with the algorithm and got my final 
 
 \subsubsection{Difference of Gaussians}
 
-This algorithm is much simpler then the previous while the \ac{Canny} have a lot of steps to get a fine tuned image it requires a per image fine tuning to get the best results. In comparison to that the \ac{DoG} algorithm requires much less fine toning but its less accurate too.
+This algorithm is much simpler then the previous, while the \ac{Canny} have a lot of steps to get an accurate image it requires a per image fine-tuning to get the best results. In comparison to that the \ac{DoG} algorithm requires much less fine-tuning but its less accurate too.
 
-I basically already wrote the algorithm previously. First I use algorithm \ref{alg:grey} to gray scale the image. Than I only need algorithm \ref{alg:gauss} to use this. The only difference is that instead of supplying the algorithm a normal Gaussian kernel I first take the difference of two Gaussian kernels and I supply that kernel to the function\cite{dog}. The resulting image will contain the edge lines of our image.
+I basically already wrote the algorithm previously. First I use algorithm \ref{alg:grey} to greyscale the image. Than I only need algorithm \ref{alg:gauss} to use this. The only difference is that instead of supplying the algorithm a normal Gaussian kernel I first take the difference of two Gaussian kernels and I supply that kernel to the function\cite{dog}. The resulting image will contain the edge lines of my image.
 
 \section{Implementation}
 
 \subsection{Architecture and Classes}
 \label{chap:Imp_Arc}
-When I started to start programming I started following the plans and realized that I overestimated the amount of classes I needed as seen in \autoref{fig:class_view_real}. Instead of using a separate class for each algorithm and library I can use only two classes for the view. Since the algorithms are the same the visualization for them is the same and I only need to use different detectors for the different libraries.
+When I started programming I was following the plans and realized that I overestimated the amount of classes I needed (as seen in \autoref{fig:class_view_real}). Instead of using a separate class for each algorithm and library I can use only two classes for the View. Since the algorithms are the same the visualization for them is the same and I only need to use different detectors for the different libraries.
 
 \begin{figure}[H]
 \centering
@@ -230,7 +230,7 @@ When I started to start programming I started following the plans and realized t
 
 As I show in \autoref{fig:class_view_real} I used \CC\ templates to achieve this. Using this language element I can reuse huge amounts of the code while keeping the View-Model architecture that I defined in \autoref{chap:dev}.
 
-On the other side the model part I needed to make some adjustments as well to accommodate this new design instead of just having all the language and algorithm specific classes there's now a base class. This class abstracts out all the common functionality and defines a virtual function. After this there's two implementation classes of this that further abstracts out things that are common between algorithms. Finally the language specific detectors that only implement the Detect function.
+On the other side the Model part I needed to make some adjustments as well to accommodate this new design, instead of just having all the language and algorithm specific classes there's now a base class. This class abstracts out all the common functionality and defines a virtual function. After this there's two implementation classes of this that further abstracts out things that are common between algorithms. Finally the language specific detectors that only implement the \textit{Detect} function.
 
 \begin{figure}[H]
 \centering
@@ -239,17 +239,17 @@ On the other side the model part I needed to make some adjustments as well to ac
 \label{fig:class_model_real}
 \end{figure}
 
-As for the algorithms during implementation there was no need to change anything about them. The only difference between the languages is that on Cuda and OpenCl because they are run on the \ac{GPU} I'm not using double for loops. Instead of for loops in both cases we launch threads grouped into $32 \times 32$ work groups. With this we can maximize the usage of most modern \ac{GPU} which have typically $1024$ threads available. We can use language specific functions to query what number of thread we on whit this we can go over all the pixels in an image much faster then if we used the \ac{CPU}. 
+As for the algorithms during implementation there was no need to change anything about them. The only difference between the languages is that on Cuda and OpenCl because they're running on the \ac{GPU} I'm not using double for loops. Instead of for loops in both cases we launch threads grouped into $32 \times 32$ work groups. With this we can maximize the usage of most modern \ac{GPU}s which have typically $1024$ threads available. We can use language specific functions to query which number of thread we on, with this we can go over all the pixels in an image much faster then if we used the \ac{CPU}. 
 
 
 \section{Testing}
 \label{chap:dev_testing}
 
-My plans for the testing is simple. Since both programs is designed in a way to compare the algorithms and libraries I will just use them to test the code. Since the visualization is very rudimentary and the code for it is is even simpler there's no need for it to be tested. There's only one vector of failure is that if someone deletes one of the pre defined pictures, OpenCl kernels or OpenGl shaders. These are assumed to exists at all time since the programs cannot function without it.
+My plans for the testing is simple. Since both programs is designed in a way to compare the algorithms and libraries I will just use them to test the code. Since the visualization is very rudimentary and the code for it is is even simpler, there's no need for it to be tested. There's only one vector of failure is that if someone deletes one of the predefined pictures, OpenCl kernels or OpenGl shaders. These are assumed to exists at all times since the programs cannot function without it.
 
-Some of these tests will be concluded on two machines to compare how hardware effects performance I will not these when it comes up the specifications of the two machines used can be seen in \autoref{tab:machine}. If a test does not state which machine its concluded than it was done on Machine1.
+Some of these tests will be concluded on two machines to compare how hardware effects performance. I'll note these when it comes up. The specifications of the two machines used can be seen in \autoref{tab:machine}. If a test does not state which machine its concluded than it was done on Machine1.
 
-I expect the Cuda version to be the fastest because Cuda has the advantage of only having to build to Nvidia \ac{GPU}. OpenCl will be the second fastest if not in some cases faster since it too runs on the \ac{GPU}. Lastly the \ac{CPU} version while on smaller pictures be fast on larger pictures will fall of rapidly.
+I expect the Cuda version to be the fastest because Cuda has the advantage of only having to build to Nvidia \ac{GPU}s. OpenCl will be the second fastest if not in some cases faster, since it too runs on the \ac{GPU}s. Lastly the \ac{CPU} version while on smaller pictures will be fast, on larger pictures it will fall of rapidly.
 
 \begin{table}[H]
 \centering
@@ -269,7 +269,7 @@ Machine2 & AMD Ryzen 5 7535HS & Nvidia GeForce RTX 4050 Laptop & 6Gb & 16Gb\\
 \subsection{Real picture tester}
 \label{chap:reason}
 
-First I will show results about the real picture tester since it is more focused on the visual aspects and not hard data like the synthetic tester. My plans for testing this is to compare bot \ac{DoG} and \ac{Canny} algorithms in all three implementations based on how they look and what we can see as differences and how much time it takes them. As I have mentioned in \autoref{chap:real_pic_tester} I only used pre defined pictures the sizes and names of the pictures are shown below in \autoref{tab:pictures}. I will only show timings if they are relevant but how picture and settings size effect timing will be discussed in \autoref{chap:test_synt_test}.
+First I will show results about the real picture tester, since it is more focused on the visual aspects and not hard data like the synthetic tester. My plans for testing this is to compare both \ac{DoG} and \ac{Canny} algorithms in all three implementations, based on how they look and what we can see as differences and how much time it takes them. As I have mentioned in \autoref{chap:real_pic_tester} I only used predefined pictures (the sizes and names of the pictures are shown below in \autoref{tab:pictures}). I will only show timings if they are relevant but how picture and settings size effect timing will be discussed in \autoref{chap:test_synt_test}.
 
 \begin{table}[H]
 \centering
@@ -324,7 +324,7 @@ lines & 100 & 100 \\
 \label{fig:pictures}
 \end{figure}
 
- For this reason I have done quiet a numerous test show in \autoref{tab:real_pic_canny} and \autoref{tab:real_pic_dog}. In the tables I show which picture I used and what settings I set for all three implementations.
+ For this reason I have done quite a numerous test shown in \autoref{tab:real_pic_canny} and \autoref{tab:real_pic_dog}. In the tables I show which picture I used and what settings I set for all three implementations.
 
 \begin{table}[H]
 \centering
@@ -366,7 +366,7 @@ lines & 100 & 100 \\
 \label{tab:real_pic_dog}
 \end{table}
 
-The tests in both algorithms case serve to show the same difference so I will explain both of them tougher. The first test is to show what the algorithm looks like exactly this is show in \autoref{fig:test1c}. The slight color difference we can detect in the \ac{DoG} algorithm is because of floating point precisions.
+The tests in both algorithm's case serve to show the same difference so I will explain both of them together. The first test is to show what the algorithm looks like exactly (this is shown in \autoref{fig:test1c}). The slight color difference we can detect in the \ac{DoG} algorithm is because of floating point precisions.
 
 
 \begin{figure}[H]
@@ -450,7 +450,7 @@ Name & Whole & Grey & First Gauss creation & Second Gauss creation & DoG & Convo
 \end{table}
 
 
-The first thing to note is that the OpenCl timings will look strange. That's because I used the platform specific timing functions in every case and while Cuda offers a timing method with events. OpenCl on the other hand only offers method to time the execution time of a kernel. This results in the unfortunate fact that the timing whole execution is impossible with platform specific method. For this reason I choose to time it with the chorons built in \CC\ library but this includes the time it took for the kernel to start and other synchronization and function call timing.
+The first thing to note is that the OpenCl timings will look strange. That's because I used the platform specific timing functions in every case and while Cuda offers a timing method with events, OpenCl on the other hand only offers method to time the execution time of a kernel. This results in the unfortunate fact that timing the whole execution is impossible with platform specific method. For this reason I chose to time it with the chrono built in \CC\ library, but this includes the time it took for the kernel to start and other synchronization and function call timing.
 
 
 \begin{figure}[H]
@@ -503,7 +503,7 @@ Name & Whole & Grey & First Gauss creation & Second Gauss creation & DoG & Convo
 \label{tab:test2c}
 \end{table}
 
-The second tests is the last that we can directly compare the \ac{Canny} and \ac{DoG} implementations. It's main reason is to show the difference between the time it takes for the \ac{CPU} implementations compared to the \ac{GPU} implementations. Due to the size of the original picture the details of the detectors I only show the Cuda versions of the \ac{Canny} and \ac{DoG} pictures. From the third tests forward there will be no timings since I will analyse what impacts timings in details in \autoref{chap:test_synt_test}. Moreover I will use the house picture from going forward since that has the most edge lines from all the pictures. This allowed me to show the differences between the settings and what their impact.
+The second tests is the last that we can directly compare the \ac{Canny} and \ac{DoG} implementations. It's main reason is to show the difference between the time it takes for the \ac{CPU} implementations compared to the \ac{GPU} implementations. Due to the size of the original picture the details of the detected pictures are lost in this paper. Because of this I will only show the Cuda versions of the \ac{Canny} and \ac{DoG} pictures. From the third tests forward there will be no timings since I will analyse what impacts timings in details in \autoref{chap:test_synt_test}. Moreover I will use the house picture from going forward since that has the most edge lines from all the pictures. This allowed me to show the differences between the settings and what they impact.
 
 \begin{figure}[H]
 \centering
@@ -532,7 +532,7 @@ The second tests is the last that we can directly compare the \ac{Canny} and \ac
 \label{fig:test3c}
 \end{figure}
 
-Notice that on the pictures in \autoref{fig:test3c} that the images are very noisy especially the \ac{CPU} picture the differences as I have mentioned before are because of floating point calculation differences between Cuda/OpenCl and normal \CC\ . I will now show two ways as to how to reduce the noise.
+Notice that on the pictures in \autoref{fig:test3c} that the images are very noisy especially the \ac{CPU} picture. The differences as I have mentioned before are because of floating point calculation difference between Cuda/OpenCl and normal \CC\ . I will now show two ways as to how to reduce the noise.
 
 \begin{figure}[H]
 \centering
@@ -557,7 +557,7 @@ Notice that on the pictures in \autoref{fig:test3c} that the images are very noi
 \captionsetup{labelformat=empty}
 \caption[]{Canny OpenCl}
 \end{minipage}
-\caption{Pictures of the forth test in \ac{Canny} for real pictures}
+\caption{Pictures of the fourth test in \ac{Canny} for real pictures}
 \label{fig:test4c}
 \end{figure}
 
@@ -588,7 +588,7 @@ Notice that on the pictures in \autoref{fig:test3c} that the images are very noi
 \label{fig:test5c}
 \end{figure}
 
-As seen in \autoref{fig:test4c} and \autoref{fig:test5c} if we use a bigger blur ether with increasing the kernel size or the standard deviation. this results in less noise on the images and we can get more accurate edge lines I can further define the edges lines if I adjust the last two settings as seen in \autoref{fig:test6c}
+As seen in \autoref{fig:test4c} and \autoref{fig:test5c} if we use a bigger blur either with increasing the kernel size or the standard deviation. This results in less noise on the images and we can get more accurate edge lines. I can further define the edges lines if I adjust the last two settings as seen in \autoref{fig:test6c}.
 
 \begin{figure}[H]
 \centering
@@ -619,7 +619,8 @@ As seen in \autoref{fig:test4c} and \autoref{fig:test5c} if we use a bigger blur
 
 As show on \autoref{fig:test6c} if we use the thresholds to reduce the edges we get much clearer image with less noise reduction.
 
-Now to test the \ac{DoG} algorithm I will first show how it looks whit the default settings.
+Now to test the \ac{DoG} algorithm I will first show how it looks with the default settings.
+
 \begin{figure}[H]
 \centering
 \begin{minipage}[t]{.325\textwidth}
@@ -670,11 +671,11 @@ Now to test the \ac{DoG} algorithm I will first show how it looks whit the defau
 \captionsetup{labelformat=empty}
 \caption[]{DoG OpenCl}
 \end{minipage}
-\caption{Pictures of the forth test in \ac{DoG} for real pictures}
+\caption{Pictures of the fourth test in \ac{DoG} for real pictures}
 \label{fig:test4cg}
 \end{figure}
 
-The \ac{DoG} algorithm is much simpler than the \ac{Canny} as I demonstrate on the pictures in \autoref{fig:test3cg}. The \ac{DoG} algorithm unlike the \ac{Canny} will find much more edge lines but its less controllable we can make edges lines more prominent by increasing the kernel size or the standard deviation difference as seen in \autoref{fig_test4cg} but that's it. Some include a simple threshold for the picture to make the lines more easy to detect but I choose to not add this step. Other way we could have done the algorithm is instead of just taking the differences of the kernels we could take the difference of the blurred images.
+The \ac{DoG} algorithm is much simpler than the \ac{Canny} as I demonstrate on the pictures in \autoref{fig:test3cg}. The \ac{DoG} algorithm unlike the \ac{Canny} will find much more edge lines, but its less controllable. I can make edges lines more prominent by increasing the kernel size or the standard deviation difference as seen in \autoref{fig:test4cg}, but that's it. Some include a simple threshold for the picture to make the lines more easy to detect, but I chose to not add this step. Other way I could have done the algorithm is instead of just taking the differences of the kernels I could take the difference of the blurred images.
 \clearpage
 
 
@@ -682,9 +683,9 @@ The \ac{DoG} algorithm is much simpler than the \ac{Canny} as I demonstrate on t
 \subsection{Synthetic tester}
 \label{chap:test_synt_test}
 
-As for the synthetic tester I will now focus on what effects the size of the picture and the kernel size has on execution time. And I will show what effect does someone's machine has on the program. Lastly what we can say about the error rate of these algorithms and their accuracy. Just like previously all the tests are listed below in \autoref{tab:sync_pic_canny} and \autoref{tab:sync_pic_dog}. As mentioned in \autoref{chap:reason} the timings for the whole execution is impacted by many factor thus while it's data is important it needs to be taken with a grain of salt.
-
-To test the correctness of the pictures as mentioned in \autoref{chap:plan} the synthetic tester generates pictures with lines and curves. I do this two different way the error rate and the missing pixels. Because of the nature of the \ac{Canny} algorithm it cannot detect a single edge line while the \ac{DoG} algorithm should always find the exact lines. The error rate is used to calculate how far away the detected edge lines are from the original picture. In the \ac{Canny} algorithm this will not be exact because it cannot find the exact line. While in the \ac{DoG} algorithm it should always be zero. Next the missing pixels is calculated based on if we find a pixel near the original to be exact a maximum of five pixels away in the case of the \ac{Canny} algorithm while in the case of the \ac{DoG} the exact pixel is used.
+As for the synthetic tester I will now focus on what effects the size of the picture and the kernel size has on execution time. I will show what effect does someone's machine has on the program and what we can say about the error rate of these algorithms and their accuracy. Just like previously all the tests are listed below in \autoref{tab:sync_pic_canny} and \autoref{tab:sync_pic_dog}. As mentioned in \autoref{chap:reason} the timings for the whole execution is impacted by many factor thus while it's data is important it needs to be taken with a grain of salt.
+	
+To test the correctness of the pictures as mentioned in \autoref{chap:plan} the synthetic tester generates pictures with lines and curves. I do this two different way the error rate and the missing pixels. Because of the nature of the \ac{Canny} algorithm it cannot detect a single edge line while the \ac{DoG} algorithm should always find the exact lines. The error rate is used to calculate how far away the detected edge lines are from the original picture. In the \ac{Canny} algorithm this will not be exact because it cannot find the exact line. While in the \ac{DoG} algorithm it should always be zero. Next the missing pixels is calculated based on if we find a pixel near the original, to be exact a maximum of five pixels away in the case of the \ac{Canny} algorithm while in the case of the \ac{DoG} the exact pixel is used.
 
 \begin{table}[H]
 \centering
@@ -905,11 +906,11 @@ To test the correctness of the pictures as mentioned in \autoref{chap:plan} the 
 \label{fig:test1sel}
 \end{figure}
 
-As seen in \autoref{fig:test1s} and \autoref{fig:test1sl} some of the time especially in the Cuda version there's a huge spike in the time it took to complete the algorithm. I expect this to be because the Cuda timing function puts events into the queue so its not completely exact timing and if the \ac{GPU}'s scheduler decides to work on an other process and not my program the timing will be strange. While on the OpenCl version the documentation doesn't explain how it captures the timing but I have a guess that its in the same process and not in a queue like on Cuda thus the \ac{GPU}'s scheduler cannot influence the timings this is why it's timings are less spiky. 
+As seen in \autoref{fig:test1s} and \autoref{fig:test1sl} some of the timings, especially in the Cuda version there's a huge spike in the time it took to complete the algorithm. I expect this to be because the Cuda timing function puts events into the queue, so its not completely exact timing and if the \ac{GPU}'s scheduler decides to work on an other process and not my program the timing will be strange. While on the OpenCl version the documentation doesn't explain how it captures the timing, but I have a guess that it's in the same process and not in a queue like on Cuda thus the \ac{GPU}'s scheduler cannot influence the timings this is why it's timings are less spiky. 
 
-Still if we compare the timings its clear that the Cuda and the OpenCl version is very close when it comes to how long it took to finish. While the \ac{CPU} version fall of rapidly. Its interesting to note that while the OpenCl version is faster than the Cuda version if we factor in the whole execution in \autoref{fig:test1sw} and \autoref{fig:test1swl} the Cuda version is almost always finishes faster.
+Still if we compare the timings its clear that the Cuda and the OpenCl version is very close when it comes to how long it took to finish. While the \ac{CPU} version fall of rapidly, it's interesting to note that while the OpenCl version is faster than the Cuda version if I factor in the whole execution in \autoref{fig:test1sw} and \autoref{fig:test1swl} the Cuda version is almost always finishes faster.
 
-Looking at \autoref{fig:test1se} and \autoref{fig:test1sel} its clear that the \ac{DoG} algorithm always finds the pixels perfectly and makes no mistakes every existing pixel has a match. On the other hand looking at the \ac{Canny} version it's clear that it doesn't find all the pixels exactly that's because the \ac{Canny} algorithm finds edges by transitions that means it cannot find a single line on a picture exactly but as the error rate show they are at most two pixels away.
+Looking at \autoref{fig:test1se} and \autoref{fig:test1sel} it's clear that the \ac{DoG} algorithm always finds the pixels perfectly and makes no mistakes, every existing pixel has a match. On the other hand looking at the \ac{Canny} version it's clear that it doesn't find all the pixels exactly, that's because the \ac{Canny} algorithm finds edges by transitions. That means it cannot find a single line on a picture exactly, but as the error rate show they are at most two pixels away.
 
 \clearpage
 
@@ -1093,9 +1094,9 @@ Looking at \autoref{fig:test1se} and \autoref{fig:test1sel} its clear that the \
 \label{fig:test2sel}
 \end{figure}
 
-Comparing the results of the first test with the results from the second test in \autoref{fig:test2s} and \autoref{fig:test2sl} its clear that while the size of the image matters in terms of how long it takes it isn't the deciding factor. The most time goes to the convolution done with the gauss kernel named blur and convolution respectively in the two algorithms.
+Comparing the results of the first test with the results from the second test in \autoref{fig:test2s} and \autoref{fig:test2sl} it's clear that while the size of the image matters in terms of how long it takes, it isn't the deciding factor. The most time goes to the convolution done with the gauss kernel named blur and convolution respectively in the two algorithms.
 
-But looking at the errors in \autoref{fig:test2se} and \autoref{fig:test2sel} no matter the size of the picture or the kernel the errors are just like in the first test. In the next two test lets see if increasing the lines count will produce more errors or not.
+But looking at the errors in \autoref{fig:test2se} and \autoref{fig:test2sel} no matter the size of the picture or the kernel, the errors are just like in the first test. In the next two test let's see if increasing the lines count will produce more errors or not.
 
 \begin{figure}[H]
 \centering
@@ -1213,7 +1214,7 @@ But looking at the errors in \autoref{fig:test2se} and \autoref{fig:test2sel} no
 \centering
 \includegraphics[width=\linewidth]{stest4/dog_open_cl}
 \end{minipage}
-\caption{Graphs for the forth synthetic test results on machine1}
+\caption{Graphs for the fourth synthetic test results on machine1}
 \label{fig:test4s}
 \end{figure}
 
@@ -1243,7 +1244,7 @@ But looking at the errors in \autoref{fig:test2se} and \autoref{fig:test2sel} no
 \centering
 \includegraphics[width=\linewidth]{stest4/dog_open_cl_w}
 \end{minipage}
-\caption{Graphs for the forth synthetic test whole execution time machine1}
+\caption{Graphs for the fourth synthetic test whole execution time machine1}
 \label{fig:tes4sw}
 \end{figure}
 
@@ -1273,9 +1274,9 @@ But looking at the errors in \autoref{fig:test2se} and \autoref{fig:test2sel} no
 \centering
 \includegraphics[width=\linewidth]{stest4/dog_open_cl_e}
 \end{minipage}
-\caption{Graphs for the forth synthetic test results error rate and missing rate machine1}
+\caption{Graphs for the fourth synthetic test results error rate and missing rate machine1}
 \label{fig:test4se}
 \end{figure}
 
-Looking at the results of the third and forth tests in \autoref{fig:test3s} and \autoref{fig:test4s} its clear that the time it takes for the algorithm to finish is not influenced by what is present on the pictures.
-At the same time in \autoref{fig:test3se} and \autoref{fig:test4se} the error rates are the same a little higher maybe but that's well within the range of error thus we can conclude that having more things on a picture does not results in more errors.
+Looking at the results of the third and fourth tests in \autoref{fig:test3s} and \autoref{fig:test4s}, it's clear that the time it takes for the algorithm to finish is not influenced by what is present on the pictures.
+At the same time in \autoref{fig:test3se} and \autoref{fig:test4se} the error rates are the same, a little higher maybe, but that's well within the range of error thus we can conclude that having more things on a picture does not results in more errors.

@@ -18,7 +18,16 @@ public:
           m_w(w),
           m_h(h) {}
 
+    /*!
+     * Starts the edge detection
+     * \return the detected pictures
+     */
     virtual std::shared_ptr<uint8_t> Detect() = 0;
+
+    /*!
+     * Gets the timing specific for the algorithm
+     * \return the returned timing class
+     */
     T GetTimings() const { return m_timings; }
 
     int getW() const { return m_w; }
