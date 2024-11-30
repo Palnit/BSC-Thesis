@@ -1,14 +1,14 @@
 \chapter{User Documentation}
 
-In this chapter we will explore the usage of the program from the perspective of and end user. We define the minimum requirements for the programs running, provide ways for installation and show example usages of the program.
+In this chapter we will explore the usage of the program from the perspective of an end user. We define the minimum requirements for the programs running, provide ways for installation and show example usages of the program.
 
 \section{Program requirements}
 
-The program can run on any 64 bit processor and is prepared to run on Windows and Linux operating system. The program can run with only a \ac{CPU} but for it to work with OpenGl it needs a \ac{GPU} that is capable to run atleast 1024 concurrent threads. The CUDA functionality requires an NVIDIA \ac{GPU} whit the same concurrent thread requirement.
+The program can run on any 64 bit processor and is prepared to run on Windows and Linux operating system. The program can run with any \ac{CPU}. On the other hand it cannot run on all \ac{GPU}. My program needs a \ac{GPU} that is capable to run at least 1024 concurrent threads. While the CUDA functionality requires an NVIDIA \ac{GPU} whit the same concurrent thread requirement.
 
 \section{Installation guide}
 
-The program requires no installation for an end user. You only need to download the provided compressed binaries for your operating system from the following website \href{https://github.com/Palnit/BSC-Thesis}{https://github.com/Palnit/BSC-Thesis} and unzip the binary and run. Currently there's 4 compiled binary: linux, linux-no-cuda, windows, windows-no-cuda. The no-cuda version binaries were created so the program can run on non CUDA compatible GPUs. If you want to build it for your self with CUDA capability you need to download the CUDA SDK from \href{https://developer.nvidia.com/cuda-toolkit}{https://developer.nvidia.com/cuda-toolkit} and CMAKE with a \CC\ build system e.g.: ninja, make and a compiler e.g.: \GG\ , MSVC, Clangd. There's two standalone programs one is for synthetic testing the other is for testing on real pictures. The synthetic tester's name is: BSC\_Thesis\_Tests, the real picture tester's name is: BSC\_Theis. 
+The program requires no installation for an end user. You only need to download the provided compressed binaries for your operating system from the following website \href{https://github.com/Palnit/BSC-Thesis}{https://github.com/Palnit/BSC-Thesis} and unzip the binary and run. Currently there are for compiled binary: linux, linux-no-cuda, windows, windows-no-cuda. The no-cuda version binaries were created so the program can run on non CUDA compatible GPUs. If you want to build it for yourself with CUDA capability you need to download the CUDA SDK from \href{https://developer.nvidia.com/cuda-toolkit}{https://developer.nvidia.com/cuda-toolkit} and CMAKE with a \CC\ build system e.g.: ninja, make and a compiler e.g.: \GG\ , MSVC, Clangd. There are two standalone programs: one is for synthetic testing the other is for testing on real pictures. The synthetic tester's name is: BSC\_Thesis\_Tests, the real picture tester's name is: BSC\_Theis. 
 
 \begin{figure}[H]
 \begin{minipage}{.49\textwidth}
@@ -31,7 +31,7 @@ The program requires no installation for an end user. You only need to download 
 
 \section{Program Introduction}
 
-In this section I will now demonstrate how the two programs work how to use them and what can what errors might occur during the usage of our program.
+In this section I will demonstrate how the two programs work how to use them.
 
 \subsection{Synthetic tester}
 \label{chap:tester}
@@ -52,11 +52,11 @@ In this section I will now demonstrate how the two programs work how to use them
 
 For the synthetic tester see in \autoref{fig:test_prog_dem} in both pictures at the left side of the window are the settings for the tester. At the top I can choose which detector I want to test. Below that I can choose the test pictures settings I can set it's height, width, and base color. After that are the settings for the lines how many normal and curved lines I want and what color should they be. And lastly are the specific settings for the algorithm. 
 
-If I choose to test the \ac{Canny} algorithm see in the left picture in \autoref{fig:test_prog_dem} there are 4 settings. The kernel size of the Gaussian blur, the standard deviation of sad kernel, and the high/low thresh holds of the \ac{Canny} algorithms this adjusts what pixel values should be kept these are kept low for the purpose to find the most pixels for the tests. 
+If I choose to test the \ac{Canny} algorithm see in the left picture in \autoref{fig:test_prog_dem} there are four settings. The kernel size of the Gaussian blur, the standard deviation of sad kernel, and the high/low thresholds of the \ac{Canny} algorithms this adjusts what pixel values should be kept these are kept low for the purpose to find the most pixels for the tests. 
 
-As for the \ac{DoG} algorithm see in the right picture in \autoref{fig:test_prog_dem} there's 4 settings too. The first is the same kernel size as in \ac{Canny} algorithm this will set the size for bot kernels used in the algorithm. Below that there's to standard deviation for the two kernel's that will be used. And lastly there's a Simple threshold to be able to test accuracy, this is original not a part of the algorithm but we need it to be able to differentiate between detected pictures and undetected pictures because their values are not exact
+As for the \ac{DoG} algorithm see in the right picture in \autoref{fig:test_prog_dem} there are four settings too. The first is the same kernel size as in \ac{Canny} algorithm this will set the size for bot kernels used in the algorithm. Below that there's the standard deviation for the two kernel's that will be used. And lastly there's a Simple threshold to be able to test accuracy, this is original not a part of the algorithm but we need it to be able to differentiate between detected pictures and undetected pictures because their values are not exact.
 
-This settings are needed to adjusts the algorithms to get the best results. Sadly we cannot write an algorithm that will find the edges that our human minds register and there can be many errors these settings are there to help make pictures clearer.
+These settings are needed to adjusts the algorithms to get the best results. Sadly we cannot write an algorithm that will find the edges that our human minds register and there can be many errors these settings are there to help make the pictures clearer.
 
 And lastly there's a button on the bottom of the page that will start the testing. The other button next to it is for saving the completed test data. If there were no tests no data will be saved. The original and the detected pictures are automatically saved this button only saves the timings, error rate and missing pixels count in a text file.
 

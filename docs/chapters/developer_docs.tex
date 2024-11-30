@@ -23,7 +23,7 @@ I will only explain the part of the plan for the View which is relevant to the t
 \label{fig:class_view_plan}
 \end{figure}
 
-As I demonstrate in \autoref{fig:class_view_plan} the plan was that I have a basic abstract window class named \textit{BasicWindow} in my own pipeline abstraction and implement a main window from that. Because of the complexity of the ImGui display I choose to use a class to abstract out the common elements. Lastly the detectors themselves are implementing a base class so I can store them in the main window but still have different implementation for all the algorithms in all the languages. This means that I would have 6 of these classes because of this as I will show later in \autoref{chap:Imp_Arc} this changed while developing and I will explain the reason for it in that subsection. As I have stated above there was no plan for the synthetic tester to have different class structure so the only difference is how the ImGui looks.
+As I demonstrate in \autoref{fig:class_view_plan} the plan was that I have a basic abstract window class named \textit{BasicWindow} in my own pipeline abstraction and implement a main window from that. Because of the complexity of the ImGui display I choose to use a class to abstract out the common elements. Lastly the detectors themselves are implementing a base class so I can store them in the main window but still have different implementation for all the algorithms in all the languages. This means that I would have six of these classes because of this as I will show later in \autoref{chap:Imp_Arc} this changed while developing and I will explain the reason for it in that subsection. As I have stated above there was no plan for the synthetic tester to have different class structure so the only difference is how the ImGui looks.
 
 As for the models architecturally I use the two libraries that I'm testing to implement the algorithms on the \ac{GPU} and I used no external libraries to implement the algorithm on the \ac{CPU}
 
@@ -43,12 +43,12 @@ So far I only talked about my plans for the view and class structure but by an e
 
 \subsubsection{Canny edge detection}
 
-According to the original article\cite{canny:paper} the \ac{Canny} algorithm has 4 steps
+According to the original article\cite{canny:paper} the \ac{Canny} algorithm has four steps
 
 \begin{enumerate}[nolistsep]
-\item Filter out any noise. The Gaussian filter is used for this purpose.
+\item Filter out any noise. I choose to use the most popular Gaussian filter for this porous.
 \item Find the intensity gradients of the image. For this purpose I use the Sobel filter.
-\item Non-maximum suppression is applied. This removes pixels that are not considered to be part of an edge.
+\item Non-maximum suppression. This removes pixels that are not connected to any edge.
 \item Hysteresis with double thresh holding. I choose to do this in two steps.
 \end{enumerate}
 
@@ -503,7 +503,7 @@ Name & Whole & Grey & First Gauss creation & Second Gauss creation & DoG & Convo
 \label{tab:test2c}
 \end{table}
 
-The second tests is the last that we can directly compare the \ac{Canny} and \ac{DoG} implementations. It's main reason is to show the difference between the time it takes for the \ac{CPU} implementations compared to the \ac{GPU} implementations. Due to size of the original picture the details of the detectors I only show the Cuda versions of the \ac{Canny} and \ac{DoG} pictures. From the third tests forward there will be no timings since I will analyse what impacts timings in details in \autoref{chap:test_synt_test}. Moreover I will use the house picture from going forward since that has the most edge lines from all the pictures. This allowed me to show the differences between the settings and what their impact.
+The second tests is the last that we can directly compare the \ac{Canny} and \ac{DoG} implementations. It's main reason is to show the difference between the time it takes for the \ac{CPU} implementations compared to the \ac{GPU} implementations. Due to the size of the original picture the details of the detectors I only show the Cuda versions of the \ac{Canny} and \ac{DoG} pictures. From the third tests forward there will be no timings since I will analyse what impacts timings in details in \autoref{chap:test_synt_test}. Moreover I will use the house picture from going forward since that has the most edge lines from all the pictures. This allowed me to show the differences between the settings and what their impact.
 
 \begin{figure}[H]
 \centering
@@ -684,7 +684,7 @@ The \ac{DoG} algorithm is much simpler than the \ac{Canny} as I demonstrate on t
 
 As for the synthetic tester I will now focus on what effects the size of the picture and the kernel size has on execution time. And I will show what effect does someone's machine has on the program. Lastly what we can say about the error rate of these algorithms and their accuracy. Just like previously all the tests are listed below in \autoref{tab:sync_pic_canny} and \autoref{tab:sync_pic_dog}. As mentioned in \autoref{chap:reason} the timings for the whole execution is impacted by many factor thus while it's data is important it needs to be taken with a grain of salt.
 
-To test the correctness of the pictures as mentioned in \autoref{chap:plan} the synthetic tester generates pictures with lines and curves. I do this two different way the error rate and the missing pixels. Because of the nature of the \ac{Canny} algorithm it cannot detect a single edge line while the \ac{DoG} algorithm should always find the exact lines. The error rate is used to calculate how far away the detected edge lines are from the original picture. In the \ac{Canny} algorithm this will not be exact because it cannot find the exact line. While in the \ac{DoG} algorithm it should always be zero. Next the missing pixels is calculated based on if we find a pixel near the original to be exact a maximum of 5 pixels away in the case of the \ac{Canny} algorithm while in the case of the \ac{DoG} the exact pixel is used.
+To test the correctness of the pictures as mentioned in \autoref{chap:plan} the synthetic tester generates pictures with lines and curves. I do this two different way the error rate and the missing pixels. Because of the nature of the \ac{Canny} algorithm it cannot detect a single edge line while the \ac{DoG} algorithm should always find the exact lines. The error rate is used to calculate how far away the detected edge lines are from the original picture. In the \ac{Canny} algorithm this will not be exact because it cannot find the exact line. While in the \ac{DoG} algorithm it should always be zero. Next the missing pixels is calculated based on if we find a pixel near the original to be exact a maximum of five pixels away in the case of the \ac{Canny} algorithm while in the case of the \ac{DoG} the exact pixel is used.
 
 \begin{table}[H]
 \centering
@@ -751,10 +751,531 @@ To test the correctness of the pictures as mentioned in \autoref{chap:plan} the 
 \centering
 \includegraphics[width=\linewidth]{stest1/dog_open_cl}
 \end{minipage}
-\caption{Graphs for the first synthetic test results}
+\caption{Graphs for the first synthetic test results on machine1}
 \label{fig:test1s}
 \end{figure}
 
-As seen in \autoref{fig:test1s} some of the time especially in the Cuda version there's a huge spike in the time it took to complete the algorithm. I expect this to be because the Cuda timing function puts events into the queue so its not completely exact timing and if the \ac{GPU}'s scheduler decides to work on an other process and not my program the timing will be strange. While on the OpenCl version the documentation doesn't explain how it captures the timing but I have a guess that its in the same process and not in a queue like on Cuda thus the \ac{GPU}'s scheduler cannot influence the timings this is why it's timings are less spiky. 
+\begin{figure}[H]
+\centering
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest1/canny_cpu_w}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest1/dog_cpu_w}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest1/canny_cuda_w}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest1/dog_cuda_w}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest1/canny_open_cl_w}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest1/dog_open_cl_w}
+\end{minipage}
+\caption{Graphs for the first synthetic test whole execution time machine1}
+\label{fig:test1sw}
+\end{figure}
 
-Still if we compare the timings its clear that the Cuda and the OpenCl version is very close when it comes to how long it took to finish. While the \ac{CPU} version fall of rapidly. Its interesting to note that while the OpenCl version is faster than the Cuda version if we factor in the whole execution the Cuda version is almost always finishes faster.
+\begin{figure}[H]
+\centering
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest1/canny_cpu_e}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest1/dog_cpu_e}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest1/canny_cuda_e}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest1/dog_cuda_e}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest1/canny_open_cl_e}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest1/dog_open_cl_e}
+\end{minipage}
+\caption{Graphs for the first synthetic test results error rate and missing rate machine1}
+\label{fig:test1se}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest1linux/canny_cpu}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest1linux/dog_cpu}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest1linux/canny_cuda}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest1linux/dog_cuda}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest1linux/canny_open_cl}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest1linux/dog_open_cl}
+\end{minipage}
+\caption{Graphs for the first synthetic test results on machine2}
+\label{fig:test1sl}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest1linux/canny_cpu_w}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest1linux/dog_cpu_w}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest1linux/canny_cuda_w}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest1linux/dog_cuda_w}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest1linux/canny_open_cl_w}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest1linux/dog_open_cl_w}
+\end{minipage}
+\caption{Graphs for the first synthetic test whole execution time on machine2}
+\label{fig:test1swl}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest1linux/canny_cpu_e}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest1linux/dog_cpu_e}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest1linux/canny_cuda_e}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest1linux/dog_cuda_e}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest1linux/canny_open_cl_e}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest1linux/dog_open_cl_e}
+\end{minipage}
+\caption{Graphs for the first synthetic test results error rate and missing rate on machine2}
+\label{fig:test1sel}
+\end{figure}
+
+As seen in \autoref{fig:test1s} and \autoref{fig:test1sl} some of the time especially in the Cuda version there's a huge spike in the time it took to complete the algorithm. I expect this to be because the Cuda timing function puts events into the queue so its not completely exact timing and if the \ac{GPU}'s scheduler decides to work on an other process and not my program the timing will be strange. While on the OpenCl version the documentation doesn't explain how it captures the timing but I have a guess that its in the same process and not in a queue like on Cuda thus the \ac{GPU}'s scheduler cannot influence the timings this is why it's timings are less spiky. 
+
+Still if we compare the timings its clear that the Cuda and the OpenCl version is very close when it comes to how long it took to finish. While the \ac{CPU} version fall of rapidly. Its interesting to note that while the OpenCl version is faster than the Cuda version if we factor in the whole execution in \autoref{fig:test1sw} and \autoref{fig:test1swl} the Cuda version is almost always finishes faster.
+
+Looking at \autoref{fig:test1se} and \autoref{fig:test1sel} its clear that the \ac{DoG} algorithm always finds the pixels perfectly and makes no mistakes every existing pixel has a match. On the other hand looking at the \ac{Canny} version it's clear that it doesn't find all the pixels exactly that's because the \ac{Canny} algorithm finds edges by transitions that means it cannot find a single line on a picture exactly but as the error rate show they are at most two pixels away.
+
+\clearpage
+
+\begin{figure}[H]
+\centering
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest2/canny_cpu}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest2/dog_cpu}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest2/canny_cuda}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest2/dog_cuda}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest2/canny_open_cl}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest2/dog_open_cl}
+\end{minipage}
+\caption{Graphs for the second synthetic test results on machine1}
+\label{fig:test2s}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest2/canny_cpu_w}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest2/dog_cpu_w}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest2/canny_cuda_w}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest2/dog_cuda_w}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest2/canny_open_cl_w}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest2/dog_open_cl_w}
+\end{minipage}
+\caption{Graphs for the second synthetic test whole execution time machine1}
+\label{fig:test2sw}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest2/canny_cpu_e}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest2/dog_cpu_e}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest2/canny_cuda_e}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest2/dog_cuda_e}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest2/canny_open_cl_e}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest2/dog_open_cl_e}
+\end{minipage}
+\caption{Graphs for the second synthetic test results error rate and missing rate machine1}
+\label{fig:test2se}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest2linux/canny_cpu}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest2linux/dog_cpu}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest2linux/canny_cuda}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest2linux/dog_cuda}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest2linux/canny_open_cl}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest2/dog_open_cl}
+\end{minipage}
+\caption{Graphs for the second synthetic test results on machine2}
+\label{fig:test2sl}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest2linux/canny_cpu_w}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest2linux/dog_cpu_w}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest2linux/canny_cuda_w}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest2linux/dog_cuda_w}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest2linux/canny_open_cl_w}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest2linux/dog_open_cl_w}
+\end{minipage}
+\caption{Graphs for the second synthetic test whole execution time on machine2}
+\label{fig:test2swl}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest2linux/canny_cpu_e}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest2linux/dog_cpu_e}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest2linux/canny_cuda_e}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest2linux/dog_cuda_e}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest2linux/canny_open_cl_e}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest2linux/dog_open_cl_e}
+\end{minipage}
+\caption{Graphs for the second synthetic test results error rate and missing rate on machine2}
+\label{fig:test2sel}
+\end{figure}
+
+Comparing the results of the first test with the results from the second test in \autoref{fig:test2s} and \autoref{fig:test2sl} its clear that while the size of the image matters in terms of how long it takes it isn't the deciding factor. The most time goes to the convolution done with the gauss kernel named blur and convolution respectively in the two algorithms.
+
+But looking at the errors in \autoref{fig:test2se} and \autoref{fig:test2sel} no matter the size of the picture or the kernel the errors are just like in the first test. In the next two test lets see if increasing the lines count will produce more errors or not.
+
+\begin{figure}[H]
+\centering
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest3/canny_cpu}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest3/dog_cpu}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest3/canny_cuda}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest3/dog_cuda}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest3/canny_open_cl}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest3/dog_open_cl}
+\end{minipage}
+\caption{Graphs for the third synthetic test results on machine1}
+\label{fig:test3s}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest3/canny_cpu_w}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest3/dog_cpu_w}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest3/canny_cuda_w}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest3/dog_cuda_w}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest3/canny_open_cl_w}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest3/dog_open_cl_w}
+\end{minipage}
+\caption{Graphs for the third synthetic test whole execution time machine1}
+\label{fig:test3sw}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest3/canny_cpu_e}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest3/dog_cpu_e}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest3/canny_cuda_e}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest3/dog_cuda_e}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest3/canny_open_cl_e}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest3/dog_open_cl_e}
+\end{minipage}
+\caption{Graphs for the third synthetic test results error rate and missing rate machine1}
+\label{fig:test3se}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest4/canny_cpu}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest4/dog_cpu}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest4/canny_cuda}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest4/dog_cuda}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest4/canny_open_cl}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest4/dog_open_cl}
+\end{minipage}
+\caption{Graphs for the forth synthetic test results on machine1}
+\label{fig:test4s}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest4/canny_cpu_w}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest4/dog_cpu_w}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest4/canny_cuda_w}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest4/dog_cuda_w}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest4/canny_open_cl_w}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest4/dog_open_cl_w}
+\end{minipage}
+\caption{Graphs for the forth synthetic test whole execution time machine1}
+\label{fig:tes4sw}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest4/canny_cpu_e}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest4/dog_cpu_e}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest4/canny_cuda_e}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest4/dog_cuda_e}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest4/canny_open_cl_e}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stest4/dog_open_cl_e}
+\end{minipage}
+\caption{Graphs for the forth synthetic test results error rate and missing rate machine1}
+\label{fig:test4se}
+\end{figure}
+
+Looking at the results of the third and forth tests in \autoref{fig:test3s} and \autoref{fig:test4s} its clear that the time it takes for the algorithm to finish is not influenced by what is present on the pictures.
+At the same time in \autoref{fig:test3se} and \autoref{fig:test4se} the error rates are the same a little higher maybe but that's well within the range of error thus we can conclude that having more things on a picture does not results in more errors.

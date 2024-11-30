@@ -78,19 +78,6 @@ public:
         if (ImGui::Button("Save")) {
             std::string save_path = "./" + m_internalName + ".png";
             IMG_SavePNG(m_detected, save_path.c_str());
-            std::string save_path2 = "./" + m_internalName + ".txt";
-            std::ofstream out(save_path2);
-            out << "$" << m_detector.GetTimings().All_ms << "$ & "
-                << "$" << m_detector.GetTimings().GrayScale_ms << "$ & "
-                << "$" << m_detector.GetTimings().GaussCreation_ms << "$ & "
-                << "$" << m_detector.GetTimings().Blur_ms << "$ & "
-                << "$" << m_detector.GetTimings().SobelOperator_ms << "$ & "
-                << "$" << m_detector.GetTimings().NonMaximumSuppression_ms
-                << "$ & "
-                << "$" << m_detector.GetTimings().DoubleThreshold_ms << "$ & "
-                << "$" << m_detector.GetTimings().Hysteresis_ms << "$"
-                << std::endl;
-            out.close();
         }
         ImGui::Separator();
         ImGui::TextColored(ImVec4(1, 0, 0, 1), "CannyTimings:");

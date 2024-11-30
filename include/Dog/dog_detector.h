@@ -81,17 +81,6 @@ public:
         if (ImGui::Button("Save")) {
             std::string save_path = "./" + m_internalName + ".png";
             IMG_SavePNG(m_detected, save_path.c_str());
-            std::string save_path2 = "./" + m_internalName + ".txt";
-            std::ofstream out(save_path2);
-            out << "$" << m_detector.GetTimings().All_ms << "$ & "
-                << "$" << m_detector.GetTimings().GrayScale_ms << "$ & "
-                << "$" << m_detector.GetTimings().Gauss1Creation_ms << "$ & "
-                << "$" << m_detector.GetTimings().Gauss2Creation_ms << "$ & "
-                << "$" << m_detector.GetTimings().DifferenceOfGaussian_ms
-                << "$ & "
-                << "$" << m_detector.GetTimings().Convolution_ms << "$"
-                << std::endl;
-            out.close();
         }
 
         ImGui::Separator();
