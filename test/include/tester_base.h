@@ -57,10 +57,34 @@ public:
             ImGui::EndTabItem();
         }
     }
+    /*!
+     * Virtual function \n
+     * Display the result data of the testing
+     */
     virtual void ResultDisplay() = 0;
+    /*!
+     * Virtual function \n
+     * Display the specialized algorithm specific imgui window
+     */
     virtual void SpecializedDisplayImGui() = 0;
+    /*!
+     * Virtual function \n
+     * Start the testing
+     */
     virtual void Test() = 0;
+    /*!
+     * Virtual function \n
+     * Saves the test data to a text file
+     */
     virtual void SaveData() = 0;
+    /*!
+     * Calculates the distance between two pixels
+     * \param x1 x coordinate of first pixel
+     * \param y1 y coordinate of first pixel
+     * \param x2 x coordinate of second pixel
+     * \param y2 y coordinate of second pixel
+     * \return the distance of the coordinates
+     */
     float DistanceOfPixels(int x1, int y1, int x2, int y2) {
         int x = (x2 - x1) * (x2 - x1);
         int y = (y2 - y1) * (y2 - y1);

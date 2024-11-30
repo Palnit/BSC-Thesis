@@ -65,9 +65,9 @@ public:
         ImGui::SliderFloat("Standard Deviation",
                            m_detector.getStandardDeviation(), 0.0001f,
                            30.0f);
-        ImGui::SliderFloat("High ThreshHold", m_detector.getHigh(), 0.0f,
+        ImGui::SliderFloat("High Threshold", m_detector.getHigh(), 0.0f,
                            255.0f);
-        ImGui::SliderFloat("Low ThreshHold", m_detector.getLow(), 0.0f,
+        ImGui::SliderFloat("Low Threshold", m_detector.getLow(), 0.0f,
                            255.0f);
         ImGui::Separator();
         if (ImGui::Button("Detect")) { DetectEdge(); }
@@ -80,7 +80,7 @@ public:
             IMG_SavePNG(m_detected, save_path.c_str());
         }
         ImGui::Separator();
-        ImGui::TextColored(ImVec4(1, 0, 0, 1), "CannyTimings:");
+        ImGui::TextColored(ImVec4(1, 0, 0, 1), "Canny Timings:");
         ImGui::Text("Whole execution:         %f ms",
                     m_detector.GetTimings().All_ms);
         ImGui::Separator();

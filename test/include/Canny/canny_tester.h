@@ -231,9 +231,9 @@ public:
         ImGui::SliderFloat("Standard Deviation",
                            m_detector.getStandardDeviation(), 0.0001f,
                            30.0f);
-        ImGui::SliderFloat("High ThreshHold", m_detector.getHigh(), 0.0f,
+        ImGui::SliderFloat("High Threshold", m_detector.getHigh(), 0.0f,
                            255.0f);
-        ImGui::SliderFloat("Low ThreshHold", m_detector.getLow(), 0.0f,
+        ImGui::SliderFloat("Low Threshold", m_detector.getLow(), 0.0f,
                            255.0f);
     }
     void Test() override {
@@ -373,7 +373,7 @@ public:
         if (!std::filesystem::exists(m_internalName)) {
             std::filesystem::create_directory(m_internalName);
         }
-        std::ofstream out(m_internalName + "/"+ m_internalName +".txt");
+        std::ofstream out(m_internalName + "/" + m_internalName + ".txt");
         auto timingsIt = m_allTimings.begin();
         auto avgIt = m_AVG.begin();
         auto missingIt = m_missing.begin();

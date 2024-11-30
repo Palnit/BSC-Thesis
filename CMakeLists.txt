@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.22)
+cmake_minimum_required(VERSION 3.16)
 
 include(FetchContent)
 FetchContent_Declare(vcpkg
@@ -16,6 +16,7 @@ project(BSC_Thesis
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CUDA_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CUDA_VERSION_BUILD ON)
 
 set(HEADER_FILES
         include/general/OpenGL_SDL/basic_window.h
@@ -142,7 +143,7 @@ find_package(implot CONFIG REQUIRED)
 find_package(OpenCL CONFIG REQUIRED)
 
 
-if (CUDAToolkit_FOUND AND CUDA_FOUND)
+if (CUDAToolkit_FOUND AND CUDA_FOUND AND CUDA_VERSION_BUILD)
     enable_language(CUDA)
     add_compile_definitions(CUDA_EXISTS)
     add_library(cuda_comp STATIC
@@ -188,7 +189,7 @@ add_library(${CMAKE_PROJECT_NAME}_lib STATIC
         ${OPENCL_SOURCE_FILES}
         ${OPENCL_HEADER_FILES}
 )
-if (CUDAToolkit_FOUND AND CUDA_FOUND)
+if (CUDAToolkit_FOUND AND CUDA_FOUND AND CUDA_VERSION_BUILD)
     target_sources(${CMAKE_PROJECT_NAME}_lib PRIVATE
             ${CUDA_CPP_HEADER_FILES}
             ${CUDA_CPP_SOURCE_FILES}
@@ -224,7 +225,7 @@ target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE
         OpenCL::OpenCL
 )
 
-if (CUDAToolkit_FOUND AND CUDA_FOUND)
+if (CUDAToolkit_FOUND AND CUDA_FOUND AND CUDA_VERSION_BUILD)
 
     target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE
             cuda_comp

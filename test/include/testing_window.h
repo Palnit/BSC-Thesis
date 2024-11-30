@@ -8,15 +8,39 @@
 
 class TestingWindow : public BasicWindow {
 public:
+    /*!
+     * Constructor for the class same as the basic windows constructor
+     * \param title The title of the window
+     * \param x The horizontal position of the window
+     * \param y The vertical position of the window
+     * \param width The width of the window
+     * \param height The height of the window
+     * \param flags Flags for the sdl window creation function SDL_WINDOW_OPENGL
+     * is always appended
+     */
     TestingWindow(const char* title,
                   int x,
                   int y,
                   int width,
                   int height,
                   uint32_t flags);
+    /*!
+     * Destructor takes care of any data that need freeing after the program has
+     * finished running
+     */
     ~TestingWindow();
+    /*!
+     * Implementation of the RenderImGui function of the base class
+     */
     void RenderImGui() override;
+    /*!
+     * Implementation of the Resize function of the base class
+     */
     void Resize() override;
+    /*!
+     * Implementation of the Init function of the base class
+     * \return Status
+     */
     int Init() override;
 
     const std::vector<TesterBase*>& GetTesters() {
